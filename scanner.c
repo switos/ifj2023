@@ -6,7 +6,7 @@ int identifierState(char symbol) {
         symbol = getc();
         identifierState(symbol);
     } else {
-        return 0; //succes, return the identifier, clean buffer 
+        return 0; //success, return the identifier, clean buffer 
     }
 }
 
