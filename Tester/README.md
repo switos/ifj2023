@@ -1,4 +1,7 @@
 # Our tester for IFJ23 project
 
-Run the test script as `python tester.py /path/to/compiler /path/to/folder/with/tests`
-or alternatively as `python3 tester.py /path/to/compiler /path/to/folder/with/tests`
+1. Write the command `make`
+
+2. Run the test script as `python3 tester.py ./compiler ./Tests`
+
+3. (Optionally) Clean with `make clean`
