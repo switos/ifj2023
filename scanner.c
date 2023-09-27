@@ -1,6 +1,4 @@
-#include <ctype.h>
-#include "token.h"
-#include "error.h"
+#include "scanner.h"
 
 string tokenContent;
 token_t token;
