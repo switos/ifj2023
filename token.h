@@ -3,7 +3,7 @@
 typedef enum {
     T_EOF,
     T_ID,
-    T_LET
+    T_LET,
     T_INT,
     T_FLOAT,
     T_INT_EXP,

@@ -44,7 +44,7 @@ int intState(char symbol, token_t * token) {
         intState(symbol, token);
     } else if (symbol == '.') {
         if (!str_add_char(&token->content, symbol))
-            exit(LEX_ERR);
+            exit(ERROR_INTERNAL);
         symbol = getc(stdin);
         if (isnumber(symbol)) {
             floatState(symbol, token);
@@ -53,7 +53,7 @@ int intState(char symbol, token_t * token) {
         }
     } else if (symbol == 'E' || symbol == 'e') {
         if (!str_add_char(&token->content, symbol))
-            exit(LEX_ERR);
+            exit(ERROR_INTERNAL);
         symbol = getc(stdin);
         if (symbol == '+' || symbol == '-' || isnumber(symbol)) {
             if (!str_add_char(&token->content, symbol))
