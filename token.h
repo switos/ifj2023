@@ -3,6 +3,7 @@
 typedef enum {
     T_EOF,
     T_ID,
+    T_LET
 } token_type;
 
 typedef struct token
