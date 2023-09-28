@@ -32,7 +32,7 @@ def run_tests(compiler_path, test_folder):
                 [compiler_path], stdin=open(input_path, "r"), stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT, text=True
             )
-            
+
             # Read expected output and expected return code from .out file
             with open(expected_output_path, "r") as expected_output_file:
                 expected_output_lines = expected_output_file.readlines()

@@ -1,7 +1,9 @@
-# Our tester for IFJ23 project
+# My tester for IFJ23 project
 
-1. Write the command `make`
+The tester runs the compiler program, inputs `.in` files from the tests folder to `stdin`, and then compares `stdout` with the expected output in the form of `.out` files, including the return code.
 
-2. Run the test script as `python3 tester.py ./parser ./Tests`
+1. Make sure your compiler has been made using the `make` command
 
-3. (Optionally) Clean with `make clean`
+2. Run the test script as `python tester.py /path/to/compiler /path/to/tests/folder` or alternatively as `python3 tester.py /path/to/compiler /path/to/tests/folder`
+
+For example: `python3 tester.py ../parser ./Tests`
