@@ -1,5 +1,5 @@
-compiler: compiler.c
-	gcc compiler.c -o compiler
+parser: parser.c
+	gcc parser.c -o parser
 
 clean:
-	rm -f compiler
+	rm -f parser

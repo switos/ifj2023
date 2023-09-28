@@ -10,9 +10,11 @@ int main() {
     const char *goodbye_world = "Goodbye world!";
 
     // Reading the input text
-    while ( fgets(buffer, sizeof(buffer), stdin) != NULL ) {
+    while ( fgets(buffer, sizeof(buffer), stdin) != NULL )
+    {
         // We check whether the input text contains the phrase "Hello world!"
-        if (strstr(buffer, hello_world) != NULL) {
+        if ( strstr(buffer, hello_world) != NULL )
+        {
             // If yes, we print "Goodbye world!"
             printf("%s\n", goodbye_world);
         } else {
