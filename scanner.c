@@ -35,7 +35,7 @@ int underscoreState(char symbol, token_t * token) {
 }
 
 int intState(char symbol, token_t * token) {
-    if (isnumber(symbol)) {
+    if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
             exit(1);
         symbol = getc(stdin);
@@ -44,7 +44,7 @@ int intState(char symbol, token_t * token) {
         if (!str_add_char(&token->content, symbol))
             exit(LEX_ERR);
         symbol = getc(stdin);
-        if (isnumber(symbol)) {
+        if (isdigit(symbol)) {
             floatState(symbol, token);
         } else {
             exit(LEX_ERR);
@@ -53,7 +53,7 @@ int intState(char symbol, token_t * token) {
         if (!str_add_char(&token->content, symbol))
             exit(LEX_ERR);
         symbol = getc(stdin);
-        if (symbol == '+' || symbol == '-' || isnumber(symbol)) {
+        if (symbol == '+' || symbol == '-' || isdigit(symbol)) {
             if (!str_add_char(&token->content, symbol))
                 exit(1);
             symbol = getc(stdin);
@@ -71,7 +71,7 @@ int intState(char symbol, token_t * token) {
 }
 
 int floatState(char symbol, token_t * token) {
-    if (isnumber(symbol)) {
+    if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
             exit(1);
         symbol = getc(stdin);
@@ -80,7 +80,7 @@ int floatState(char symbol, token_t * token) {
         if (!str_add_char(&token->content, symbol))
             exit(LEX_ERR);
         symbol = getc(stdin);
-        if (symbol == '+' || symbol == '-' || isnumber(symbol)) {
+        if (symbol == '+' || symbol == '-' || isdigit(symbol)) {
             if (!str_add_char(&token->content, symbol))
                 exit(1);
             symbol = getc(stdin);
@@ -98,7 +98,7 @@ int floatState(char symbol, token_t * token) {
 }
 
 int intExpState(char symbol, token_t * token) {
-    if (isnumber(symbol)) {
+    if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
             exit(1);
         symbol = getc(stdin);
@@ -113,7 +113,7 @@ int intExpState(char symbol, token_t * token) {
 }
 
 int floatExpState(char symbol, token_t * token) {
-    if (isnumber(symbol)) {
+    if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
             exit(1);
         symbol = getc(stdin);
@@ -139,7 +139,7 @@ int startState(char symbol, token_t * token) {
             exit(LEX_ERR);
         symbol = getc(stdin);
         identifierState(symbol, token);
-    } else if (isnumber(symbol)) {
+    } else if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
             exit(LEX_ERR);
         symbol = getc(stdin);
