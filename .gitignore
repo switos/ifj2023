@@ -1,5 +1,7 @@
 .vscode/
 local/
 old/
-testcases/
 compiler
+testFile
+ifj_fine_automata.drawio
+testcases/
