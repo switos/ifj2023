@@ -166,6 +166,6 @@ int getToken(token_t * token) {
     str_clear(&token->content);
     char symbol = getc(stdin);
     int returnCode = startState(symbol, token);
-    // ungetc(symbol, stdin);
+    ungetc(symbol, stdin);
     return returnCode;
 }

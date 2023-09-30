@@ -5,9 +5,6 @@ token_t token;
 
 int parse() {
     getToken(&token);
-    while (token.type != T_EOF) {
-        getToken(&token);
-    }
     if (token.type == T_LET) {
         getToken(&token);
     } else if(token.type == T_EOF) {

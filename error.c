@@ -2,6 +2,6 @@
 #include <stdio.h>
 
 int printErrorAndReturn(char * text, int code) {
-    fprintf(stderr + '\n', text);
+    fprintf(stderr, "%s\n", text);
     return code;
 }
