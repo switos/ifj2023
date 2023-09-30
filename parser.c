@@ -5,13 +5,13 @@ token_t token;
 
 int parse() {
     getToken(&token);
-    if(token.type == T_LET) {
+    if (token.type == T_LET) {
         getToken(&token);
     } else if(token.type == T_EOF) {
-        return 0;
+        return NO_ERR;
     } else {
         fprintf(stderr, "Syntaxe error in parse rule\n");
-        return 2;
+        return SYNTAX_ERR;
     }
 }
 
