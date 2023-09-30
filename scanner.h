@@ -1,3 +1,6 @@
+#ifndef SCANNER_H
+#define SCANNER_H
+
 #include <ctype.h>
 #include "token.h"
 #include "error.h"
@@ -10,3 +13,5 @@ int floatExpState(char symbol, token_t * token);
 int intExpState(char symbol, token_t * token);
 int startState(char symbol, token_t * token);
 int getToken(token_t * token);
+
+#endif

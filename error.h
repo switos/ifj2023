@@ -12,4 +12,6 @@
 #define SEM_ERR_OTHER                   8
 #define ERROR_INTERNAL                  99
 
+int printErrorAndReturn(char * text, int code);
+
 #endif

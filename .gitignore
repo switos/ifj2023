@@ -5,3 +5,5 @@ compiler
 testFile
 ifj_fine_automata.drawio
 .gitignore
+testcases/
+compiler
