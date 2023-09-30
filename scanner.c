@@ -9,7 +9,7 @@ int identifierState(char symbol, token_t * token) {
             return printErrorAndReturn("Enternal error in identiferState in scanner", ERROR_INTERNAL);
             // fprintf(stderr, "Enternal error in identiferState in scanner\n");
             // return(ERROR_INTERNAL);
-            //return int error(str errorText, int error);
+            // return int error(str errorText, int error);
         }
         symbol = getc(stdin);
         identifierState(symbol, token);
@@ -42,124 +42,130 @@ int underscoreState(char symbol, token_t * token) {
 int intState(char symbol, token_t * token) {
     if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
-            exit(ERROR_INTERNAL);
+            return printErrorAndReturn("Enternal error in intState in scanner", ERROR_INTERNAL);
+            // exit(ERROR_INTERNAL);
         symbol = getc(stdin);
         return intState(symbol, token);
     } else if (symbol == '.') {
         if (!str_add_char(&token->content, symbol))
-            exit(ERROR_INTERNAL);
+            return printErrorAndReturn("Enternal error in intState in scanner", ERROR_INTERNAL);
+            // exit(ERROR_INTERNAL);
         symbol = getc(stdin);
         if (isdigit(symbol)) {
-            floatState(symbol, token);
+            return floatState(symbol, token);
         } else {
-            exit(LEX_ERR);
+            return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
+            // exit(LEX_ERR);
         }
     } else if (symbol == 'E' || symbol == 'e') {
         if (!str_add_char(&token->content, symbol))
-            exit(ERROR_INTERNAL);
+            return printErrorAndReturn("Enternal error in intState in scanner", ERROR_INTERNAL);
+            // exit(ERROR_INTERNAL);
         symbol = getc(stdin);
         if (symbol == '+' || symbol == '-' || isdigit(symbol)) {
             if (!str_add_char(&token->content, symbol))
-                exit(1);
+                return printErrorAndReturn("Enternal error in intState in scanner", ERROR_INTERNAL);
+                // exit(1);
             symbol = getc(stdin);
-            intExpState(symbol, token);
+            return intExpState(symbol, token);
         } else {
-            exit(LEX_ERR);
+            return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
+            // exit(LEX_ERR);
         }
     } else if (isspace(symbol)) {
-        printf("Success, identifier is %s\n", token->content.str);
+        printf("Success, int is %s\n", token->content.str);
         token->type = T_INT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
-        exit(LEX_ERR);
+        return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
+        // exit(LEX_ERR);
     }
 }
 
 int floatState(char symbol, token_t * token) {
     if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
-            return(LEX_ERR);
+            return printErrorAndReturn("Enternal error in floatState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        floatState(symbol, token);
+        return floatState(symbol, token);
     } else if (symbol == 'E' || symbol == 'e') {
         if (!str_add_char(&token->content, symbol))
-            return(LEX_ERR);
+            return printErrorAndReturn("Enternal error in floatState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
         if (symbol == '+' || symbol == '-' || isdigit(symbol)) {
             if (!str_add_char(&token->content, symbol))
-                return(LEX_ERR);
+                return printErrorAndReturn("Enternal error in floatState in scanner", ERROR_INTERNAL);
             symbol = getc(stdin);
             return floatExpState(symbol, token);
         } else {
-            return(LEX_ERR);
+            return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
         }
     } else if (isspace(symbol)) {
-        printf("Success, identifier is %s\n", token->content.str);
+        printf("Success, float is %s\n", token->content.str);
         token->type = T_FLOAT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
-        exit(LEX_ERR);
+        return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
     }
 }
 
 int intExpState(char symbol, token_t * token) {
     if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
-            exit(1);
+            return printErrorAndReturn("Enternal error in intExpState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        floatState(symbol, token);
+        return floatState(symbol, token);
     } else if (isspace(symbol)) {
-        printf("Success, identifier is %s\n", token->content.str);
+        printf("Success, int exp is %s\n", token->content.str);
         token->type = T_INT_EXP;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
-        exit(LEX_ERR);
+        return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
     }
 }
 
 int floatExpState(char symbol, token_t * token) {
     if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
-            exit(1);
+            return printErrorAndReturn("Enternal error in floatExpState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        floatState(symbol, token);
+        return floatState(symbol, token);
     } else if (isspace(symbol)) {
-        printf("Success, identifier is %s\n", token->content.str);
+        printf("Success, float exp is %s\n", token->content.str);
         token->type = T_FLOAT_EXP;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
-        exit(LEX_ERR);
+        return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
     }
 }
 
 int startState(char symbol, token_t * token) {
     if (isspace(symbol)) { // White symbols
         symbol = getc(stdin);
-        startState(symbol, token);
+        return startState(symbol, token);
     } else if (symbol == '_') { // underscore
         symbol = getc(stdin);
-        underscoreState(symbol, token);
+        return underscoreState(symbol, token);
     } else if (isalpha(symbol)) {
         if (!str_add_char(&token->content, symbol))
-            exit(LEX_ERR);
+            return printErrorAndReturn("Enternal error in startState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        identifierState(symbol, token);
+        return identifierState(symbol, token);
     } else if (isdigit(symbol)) {
         if (!str_add_char(&token->content, symbol))
-            exit(LEX_ERR);
+            return printErrorAndReturn("Enternal error in startState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        intState(symbol, token);
+        return intState(symbol, token);
     } else if (symbol == EOF) {
         token->type = 0;
         printf("Success, EOF is found\n");
     }
-    
 }
 
 int getToken(token_t * token) {
     str_clear(&token->content);
     char symbol = getc(stdin);
     int returnCode = startState(symbol, token);
-    ungetc(symbol, stdin);
+    // ungetc(symbol, stdin);
     return returnCode;
 }

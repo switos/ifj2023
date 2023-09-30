@@ -5,13 +5,17 @@ token_t token;
 
 int parse() {
     getToken(&token);
+    while (token.type != T_EOF) {
+        getToken(&token);
+    }
     if (token.type == T_LET) {
         getToken(&token);
     } else if(token.type == T_EOF) {
         return NO_ERR;
     } else {
-        fprintf(stderr, "Syntaxe error in parse rule\n");
-        return SYNTAX_ERR;
+        return printErrorAndReturn("Syntaxe error in parse rule", SYNTAX_ERR);
+        // fprintf(stderr, "Syntaxe error in parse rule\n");
+        // return SYNTAX_ERR;
     }
 }
 
@@ -19,7 +23,7 @@ int main() {
         str_init(&token.content);
         int result = parse();
         str_free(&token.content);
-        if(result){
+        if (result){
             exit(result);
         }
 }
