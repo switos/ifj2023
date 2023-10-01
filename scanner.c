@@ -230,19 +230,26 @@ int twoQuotesStringState(token_t * token) {
  * 
  * @return char* saved content of original string (in case if it's not the end)
  */
-char* endOfMultilineStringDetector() {
-    char returnValue[6];
-    returnValue[0] = symbol;
+void endOfMultilineStringDetector(char* temp) {
+    // char returnValue[6];
+    // returnValue[0] = symbol;
+    temp[0] = symbol;
+    // printf("symbol is #%c#\n", symbol);
     for (int i = 0; i < 3; i++) {
         symbol = getc(stdin);
-        returnValue[i+1] = symbol;
+        // returnValue[i+1] = symbol;
+        temp[i+1] = symbol;
         if (symbol != '\"') { // if symbol is not quote, then we can put value of parsed part into main string token
-            returnValue[i+2] = '\0';
-            return returnValue;
+            // returnValue[i+2] = '\0';
+            temp[i+2] = '\0';
+            return;
+            // return returnValue;
         }
     }
-    returnValue[0] = '\0';
-    return returnValue;
+    // returnValue[0] = '\0';
+    temp[0] = '\0';
+    return;
+    // return returnValue;
 }
 
 /**
@@ -257,7 +264,9 @@ int multilineStringState(token_t * token) {
     temp[0] = '\0';
     if (symbol > 31) { // get content of multiline string, excluding '\n' because it might be before the final three quotes
         if (symbol == '\"') { // if quote detected, we need to check if we have 3 quotes in order without new line, this means lexical error
-            temp[0] = *endOfMultilineStringDetector();
+            // *temp = endOfMultilineStringDetector();
+            endOfMultilineStringDetector(temp);
+            printf("temp : #%s#\n", temp);
             if (temp[0] == '\"' && temp[1] == '\"' && temp[2] == '\"') {
                 return printErrorAndReturn("Lexical error in multilineStringState in scanner", LEX_ERR);
             } else {
@@ -270,7 +279,9 @@ int multilineStringState(token_t * token) {
         symbol = getc(stdin);
         return multilineStringState(token);
     } else if (symbol == '\n') { // now we should check if it's the end of the multiline string or not
-        temp[0] = *endOfMultilineStringDetector();
+        // *temp = endOfMultilineStringDetector();
+        endOfMultilineStringDetector(temp);
+        printf("temp : #%s#\n", temp);
         if (temp[0] != '\0') { // check if it were not final 3 quotes
             if (!str_add_more_chars(&token->content, temp))
                 return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);

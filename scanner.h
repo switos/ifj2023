@@ -17,6 +17,6 @@ int stringState(token_t * token);
 int twoQuotesStringState(token_t * token);
 int multilineStringState(token_t * token);
 int oneQuoteState(token_t * token);
-char* endOfMultilineStringDetector();
+void endOfMultilineStringDetector(char * temp);
 
 #endif
