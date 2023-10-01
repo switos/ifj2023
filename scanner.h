@@ -13,5 +13,10 @@ int floatExpState(token_t * token);
 int intExpState(token_t * token);
 int startState(token_t * token);
 int getToken(token_t * token);
+int stringState(token_t * token);
+int twoQuotesStringState(token_t * token);
+int multilineStringState(token_t * token);
+int oneQuoteState(token_t * token);
+char* endOfMultilineStringDetector();
 
 #endif
