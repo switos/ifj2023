@@ -6,9 +6,8 @@ typedef enum {
     T_LET,
     T_INT,
     T_FLOAT,
-    T_INT_EXP,
-    T_FLOAT_EXP,
     T_STRING,
+    T_COLON
 } token_type;
 
 typedef struct token

@@ -133,7 +133,7 @@ int intExpState(token_t * token) {
         return intExpState(token);
     } else if (isspace(symbol) || symbol == EOF) {
         printf("Success, int exp is %s\n", token->content.str);
-        token->type = T_INT_EXP;
+        token->type = T_FLOAT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
@@ -154,7 +154,7 @@ int floatExpState(token_t * token) {
         return floatExpState(token);
     } else if (isspace(symbol) || symbol == EOF) {
         printf("Success, float exp is %s\n", token->content.str);
-        token->type = T_FLOAT_EXP;
+        token->type = T_FLOAT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
