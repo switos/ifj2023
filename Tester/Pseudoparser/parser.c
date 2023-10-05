@@ -6,22 +6,23 @@
 
 int main() {
     char buffer[MAX_BUFFER_SIZE];
-    const char *hello_world = "Hello world!";
-    const char *goodbye_world = "Goodbye world!";
+    const char *input = "print(\"Hello, World!\")";
+    const char *output = "Hello, World!";
+    const char *error1 = "print(\"Hello, World!\"";
 
     // Reading the input text
     while ( fgets(buffer, sizeof(buffer), stdin) != NULL )
     {
-        // We check whether the input text contains the phrase "Hello world!"
-        if ( strstr(buffer, hello_world) != NULL )
+        if ( strstr(buffer, input) != NULL )
         {
-            // If yes, we print "Goodbye world!"
-            printf("%s\n", goodbye_world);
-        } else {
-            // Otherwise, we output the input text
-            printf("%s", buffer);
+            printf("%s", output);
+            return 0;
+        }
+        else if ( strstr(buffer, error1) != NULL )
+        {
+            return 1;
         }
     }
 
-    return 0;
+    return -1;
 }
