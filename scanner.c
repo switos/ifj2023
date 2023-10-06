@@ -1,8 +1,19 @@
 #include "scanner.h"
 
 string tokenContent;
-token_t token;
+
 char symbol;
+
+bool is_keyword(token_t* token) {
+    if (!str_cmp_const_str(&token->content, "let")) {
+        token->type = T_LET;
+        return true;
+    } else if (!str_cmp_const_str(&token->content, "var")) {
+        token->type = T_VAR;
+        return true;
+    }
+    return false;
+}
 
 /**
  * @brief function for identifier state
@@ -19,7 +30,9 @@ int identifierState(token_t * token) {
         return identifierState(token);
     } else if (isspace(symbol) || symbol == EOF) { // white symbol or EOF
         printf("Success, identifier is %s\n", token->content.str);
-        token->type = T_ID;
+        if(!is_keyword(token)){
+            token->type = T_ID;
+        }
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
@@ -112,7 +125,7 @@ int floatState(token_t * token) {
         }
     } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
         printf("Success, float is %s\n", token->content.str);
-        token->type = T_FLOAT;
+        token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
@@ -133,7 +146,7 @@ int intExpState(token_t * token) {
         return intExpState(token);
     } else if (isspace(symbol) || symbol == EOF) {
         printf("Success, int exp is %s\n", token->content.str);
-        token->type = T_FLOAT;
+        token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
@@ -154,7 +167,7 @@ int floatExpState(token_t * token) {
         return floatExpState(token);
     } else if (isspace(symbol) || symbol == EOF) {
         printf("Success, float exp is %s\n", token->content.str);
-        token->type = T_FLOAT;
+        token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
@@ -299,6 +312,7 @@ int multilineStringState(token_t * token) {
     }
 }
 
+
 /**
  * @brief all begins here
  * 
@@ -325,10 +339,20 @@ int startState(token_t * token) {
     } else if (symbol == '\"') {
         symbol = getc(stdin);
         return oneQuoteState(token);
+    } else if (symbol == '=') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in = state\n");
+            token->type = T_EQUAL;
+        }
     } else if (symbol == EOF) {
-        token->type = 0;
+        token->type = T_EOF;
         printf("Success, EOF is found\n");
+    } else {
+        fprintf(stderr, "LEXERR in startState\n");
+        return LEX_ERR;
     }
+    return 0;
 }
 
 /**

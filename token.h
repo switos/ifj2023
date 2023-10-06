@@ -4,10 +4,15 @@ typedef enum {
     T_EOF,
     T_ID,
     T_LET,
+    T_VAR,
+    T_DOUBLE,
     T_INT,
-    T_FLOAT,
     T_STRING,
-    T_COLON
+    T_INT_LIT,
+    T_FLOAT_LIT,
+    T_STRING_LIT,
+    T_COLON,
+    T_EQUAL,
 } token_type;
 
 typedef struct token
