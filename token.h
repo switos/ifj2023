@@ -6,8 +6,6 @@ typedef enum {
     T_LET,
     T_INT,
     T_FLOAT,
-    T_INT_EXP,
-    T_FLOAT_EXP,
     T_STRING,
 } token_type;
 
