@@ -253,8 +253,15 @@ void endOfMultilineStringDetector(char* temp) {
         // returnValue[i+1] = symbol;
         temp[i+1] = symbol;
         if (symbol != '\"') { // if symbol is not quote, then we can put value of parsed part into main string token
+            if (symbol == '\n') {
+                ungetc(symbol, stdin);
+                temp[i+1] = '\0';
+                symbol = getc(stdin);
+            } else {
+                temp[i+2] = '\0';
+                symbol = getc(stdin);
+            }
             // returnValue[i+2] = '\0';
-            temp[i+2] = '\0';
             return;
             // return returnValue;
         }
@@ -279,6 +286,7 @@ int multilineStringState(token_t * token) {
         if (symbol == '\"') { // if quote detected, we need to check if we have 3 quotes in order without new line, this means lexical error
             // *temp = endOfMultilineStringDetector();
             endOfMultilineStringDetector(temp);
+            // printf("temp : #%s#\n", temp);
             fprintf(stderr, "temp : #%s#\n", temp);
             if (temp[0] == '\"' && temp[1] == '\"' && temp[2] == '\"') {
                 return printErrorAndReturn("Lexical error in multilineStringState in scanner", LEX_ERR);
@@ -286,10 +294,11 @@ int multilineStringState(token_t * token) {
                 if (!str_add_more_chars(&token->content, temp))
                     return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
             }
+        } else {
+            if (!str_add_char(&token->content, symbol))
+                return printErrorAndReturn("Enternal error in multilineStringState in scanner", ERROR_INTERNAL);
+            symbol = getc(stdin);
         }
-        if (!str_add_char(&token->content, symbol))
-            return printErrorAndReturn("Enternal error in multilineStringState in scanner", ERROR_INTERNAL);
-        symbol = getc(stdin);
         return multilineStringState(token);
     } else if (symbol == '\n') { // now we should check if it's the end of the multiline string or not
         // *temp = endOfMultilineStringDetector();
@@ -298,6 +307,7 @@ int multilineStringState(token_t * token) {
         if (temp[0] != '\0') { // check if it were not final 3 quotes
             if (!str_add_more_chars(&token->content, temp))
                 return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
+            // symbol = getc(stdin);
             return multilineStringState(token);
         } else {
             symbol = getc(stdin);
