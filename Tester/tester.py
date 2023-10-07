@@ -53,10 +53,16 @@ def run_tests(compiler_path, test_folder):
                 test_result = colorize("PASSED", GREEN)
                 print(f"{test_name} {test_result}")
             else:
+
+                # Print expected program output and return code in case of failure
                 test_result = colorize("FAILED", RED)
                 print(f"{test_name} {test_result}")
                 for line in expected_output_lines:
                     print("\t", line, end="")
+
+                # Print actual program output and return code in case of failure
+                print(f"\n\t Your Output:\n\t {result.stdout}")
+                print(f"\t Your Return Code: {result.returncode}")
 
         except subprocess.CalledProcessError as e:
             print(f"{test_name} ERROR: {e.output}")
