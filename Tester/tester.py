@@ -30,7 +30,7 @@ def run_tests(compiler_path, test_folder):
         try:
             result = subprocess.run(
                 [compiler_path], stdin=open(input_path, "r"), stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT, text=True
+                stderr=subprocess.DEVNULL, text=True
             )
 
             # Read expected output and expected return code from .out file
