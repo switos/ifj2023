@@ -5,5 +5,6 @@
         "stdlib.h": "c",
         "string.h": "c",
         "str.c": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

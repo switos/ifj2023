@@ -19,31 +19,32 @@ void getTokenWrapped() {
     if (getToken(&token)) {
         exitAndFree(LEX_ERR); 
     }
-    fprintf(stderr, "%s\n",token.content.str);    
+    //fprintf(stderr, "%s\n", token.content.str);    
 }
 
 int assigmentRule() {
+    if (litCheck() || token.type == T_ID) {
+        bottomtotop();
+        fprintf(stderr, "Succes, assigments rule is parsed\n");
         getTokenWrapped();
-        if (token.type = T_EQUAL) {
-            //expression
-            getTokenWrapped();
-            if (litCheck() || token.type == T_ID) {
-                bottomtotop();
-                fprintf(stderr, "Succes, assigments rule is parsed\n");
-                return parse();
-            } else  {
-                return SYNTAX_ERR;
-            }
+        return parse();
+    } else  {
+        return printErrorAndReturn("Syntaxe error in assigment rule", SYNTAX_ERR);
+    }
             
-        }
 }
 
 int varDefTypeInitRule() {
-    getTokenWrapped();
     if(token.type == T_DOUBLE || token.type == T_INT || token.type == T_STRING) {
-        return assigmentRule();
+        getTokenWrapped();
+        if(token.type = T_EQUAL) {
+            getTokenWrapped();
+            return assigmentRule();
+        } else {
+            return parse();
+        }
     } else {
-        return SYNTAX_ERR;
+        return printErrorAndReturn("Syntaxe error in varDefTypeInitRule", SYNTAX_ERR);
     }
 } 
 
@@ -58,36 +59,39 @@ int variableDefRule() {
         //int varTypeTmp = MUTABLE_T
     }
     getTokenWrapped();
-    if (token.type ==  T_ID) {
+    if(token.type ==  T_ID) {
         getTokenWrapped();
-        if (token.type == T_COLON) {
+        if(token.type == T_COLON) {
+            getTokenWrapped();
             return varDefTypeInitRule();
-        } else {
+        } else if(token.type = T_EQUAL) {
+            getTokenWrapped();
             return assigmentRule();
         } 
     }
-    return SYNTAX_ERR;
+    return printErrorAndReturn("Syntaxe error in variableDefRule", SYNTAX_ERR);
 
 }
 
 int parse() {
-    getTokenWrapped();
-    if (token.type == T_LET || token.type == T_VAR ) {
+    if(token.type == T_LET || token.type == T_VAR) {
         return variableDefRule();
     } else if(token.type == T_EOF) {
         fprintf(stderr, "Succes, EOF parsed\n");
         return NO_ERR;
     } else {
         return printErrorAndReturn("Syntaxe error in parse rule", SYNTAX_ERR);
-        // fprintf(stderr, "Syntaxe error in parse rule\n");
-        // return SYNTAX_ERR;
     }
 }
 
 int main() {
         str_init(&token.content);
+        getTokenWrapped();
         int result = parse();
         str_free(&token.content);
+        precedenceStackNode_t* top;
+        prcStackInnit(top);
+        prcStackFree(top);
         if (result){
             fprintf(stderr,"exit code is %d\n",result);
             exit(result);

@@ -29,7 +29,7 @@ int identifierState(token_t * token) {
         symbol = getc(stdin);
         return identifierState(token);
     } else if (isspace(symbol) || symbol == EOF) { // white symbol or EOF
-        printf("Success, identifier is %s\n", token->content.str);
+        fprintf(stderr, "Success, identifier is %s\n", token->content.str);
         if(!is_keyword(token)){
             token->type = T_ID;
         }
@@ -91,8 +91,8 @@ int intState(token_t * token) {
             return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
         }
     } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
-        printf("Success, int is %s\n", token->content.str);
-        token->type = T_INT;
+        fprintf(stderr, "Success, int is %s\n", token->content.str);
+        token->type = T_INT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
@@ -124,7 +124,7 @@ int floatState(token_t * token) {
             return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
         }
     } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
-        printf("Success, float is %s\n", token->content.str);
+        fprintf(stderr, "Success, float is %s\n", token->content.str);
         token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
@@ -145,7 +145,7 @@ int intExpState(token_t * token) {
         symbol = getc(stdin);
         return intExpState(token);
     } else if (isspace(symbol) || symbol == EOF) {
-        printf("Success, int exp is %s\n", token->content.str);
+        fprintf(stderr, "Success, int exp is %s\n", token->content.str);
         token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
@@ -166,7 +166,7 @@ int floatExpState(token_t * token) {
         symbol = getc(stdin);
         return floatExpState(token);
     } else if (isspace(symbol) || symbol == EOF) {
-        printf("Success, float exp is %s\n", token->content.str);
+        fprintf(stderr, "Success, float exp is %s\n", token->content.str);
         token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
     } else {
@@ -205,8 +205,8 @@ int stringState(token_t * token) {
     } else if (symbol == '\"') {
         symbol = getc(stdin);
         if (isspace(symbol) || symbol == EOF) {
-            printf("Success, string content is %s\n", token->content.str);
-            token->type = T_STRING;
+            fprintf(stderr, "Success, string content is %s\n", token->content.str);
+            token->type = T_STRING_LIT;
             return NO_ERR; // success, return the string, clean buffer 
         } else {
             return printErrorAndReturn("Lexical error in stringState in scanner after final quote", LEX_ERR);
@@ -224,8 +224,8 @@ int stringState(token_t * token) {
  */
 int twoQuotesStringState(token_t * token) {
     if (symbol == EOF || isspace(symbol)) {
-        printf("Success, empty string detected\n");
-        token->type = T_STRING;
+        fprintf(stderr, "Success, empty string detected\n");
+        token->type = T_STRING_LIT;
         return NO_ERR; // success, return the empty string, clean buffer 
     } else if (symbol == '\"') {
         symbol = getc(stdin);
@@ -279,7 +279,7 @@ int multilineStringState(token_t * token) {
         if (symbol == '\"') { // if quote detected, we need to check if we have 3 quotes in order without new line, this means lexical error
             // *temp = endOfMultilineStringDetector();
             endOfMultilineStringDetector(temp);
-            printf("temp : #%s#\n", temp);
+            fprintf(stderr, "temp : #%s#\n", temp);
             if (temp[0] == '\"' && temp[1] == '\"' && temp[2] == '\"') {
                 return printErrorAndReturn("Lexical error in multilineStringState in scanner", LEX_ERR);
             } else {
@@ -294,7 +294,7 @@ int multilineStringState(token_t * token) {
     } else if (symbol == '\n') { // now we should check if it's the end of the multiline string or not
         // *temp = endOfMultilineStringDetector();
         endOfMultilineStringDetector(temp);
-        printf("temp : #%s#\n", temp);
+        fprintf(stderr, "temp : #%s#\n", temp);
         if (temp[0] != '\0') { // check if it were not final 3 quotes
             if (!str_add_more_chars(&token->content, temp))
                 return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
@@ -302,8 +302,8 @@ int multilineStringState(token_t * token) {
         } else {
             symbol = getc(stdin);
             if (symbol == '\n' || symbol == EOF) {
-                printf("Success, multistring content is @@%s@@\n", token->content.str);
-                token->type = T_STRING;
+                fprintf(stderr, "Success, multistring content is @@%s@@\n", token->content.str);
+                token->type = T_STRING_LIT;
                 return NO_ERR; // success, return the string, clean buffer 
             } else {
                 return printErrorAndReturn("Lexical error in multilineStringState in scanner after final 3 quotes", LEX_ERR);
@@ -311,7 +311,6 @@ int multilineStringState(token_t * token) {
         }
     }
 }
-
 
 /**
  * @brief all begins here
@@ -347,7 +346,7 @@ int startState(token_t * token) {
         }
     } else if (symbol == EOF) {
         token->type = T_EOF;
-        printf("Success, EOF is found\n");
+        fprintf(stderr, "Success, EOF is found\n");
     } else {
         fprintf(stderr, "LEXERR in startState\n");
         return LEX_ERR;
@@ -362,9 +361,9 @@ int startState(token_t * token) {
  * @return int 
  */
 int getToken(token_t * token) {
+    str_clear(&token->content);
     symbol = getc(stdin);
     int returnCode = startState(token);
     ungetc(symbol, stdin);
-    str_clear(&token->content);
     return returnCode;
 }

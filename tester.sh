@@ -1,3 +1,3 @@
 #!/bin/bash
 make
-./compiler < testFile
+python3 ./Tester/tester.py ./compiler ./Tester/Tests
