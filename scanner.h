@@ -2,7 +2,7 @@
 #define SCANNER_H
 
 #include <ctype.h>
-#include "expressionAnalyser.h"
+#include "expressionAnalyser.c"
 
 int identifierState(token_t * token);
 int underscoreState(token_t * token);

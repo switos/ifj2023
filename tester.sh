@@ -1,3 +1,3 @@
 #!/bin/bash
 make
-./compiler < testcases/$1
+./compiler < testFile

@@ -24,7 +24,7 @@ void getTokenWrapped() {
 
 int assigmentRule() {
     if (litCheck() || token.type == T_ID) {
-        bottomtotop();
+        expAnalyse(&token);
         fprintf(stderr, "Succes, assigments rule is parsed\n");
         getTokenWrapped();
         return parse();
@@ -37,7 +37,7 @@ int assigmentRule() {
 int varDefTypeInitRule() {
     if(token.type == T_DOUBLE || token.type == T_INT || token.type == T_STRING) {
         getTokenWrapped();
-        if(token.type = T_EQUAL) {
+        if(token.type == T_EQUAL) {
             getTokenWrapped();
             return assigmentRule();
         } else {
@@ -53,7 +53,7 @@ int bottomtotop() {
 }
 
 int variableDefRule() {
-    if(token.type = T_LET) {
+    if(token.type == T_LET) {
         //int varTypeTmp = UNMUTABLE_T
     } else {
         //int varTypeTmp = MUTABLE_T
@@ -64,7 +64,7 @@ int variableDefRule() {
         if(token.type == T_COLON) {
             getTokenWrapped();
             return varDefTypeInitRule();
-        } else if(token.type = T_EQUAL) {
+        } else if(token.type == T_EQUAL) {
             getTokenWrapped();
             return assigmentRule();
         } 
@@ -89,9 +89,6 @@ int main() {
         getTokenWrapped();
         int result = parse();
         str_free(&token.content);
-        precedenceStackNode_t* top;
-        prcStackInnit(top);
-        prcStackFree(top);
         if (result){
             fprintf(stderr,"exit code is %d\n",result);
             exit(result);
