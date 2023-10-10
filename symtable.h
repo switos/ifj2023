@@ -1,9 +1,11 @@
 #ifndef SYMTABLE_H
 #define SYMTABLE_H
 
+
+#include "stdbool.h"
 #include <stdio.h>
 #include <string.h>
-#include "stdbool.h"
+#include <stdlib.h>
 
 #define INIT_SIZE 8     //initial size for symtable
 #define THRESHOLD 0.7   //if symtable is filled above this percentage, it is being resized twice its current size 
@@ -64,4 +66,4 @@ void symtable_free (symtable_t* table);
 
 htab_data_t* symtable_search (symtable_t* table, char* key);
 
-#endif SYMTABLE_H
+#endif
