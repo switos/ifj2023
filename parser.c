@@ -1,5 +1,6 @@
 #include "parser.h"
 token_t token;
+precedenceStackNode_t* prcStack;
 
 int litCheck(){
     if (token.type == T_FLOAT_LIT || token.type == T_STRING_LIT || token.type == T_INT_LIT) {
@@ -19,7 +20,6 @@ void getTokenWrapped() {
     if (getToken(&token)) {
         exitAndFree(LEX_ERR); 
     }
-    //fprintf(stderr, "%s\n", token.content.str);    
 }
 
 int assigmentRule() {

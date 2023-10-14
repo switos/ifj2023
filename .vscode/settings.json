@@ -4,7 +4,8 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "string.h": "c",
-        "str.c": "cpp"
+        "str.c": "cpp",
+        "expressionanalyser.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -1,28 +1,41 @@
-#include "token.h"
-#include "error.h"
+#include "scanner.c"
 
-/*
-    |    | *  | +  | id | 
-    | *  | >  | >  | <  | 
-    | +  | <  | >  | >  |
-    | id | <  | <  |    |
-*/
-
-char precedenceTable [3][3] = { 
-    {'>', '>', '<'},
-    {'<', '>', '>'},
-    {'<', '<', ' '},
-    };
+char precedenceTable [6][6] = { 
+        //  +    -    *    /   id    $
+   /*+*/  {'g', 'g', 'l', 'l', 'l', 'g'},
+   /*-*/  {'g', 'g', 'l', 'l', 'l', 'g'},
+   /***/  {'g', 'g', 'g', 'g', 'l', 'g'},
+   /*/*/  {'g', 'g', 'g', 'g', 'l', 'g'},
+   /*id*/ {'g', 'g', 'g', 'g', ' ', 'g'},
+   /*$*/  {'l', 'l', 'l', 'l', 'l', ' '},
+};
 
 typedef enum { 
-    ES_MUL,
     ES_PLUS,
+    ES_MINUS,
+    ES_MUL,
+    ES_DIV,
     ES_ID,
     ES_END,
     ES_CATCH,
     ES_NONTER,
     ES_UNDEFINED,
-} ES_TYPE;
+} ES_SYMBOL;
+
+typedef enum {
+    R_ID,
+    R_ERROR
+} R_RULE;
+
+int getSymbolFromToken(token_t* token) {
+    if(token->type < T_ID) {
+        return token->type;
+    } else if (token->type < T_EOF) {
+        return ES_ID;
+    } else {
+        return ES_END;
+    }
+}
 
 typedef struct precedenceStackNode
 {
@@ -32,36 +45,31 @@ typedef struct precedenceStackNode
 } precedenceStackNode_t;
 
 
-int prcStackInit(precedenceStackNode_t **top, int symbol, int type) {
+
+int prcStackInit(precedenceStackNode_t** top, int symbol, int type) {
     (*top) = (precedenceStackNode_t*)malloc(sizeof(struct precedenceStackNode));
-    fprintf(stderr, "out p : %p\n", top);
-    if (top == NULL) {
+    if ((*top) == NULL) {
         return printErrorAndReturn("Enternal error in prcStackInit", ERROR_INTERNAL); 
     }
-    // printf("112");
     (*top)->symbol = symbol;
     (*top)->type = type;
     (*top)->next = NULL;
     return 0;
 }
 
-int prcStackFree(precedenceStackNode_t **top) {
+int prcStackFree(precedenceStackNode_t** top) {
     while ((*top) != NULL) {
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
-        free((*top));
+        free(tmp);
+        printf("i am free\n");
     }
+    return 0;
 }
 
-int prcStackPush(precedenceStackNode_t **top, int symbol, int type) {
+int prcStackPush(precedenceStackNode_t** top, int symbol, int type) {
     if ((*top) == NULL) {
-        fprintf(stderr, "CHECKARINA\n");
-        fprintf(stderr, "inp p : %p\n", top);
         prcStackInit(top, symbol, type);
-        fprintf(stderr, "out out p : %p\n", top);
-        if ((*top) == NULL) {
-            fprintf(stderr, "CHECKARINA2\n");
-        }
     } else {
         precedenceStackNode_t* new;
         prcStackInit(&new, symbol, type);
@@ -70,11 +78,27 @@ int prcStackPush(precedenceStackNode_t **top, int symbol, int type) {
     }
 }
 
-int prcStackGetTerminal(precedenceStackNode_t **top) {
-    if((*top) != NULL) {
-        return (*top)->symbol;
+int prcStackPop(precedenceStackNode_t** top){
+    if((*top) != NULL){
+        printf("let's go\n");
+        precedenceStackNode_t* tmp = (*top);
+        (*top) = (*top)->next;
+        free(tmp);
+        tmp == NULL;
+        return 0;
     } else {
-        printf("ja pidor\n");
-        exit(99);
+        printf("stack is empty\n");
+        return 1;
     }
+}
+
+precedenceStackNode_t* prcStackGetTerminal(precedenceStackNode_t** top) {
+    precedenceStackNode_t* current = (*top);
+    while (current != NULL)
+    {
+        if(current->symbol < ES_CATCH) 
+            return current;
+        current = current->next;
+    }
+    return NULL;   
 }
