@@ -30,7 +30,7 @@ symtable_t* symtable_init() {
     return table;
 }
 
-void symtable_resize(symtable_t* table, int newTableSize) {
+symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
    htab_item_t** newBucket = (htab_item_t**)calloc(newTableSize, sizeof(htab_item_t*));
    if(newBucket == NULL) {
         fprintf(stderr, "Failed to allocate memory");
@@ -46,6 +46,20 @@ void symtable_resize(symtable_t* table, int newTableSize) {
             tmp = tmpNext;
         }
     }
+    symtable_t* newTable = (symtable_t*)malloc(sizeof(symtable_t));
+    if (newTable == NULL) {
+        fprintf(stderr, "Failed to allocate memory");
+        free(newBucket);
+        return NULL;
+    }
+
+    newTable->sizeAllocated = newTableSize;
+    newTable->sizeUsed = table->sizeUsed;
+    newTable->bucket = newBucket;
+
+    
+    symtable_free(table);
+    return newTable;
 }
 
 htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, char* name, char* value, bool defined, bool constant){

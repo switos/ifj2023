@@ -54,7 +54,7 @@ unsigned int get_hash (char *key, int tableSize);
 
 symtable_t* symtable_init();
 
-void symtable_resize(symtable_t* table, int newTableSize);
+symtable_t* symtable_resize(symtable_t* table, int newTableSize);
 
 htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, char* name, char* value, bool defined, bool constant);
 
