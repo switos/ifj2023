@@ -64,7 +64,7 @@ symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
 
 htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, char* name, char* value, bool defined, bool constant){
     if(table->sizeUsed / table->sizeAllocated > THRESHOLD) {
-        symtable_resize(table, table->sizeAllocated * 2);
+        table = symtable_resize(table, table->sizeAllocated * 2);
     }
     
     unsigned int index = get_hash(key, table->sizeAllocated);
@@ -132,7 +132,7 @@ htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, 
 
 htab_data_t* symtable_insert_func(symtable_t* table, char* key, char* returnType, char* name, bool defined, int argumentAmount){
     if(table->sizeUsed / table->sizeAllocated > THRESHOLD) {
-        symtable_resize(table, table->sizeAllocated * 2);
+        table = symtable_resize(table, table->sizeAllocated * 2);
     }
 
     unsigned int index = get_hash(key, table->sizeAllocated);
