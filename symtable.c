@@ -119,6 +119,19 @@ htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, 
         free(newBucket);
         return NULL; 
     }
+
+    newBucket->key = (char*)malloc(strlen(key) + 1);
+    if(newBucket->key == NULL) {
+        fprintf(stderr, "Failed to allocate memory");
+        free(newBucket->data->var->type);
+        free(newBucket->data->var->name);
+        free(newBucket->data->var);
+        free(newBucket->data); 
+        free(newBucket->key);
+        free(newBucket);
+        return NULL; 
+    }
+    strcpy(newBucket->key, key);
     strcpy(newBucket->data->var->name, name);
     strcpy(newBucket->data->var->type, type);
     strcpy(newBucket->data->var->value, value);
@@ -185,7 +198,18 @@ htab_data_t* symtable_insert_func(symtable_t* table, char* key, char* returnType
         free(newBucket);
         return NULL; 
     }
-
+    newBucket->key = (char*)malloc(strlen(key) + 1);
+    if(newBucket->key == NULL) {
+        fprintf(stderr, "Failed to allocate memory");
+        free(newBucket->data->func->returnType);
+        free(newBucket->data->func->name);
+        free(newBucket->data->func);
+        free(newBucket->data); 
+        free(newBucket->key); 
+        free(newBucket);
+        return NULL; 
+    }
+    strcpy(newBucket->key, key);
     strcpy(newBucket->data->func->name, name);
     strcpy(newBucket->data->func->returnType, returnType);
     newBucket->data->func->defined = defined;
@@ -258,27 +282,32 @@ void symtable_free (symtable_t* table) {
         while(current != NULL) {
             htab_item_t* tmp = current;
             current = current->next;
-            if(tmp->data->var != NULL) {
+            if(tmp->data != NULL) {
                 
-                free(tmp->data->var->name);
-                free(tmp->data->var->type);
-                free(tmp->data->var->value);
-                free(tmp->data->var);
-            }
-            if(tmp->data->func != NULL) {
-                
-                free(tmp->data->func->name);
-                free(tmp->data->func->returnType);
-                if(tmp->data->func->param != NULL) {
-                    for(int i = 0; i < tmp->data->func->argumentsInArray; i++) {
-                        free(tmp->data->func->param[i].identifier);
-                        free(tmp->data->func->param[i].name);
-                        free(tmp->data->func->param[i].type);
-                    }
-                    free(tmp->data->func->param);
+                if(tmp->data->var != NULL) {   
+                    free(tmp->data->var->name);
+                    free(tmp->data->var->type);
+                    free(tmp->data->var->value);
+                    free(tmp->data->var);
                 }
-                free(tmp->data->func);
+                printf("hi\n");
+                if(tmp->data->func != NULL) {
+                    free(tmp->data->func->name);
+                    free(tmp->data->func->returnType);
+                    if(tmp->data->func->param != NULL) {
+                        for(int i = 0; i < tmp->data->func->argumentsInArray; i++) {
+                            free(tmp->data->func->param[i].identifier);
+                            free(tmp->data->func->param[i].name);
+                            free(tmp->data->func->param[i].type);
+                        }
+                        free(tmp->data->func->param);
+                    }
+                    free(tmp->data->func);
+                }
+                
+                free(tmp->data);
             }
+            free(tmp->key);
             free(tmp);
             
         }
@@ -290,5 +319,21 @@ void symtable_free (symtable_t* table) {
 
 int main(int argc, char* argv[]) {
     
+    symtable_t *symtable = symtable_init();
+
+    symtable_insert_func(symtable, "aboba", "int", "func", true, 1);
+
+
+    printf("%d\n", symtable->sizeUsed);
+    printf("%d\n", symtable->sizeAllocated);
+
+
+    symtable = symtable_resize(symtable, 16);
+
+    printf("%d\n", symtable->sizeUsed);
+    printf("%d\n", symtable->sizeAllocated);
+
+    symtable_free(symtable);
+
     return 0;
 }
