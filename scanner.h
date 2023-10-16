@@ -2,7 +2,8 @@
 #define SCANNER_H
 
 #include <ctype.h>
-#include "expressionAnalyser.c"
+#include "token.h"
+#include "error.h"
 
 int identifierState(token_t * token);
 int underscoreState(token_t * token);
@@ -17,5 +18,10 @@ int twoQuotesStringState(token_t * token);
 int multilineStringState(token_t * token);
 int oneQuoteState(token_t * token);
 void endOfMultilineStringDetector(char * temp);
+bool isKeyword(token_t * token);
+bool isType(token_t * token);
+bool isAcc();
+bool isCommi();
+
 
 #endif

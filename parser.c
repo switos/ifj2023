@@ -85,12 +85,12 @@ int parse() {
 }
 
 int main() {
-        str_init(&token.content);
-        getTokenWrapped();
-        int result = parse();
-        str_free(&token.content);
-        if (result){
-            fprintf(stderr,"exit code is %d\n",result);
-            exit(result);
-        }
+    str_init(&token.content);
+    getTokenWrapped();
+    int result = parse();
+    str_free(&token.content);
+    if (result){
+        fprintf(stderr,"exit code is %d\n",result);
+        exit(result);
+    }
 }
