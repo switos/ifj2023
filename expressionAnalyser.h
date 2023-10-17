@@ -1,8 +1,8 @@
 #include "scanner.c"
 
 char precedenceTable [6][6] = { 
-        //  +    -    *    /   id    $
-   /*+*/  {'g', 'g', 'l', 'l', 'l', 'g'},
+        //  +    -    *    /  == != < > <= >= ?? ! ( ) id    $
+   /*+*/  {'g', 'g', 'l', 'l', 'l', 'g', '', '', '', '', '', '', '', '', 'l', 'g'},
    /*-*/  {'g', 'g', 'l', 'l', 'l', 'g'},
    /***/  {'g', 'g', 'g', 'g', 'l', 'g'},
    /*/*/  {'g', 'g', 'g', 'g', 'l', 'g'},
@@ -24,6 +24,10 @@ typedef enum {
 
 typedef enum {
     R_ID,
+    R_PLUS,
+    R_MINUS,
+    R_MUL,
+    R_DIV,
     R_ERROR
 } R_RULE;
 
@@ -75,6 +79,18 @@ int prcStackPush(precedenceStackNode_t** top, int symbol, int type) {
         prcStackInit(&new, symbol, type);
         new->next = (*top);
         (*top) = new;
+    }
+}
+int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
+    if ((*node) == NULL) {
+        return 1;
+    } else {
+        precedenceStackNode_t* new;
+        prcStackInit(&new, (*node)->symbol, (*node)->type);
+        new->next = (*node)->next;
+        (*node)->next = new;
+        (*node)->symbol = symbol;
+        (*node)->type = type;
     }
 }
 

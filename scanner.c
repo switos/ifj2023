@@ -354,6 +354,30 @@ int startState(token_t * token) {
             fprintf(stderr, "Succes in = state\n");
             token->type = T_EQUAL;
         }
+    } else if (symbol == '+') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in + state\n");
+            token->type = T_PLUS;
+        }
+    } else if (symbol == '/') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in / state\n");
+            token->type = T_DIV;
+        }
+    } else if (symbol == '*') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in * state\n");
+            token->type = T_MUL;
+        }
+    } else if (symbol == '-') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in - state\n");
+            token->type = T_MINUS;
+        }
     } else if (symbol == EOF) {
         token->type = T_EOF;
         fprintf(stderr, "Success, EOF is found\n");

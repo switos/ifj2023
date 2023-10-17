@@ -24,7 +24,9 @@ void getTokenWrapped() {
 
 int assigmentRule() {
     if (litCheck() || token.type == T_ID) {
-        expAnalyse(&token);
+        int result = expAnalyse(&token);
+        if(result)
+            return result;
         fprintf(stderr, "Succes, assigments rule is parsed\n");
         getTokenWrapped();
         return parse();
@@ -47,10 +49,6 @@ int varDefTypeInitRule() {
         return printErrorAndReturn("Syntaxe error in varDefTypeInitRule", SYNTAX_ERR);
     }
 } 
-
-int bottomtotop() {
-    return 1;
-}
 
 int variableDefRule() {
     if(token.type == T_LET) {
