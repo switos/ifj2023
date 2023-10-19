@@ -11,31 +11,19 @@
 #define THRESHOLD 0.7   //if symtable is filled above this percentage, it is being resized twice its current size 
 
 typedef struct {
-    char* type;
-    char* name;
-    char* value;
-    bool defined;
-    bool constant;
-}data_variable_t;
-
-typedef struct {
     char* name;
     char* identifier;
     char* type;
 }data_param_t;
 
 typedef struct {
-    char* returnType;
+    char* type;
     char* name;
     bool defined;
+    bool constant;
     int argumentAmount;
     int argumentsInArray;
     data_param_t* param;
-}data_func_t;
-
-typedef struct {
-    data_variable_t* var;
-    data_func_t* func;   
 }htab_data_t;
 
 typedef struct htab_item{
@@ -56,11 +44,9 @@ symtable_t* symtable_init();
 
 symtable_t* symtable_resize(symtable_t* table, int newTableSize);
 
-htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, char* name, char* value, bool defined, bool constant);
+htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char* name, bool defined, bool constant, int argumentAmount);
 
-htab_data_t* symtable_insert_func(symtable_t* table, char* key, char* returnType, char* name, bool defined, int argumentAmount);
-
-bool symtable_add_arguments(data_func_t* func, char* name, char* identifier, char* type);
+bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, char* type);
 
 void symtable_free (symtable_t* table);
 

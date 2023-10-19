@@ -62,7 +62,7 @@ symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
     return newTable;
 }
 
-htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, char* name, char* value, bool defined, bool constant){
+htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char* name, bool defined, bool constant, int argumentAmount) {
     if(table->sizeUsed / table->sizeAllocated > THRESHOLD) {
         table = symtable_resize(table, table->sizeAllocated * 2);
     }
@@ -81,147 +81,60 @@ htab_data_t* symtable_insert_variable(symtable_t* table, char* key, char* type, 
         free(newBucket); 
         return NULL; 
     }
-
-    newBucket->data->var = (data_variable_t*)malloc(sizeof(data_variable_t));
-    if(newBucket->data->var == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data); 
-        free(newBucket);
-        return NULL; 
-    }
-
-    newBucket->data->var->name = (char*)malloc(strlen(name) + 1);
-    if(newBucket->data->var->name == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->var);
-        free(newBucket->data); 
-        free(newBucket);
-        return NULL; 
-    }
-
-    newBucket->data->var->type = (char*)malloc(strlen(type) + 1);
-    if(newBucket->data->var->type == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->var->name);
-        free(newBucket->data->var);
-        free(newBucket->data); 
-        free(newBucket);
-        return NULL; 
-    }
     
-    newBucket->data->var->value = (char*)malloc(strlen(value) + 1);
-    if(newBucket->data->var->value == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->var->type);
-        free(newBucket->data->var->name);
-        free(newBucket->data->var);
-        free(newBucket->data); 
-        free(newBucket);
-        return NULL; 
-    }
-
-    newBucket->key = (char*)malloc(strlen(key) + 1);
+    newBucket->key = (htab_data_t*)malloc(strlen(key) + 1);
     if(newBucket->key == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->var->type);
-        free(newBucket->data->var->name);
-        free(newBucket->data->var);
-        free(newBucket->data); 
-        free(newBucket->key);
-        free(newBucket);
-        return NULL; 
-    }
-    strcpy(newBucket->key, key);
-    strcpy(newBucket->data->var->name, name);
-    strcpy(newBucket->data->var->type, type);
-    strcpy(newBucket->data->var->value, value);
-    newBucket->data->var->defined = defined;
-    newBucket->data->var->constant = constant;
-
-    table->bucket[index] = newBucket;
-    table->sizeUsed++;
-
-}
-
-htab_data_t* symtable_insert_func(symtable_t* table, char* key, char* returnType, char* name, bool defined, int argumentAmount){
-    if(table->sizeUsed / table->sizeAllocated > THRESHOLD) {
-        table = symtable_resize(table, table->sizeAllocated * 2);
-    }
-
-    unsigned int index = get_hash(key, table->sizeAllocated);
-
-    htab_item_t* newBucket = (htab_item_t*)malloc(sizeof(htab_item_t));
-    if(newBucket == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-    }
-    newBucket->data = (htab_data_t*)malloc(sizeof(htab_data_t));
-    if(newBucket->data == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
+        free(newBucket->data);
         free(newBucket); 
         return NULL; 
     }
 
-    newBucket->data->func = (data_func_t*)malloc(sizeof(data_func_t));
-    if(newBucket->data->func == NULL) {
+    newBucket->data->name = (htab_data_t*)malloc(strlen(name) + 1);
+    if(newBucket->data->name == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data); 
-        free(newBucket);
+        free(newBucket->data);
+        free(newBucket->key);
+        free(newBucket); 
         return NULL; 
     }
 
-    newBucket->data->func->name = (char*)malloc(strlen(name) + 1);
-    if(newBucket->data->func->name == NULL) {
+    newBucket->data->type = (htab_data_t*)malloc(strlen(type) + 1);
+    if(newBucket->data->type == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->func);
-        free(newBucket->data); 
-        free(newBucket);
+        free(newBucket->data->name);
+        free(newBucket->data);
+        free(newBucket->key);
+        free(newBucket); 
         return NULL; 
     }
 
-    newBucket->data->func->returnType = (char*)malloc(strlen(returnType) + 1);
-    if(newBucket->data->func->returnType == NULL) {
+    if(argumentAmount != 0) {
+        newBucket->data->param = (data_param_t*)malloc(sizeof(data_param_t) * argumentAmount);
+        if(newBucket->data->param == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->func->name);
-        free(newBucket->data->func);
-        free(newBucket->data); 
-        free(newBucket);
+        free(newBucket->data->name);
+        free(newBucket->data->type);
+        free(newBucket->data);
+        free(newBucket->key);
+        free(newBucket); 
         return NULL; 
-    }
-
-    newBucket->data->func->param = (data_param_t*)malloc(sizeof(data_param_t) * argumentAmount);
-    if(newBucket->data->func->param == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->func->returnType);
-        free(newBucket->data->func->name);
-        free(newBucket->data->func);
-        free(newBucket->data); 
-        free(newBucket);
-        return NULL; 
-    }
-    newBucket->key = (char*)malloc(strlen(key) + 1);
-    if(newBucket->key == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->func->returnType);
-        free(newBucket->data->func->name);
-        free(newBucket->data->func);
-        free(newBucket->data); 
-        free(newBucket->key); 
-        free(newBucket);
-        return NULL; 
+        }
     }
     strcpy(newBucket->key, key);
-    strcpy(newBucket->data->func->name, name);
-    strcpy(newBucket->data->func->returnType, returnType);
-    newBucket->data->func->defined = defined;
-    newBucket->data->func->argumentAmount = argumentAmount;
-    newBucket->data->func->argumentsInArray = 0;
+    strcpy(newBucket->data->name, name);
+    strcpy(newBucket->data->type, type);
 
-    table->bucket[index] = newBucket;
-    table->sizeUsed++;
+    newBucket->data->argumentAmount = argumentAmount;
+    newBucket->data->argumentsInArray = 0;
+    newBucket->data->constant = constant;
+    newBucket->data->defined = defined;
 
+    return newBucket->data;
 }
 
-bool symtable_add_arguments(data_func_t* func, char* name, char* identifier, char* type) {
+
+bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, char* type) {
     if(func->argumentsInArray >= func->argumentAmount) {
         return false;
     }
@@ -283,28 +196,17 @@ void symtable_free (symtable_t* table) {
             htab_item_t* tmp = current;
             current = current->next;
             if(tmp->data != NULL) {
-                
-                if(tmp->data->var != NULL) {   
-                    free(tmp->data->var->name);
-                    free(tmp->data->var->type);
-                    free(tmp->data->var->value);
-                    free(tmp->data->var);
-                }
-                printf("hi\n");
-                if(tmp->data->func != NULL) {
-                    free(tmp->data->func->name);
-                    free(tmp->data->func->returnType);
-                    if(tmp->data->func->param != NULL) {
-                        for(int i = 0; i < tmp->data->func->argumentsInArray; i++) {
-                            free(tmp->data->func->param[i].identifier);
-                            free(tmp->data->func->param[i].name);
-                            free(tmp->data->func->param[i].type);
-                        }
-                        free(tmp->data->func->param);
+
+                if(tmp->data->argumentsInArray > 0) {
+                    for(int i = 0; i < tmp->data->argumentsInArray; i++) {
+                        free(tmp->data->param[i].identifier);
+                        free(tmp->data->param[i].name);
+                        free(tmp->data->param[i].type);
                     }
-                    free(tmp->data->func);
+                    free(tmp->data->param);
                 }
-                
+                free(tmp->data->name);
+                free(tmp->data->type);
                 free(tmp->data);
             }
             free(tmp->key);
@@ -315,25 +217,4 @@ void symtable_free (symtable_t* table) {
     
     free(table->bucket);
     free(table);
-}
-
-int main(int argc, char* argv[]) {
-    
-    symtable_t *symtable = symtable_init();
-
-    symtable_insert_func(symtable, "aboba", "int", "func", true, 1);
-
-
-    printf("%d\n", symtable->sizeUsed);
-    printf("%d\n", symtable->sizeAllocated);
-
-
-    symtable = symtable_resize(symtable, 16);
-
-    printf("%d\n", symtable->sizeUsed);
-    printf("%d\n", symtable->sizeAllocated);
-
-    symtable_free(symtable);
-
-    return 0;
 }
