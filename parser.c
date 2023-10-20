@@ -12,7 +12,7 @@ int litCheck(){
 
 void exitAndFree(int etype) {
     str_free(&token.content);
-    fprintf(stderr,"exit code is %d\n",etype);
+    fprintf(stderr,"exit code is %d\n", etype);
     exit(etype);
 }
 
@@ -22,35 +22,57 @@ void getTokenWrapped() {
     }
 }
 
-int assigmentRule() {
-    if (litCheck() || token.type == T_ID) {
-        int result = expAnalyse(&token);
-        if(result)
-            return result;
-        fprintf(stderr, "Succes, assigments rule is parsed\n");
-        getTokenWrapped();
-        return parse();
-    } else  {
-        return printErrorAndReturn("Syntaxe error in assigment rule", SYNTAX_ERR);
-    }
-            
+int functionCall() {
+    return 0;    
 }
 
-int varDefTypeInitRule() {
-    if(token.type == T_DOUBLE || token.type == T_INT || token.type == T_STRING) {
+int expression() {
+    if (token.type == T_ID || litCheck()) {
+        fprintf(stderr, "Succes, expAnalyse is parsed\n");
+        return expAnalyse(&token);
+    } else if (token.type == T_FNAME) {
+        return functionCall();
+    }
+    return printErrorAndReturn("Syntaxe error has occured in expression or function rule\n", SYNTAX_ERR);
+}
+
+int id() {
+    //save id;
+    getTokenWrapped();
+    if (token.type == T_EQUAL) {
         getTokenWrapped();
-        if(token.type == T_EQUAL) {
+        return expression();
+    } else if (token.type = T_FNAME) {
+        functionCall();
+    }
+    return printErrorAndReturn("Syntaxe error has occured in id state\n", SYNTAX_ERR);
+    
+}
+
+int varDefItem() {
+    if(token.type == T_EQUAL) {
             getTokenWrapped();
-            return assigmentRule();
-        } else {
-            return parse();
-        }
+            return expression();
     } else {
-        return printErrorAndReturn("Syntaxe error in varDefTypeInitRule", SYNTAX_ERR);
+        return NO_ERR;
     }
 } 
 
-int variableDefRule() {
+int varDefList() {
+    if(token.type == T_COLON) {
+            getTokenWrapped();
+            if(token.type == T_DOUBLE || token.type == T_INT || token.type == T_STRING) {
+                getTokenWrapped();
+                return varDefItem();
+            }
+    } else if(token.type == T_EQUAL) {
+            getTokenWrapped();
+            return expression();
+    } 
+    return printErrorAndReturn("Syntaxe error in VarDefList", SYNTAX_ERR);
+}
+
+int varDef() {
     if(token.type == T_LET) {
         //int varTypeTmp = UNMUTABLE_T
     } else {
@@ -59,36 +81,41 @@ int variableDefRule() {
     getTokenWrapped();
     if(token.type ==  T_ID) {
         getTokenWrapped();
-        if(token.type == T_COLON) {
-            getTokenWrapped();
-            return varDefTypeInitRule();
-        } else if(token.type == T_EQUAL) {
-            getTokenWrapped();
-            return assigmentRule();
-        } 
+        return varDefList();
     }
-    return printErrorAndReturn("Syntaxe error in variableDefRule", SYNTAX_ERR);
-
+    return printErrorAndReturn("Syntaxe error in VarDef", SYNTAX_ERR);
 }
 
-int parse() {
+
+int parseInstruction() {
     if(token.type == T_LET || token.type == T_VAR) {
-        return variableDefRule();
-    } else if(token.type == T_EOF) {
-        fprintf(stderr, "Succes, EOF parsed\n");
-        return NO_ERR;
+        return varDef();
+    } else if (token.type == T_ID) {
+        return id();
     } else {
         return printErrorAndReturn("Syntaxe error in parse rule", SYNTAX_ERR);
     }
 }
 
+int pasreGlobal () {
+    getTokenWrapped();
+    if (token.type != T_EOF) {
+        int result = parseInstruction();
+        if (result) 
+            return result;
+        return pasreGlobal();
+    } else {
+        fprintf(stderr, "Succes, EOF parsed\n");
+        return NO_ERR;
+    }
+}
+
 int main() {
         str_init(&token.content);
-        getTokenWrapped();
-        int result = parse();
+        int result = pasreGlobal();
         str_free(&token.content);
         if (result){
-            fprintf(stderr,"exit code is %d\n",result);
+            fprintf(stderr,"exit code in main is %d\n",result);
             exit(result);
         }
 }

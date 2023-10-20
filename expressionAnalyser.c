@@ -23,6 +23,10 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
             printf("Id rule is parsed\n");
         } else {
             rule = R_ERROR;
+        } 
+    } else if ( (*cnt) == 2) { 
+        if ((*top)->symbol == ES_EX){
+            rule = R_UNAR;
         }
     } else if ((*cnt) == 3) {
         if ((*top)->next->symbol == ES_PLUS){
@@ -56,7 +60,7 @@ int expAnalyse (token_t* token) {
     precedenceStackNode_t* stack = NULL; 
     int stackItemsCounter = 0;
     prcStackPush(&stack, ES_END, ES_UNDEFINED);
-    int result;
+    int result = 0;
     do {
         precedenceStackNode_t* stackTerminal = prcStackGetTerminal(&stack);
         switch (precedenceTable[stackTerminal->symbol][getSymbolFromToken(token)])
@@ -80,7 +84,7 @@ int expAnalyse (token_t* token) {
                 result = printErrorAndReturn("Syntax error has occured in expression analyser while findCatch\n", SYNTAX_ERR);
             }
             break;
-        case ' ':
+        case 'e':
             result = printErrorAndReturn("Syntax error has occured in expression analyser\n", SYNTAX_ERR);
             break;
         }
