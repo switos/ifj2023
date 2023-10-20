@@ -1,0 +1,7 @@
+func exampleFunction() -> Int {
+    if true {
+        return
+    } else {
+        return 42
+    }
+}
