@@ -426,6 +426,18 @@ int startState(token_t * token) {
     } else if (symbol == '\"') {
         symbol = getc(stdin);
         return oneQuoteState(token);
+    } else if (symbol == '(') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in ( state\n");
+            token->type = T_LEFT_BRAC;
+        }
+    } else if (symbol == ')') {
+        symbol = getc(stdin);
+        if (isspace(symbol) || symbol == EOF) {
+            fprintf(stderr, "Succes in ) state\n");
+            token->type = T_RIGHT_BRAC;
+        }
     } else if (symbol == '=') {
         symbol = getc(stdin);
         if (isspace(symbol) || symbol == EOF) {

@@ -11,6 +11,13 @@ typedef enum {
     T_STRING_LIT,
     T_EOF,
     T_FNAME,
+    T_LEFT_BRAC,
+    T_RIGHT_BRAC,
+    T_LEFT_CBRAC, //curly brace
+    T_RIGHT_CBRAC,
+    T_UNDER, //underscore
+    T_ARROW,
+    T_COMMA,
     T_LET,
     T_VAR,
     T_DOUBLE,
