@@ -20,7 +20,7 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
     if ((*cnt) == 1) {
         if((*top)->symbol == ES_ID){
             rule == R_ID;
-            printf("Id rule is parsed\n");
+            fprintf(stderr,"Id rule is parsed\n");
         } else {
             rule = R_ERROR;
         } 
@@ -31,7 +31,7 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
     } else if ((*cnt) == 3) {
         if ((*top)->next->symbol == ES_PLUS){
             rule = R_PLUS;
-            printf("Plus rule is parsed\n");
+            fprintf(stderr,"Plus rule is parsed\n");
         } else if ((*top)->next->symbol == ES_MINUS) {
             rule = R_MINUS;
         } else if  ((*top)->next->symbol == ES_MUL) {
@@ -69,7 +69,7 @@ int expAnalyse (token_t* token) {
             /* code */
             break;
         case 'l':
-            printf("in case less with token %d\nterminal on stack is %d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
+            fprintf(stderr,"in case less with token %d\nterminal on stack is %d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
             prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED);
             prcStackPush(&stack, getSymbolFromToken(token), ES_UNDEFINED);
             if (getToken(token))
@@ -77,7 +77,7 @@ int expAnalyse (token_t* token) {
             break;
 
         case 'g':
-            printf("in case great with token %d\nterminal on stack is %d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
+            fprintf(stderr,"in case great with token %d\nterminal on stack is %d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
             if( ! (findCatch(&stack, &stackItemsCounter)) ) {
                 result = reduceByRule(&stack, &stackItemsCounter);
             } else { 
@@ -88,7 +88,7 @@ int expAnalyse (token_t* token) {
             result = printErrorAndReturn("Syntax error has occured in expression analyser\n", SYNTAX_ERR);
             break;
         }
-        printf("%d\n%d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
+        fprintf(stderr,"%d\n%d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
     } while (((getSymbolFromToken(token) != ES_END) || (prcStackGetTerminal(&stack)->symbol != ES_END)) && result == 0 );
     prcStackFree(&stack);
     return result;

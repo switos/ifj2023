@@ -1,0 +1,5 @@
+func printMessage(message: String) {
+    print(message)
+}
+
+printM("Hello, World!")

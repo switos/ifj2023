@@ -79,7 +79,7 @@ int prcStackFree(precedenceStackNode_t** top) {
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
         free(tmp);
-        printf("i am free\n");
+        fprintf(stderr,"i am free\n");
     }
     return 0;
 }
@@ -109,14 +109,14 @@ int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
 
 int prcStackPop(precedenceStackNode_t** top){
     if((*top) != NULL){
-        printf("let's go\n");
+        fprintf(stderr,"let's go\n");
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
         free(tmp);
         tmp == NULL;
         return 0;
     } else {
-        printf("stack is empty\n");
+        fprintf(stderr,"stack is empty\n");
         return 1;
     }
 }

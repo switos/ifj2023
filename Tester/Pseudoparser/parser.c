@@ -8,7 +8,7 @@ int main() {
     char buffer[MAX_BUFFER_SIZE];
     const char *input = "print(\"Hello, World!\")";
     const char *output = "Hello, World!";
-    const char *error1 = "print(\"Hello, World!\"";
+    const char *error1 = "let 123abc = \"Hello, World!\"";
 
     // Reading the input text
     while ( fgets(buffer, sizeof(buffer), stdin) != NULL )
