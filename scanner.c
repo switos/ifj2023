@@ -14,15 +14,14 @@ char symbol;
 bool isType(token_t * token) {
     if (!str_cmp_const_str(&token->content, "Double")) {
         token->type = T_DOUBLE;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "String")) {
         token->type = T_STRING;
-        return true;
     }  else if (!str_cmp_const_str(&token->content, "Int")) {
         token->type = T_INT;
-        return true;
+    } else {
+        return false;
     }
-    return false;
+    return true;
 }
 
 /**
@@ -39,30 +38,24 @@ bool isKeyword(token_t * token) {
 
     if (!str_cmp_const_str(&token->content, "let")) {
         token->type = T_LET;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "var")) {
         token->type = T_VAR;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "else")) {
         token->type = T_ELSE;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "func")) {
         token->type = T_FUNC;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "if")) {
         token->type = T_IF;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "nil")) {
         token->type = T_NIL;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "return")) {
         token->type = T_RETURN;
-        return true;
     } else if (!str_cmp_const_str(&token->content, "while")) {
         token->type = T_WHILE;
-        return true;
+    } else {
+        return false;
     }
-    return false;
+    return true;
 }
 
 /**
@@ -202,9 +195,7 @@ bool isOper(token_t * token) {
             fprintf(stderr, "Success, oper is ??\n");
             token->type = T_NIL_COAL;
         } else {
-
-
-
+            return false;
         }
     } else if (symbol == ':') {
         fprintf(stderr, "Success, oper is :\n");
@@ -231,15 +222,17 @@ int identifierState(token_t * token) {
         }
         symbol = getc(stdin);
         return identifierState(token);
-    } else if (isAcc()) { // white symbol or EOF
-        fprintf(stderr, "Success, identifier is %s\n", token->content.str);
-        if (!isKeyword(token)){
-            token->type = T_ID;
-        } else {
-            fprintf(stderr, "Success, it is a keyword\n");
-        }
-        return NO_ERR; // success, return the identifier, clean buffer 
-    } else if (symbol == '?') {
+    } 
+    // else if (isAcc()) { // white symbol or EOF
+    //     fprintf(stderr, "Success, identifier is %s\n", token->content.str);
+    //     if (!isKeyword(token)){
+    //         token->type = T_ID;
+    //     } else {
+    //         fprintf(stderr, "Success, it is a keyword\n");
+    //     }
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else if (symbol == '?') {
         if (isType(token)) {
             symbol = getc(stdin);
             if (isAcc()) {
@@ -251,7 +244,14 @@ int identifierState(token_t * token) {
             return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
         }
     } else {
-        return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
+        fprintf(stderr, "Success, identifier is %s\n", token->content.str);
+        if (!isKeyword(token)){
+            token->type = T_ID;
+        } else {
+            fprintf(stderr, "Success, it is a keyword\n");
+        }
+        return NO_ERR; // success, return the identifier, clean buffer 
+        // return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
     }
 }
 
@@ -306,12 +306,17 @@ int intState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
         }
-    } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
+    } 
+    // else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
+    //     fprintf(stderr, "Success, int is %s\n", token->content.str);
+    //     token->type = T_INT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
         fprintf(stderr, "Success, int is %s\n", token->content.str);
         token->type = T_INT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
     }
 }
 
@@ -339,12 +344,17 @@ int floatState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
         }
-    } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
+    } 
+    // else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
+    //     fprintf(stderr, "Success, float is %s\n", token->content.str);
+    //     token->type = T_FLOAT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
         fprintf(stderr, "Success, float is %s\n", token->content.str);
         token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
     }
 }
 
@@ -360,12 +370,17 @@ int intExpState(token_t * token) {
             return printErrorAndReturn("Enternal error in intExpState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
         return intExpState(token);
-    } else if (isspace(symbol) || symbol == EOF) {
+    } 
+    // else if (isspace(symbol) || symbol == EOF) {
+    //     fprintf(stderr, "Success, int exp is %s\n", token->content.str);
+    //     token->type = T_FLOAT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
         fprintf(stderr, "Success, int exp is %s\n", token->content.str);
         token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
     }
 }
 
@@ -381,12 +396,17 @@ int floatExpState(token_t * token) {
             return printErrorAndReturn("Enternal error in floatExpState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
         return floatExpState(token);
-    } else if (isspace(symbol) || symbol == EOF) {
+    } 
+    // else if (isspace(symbol) || symbol == EOF) {
+    //     fprintf(stderr, "Success, float exp is %s\n", token->content.str);
+    //     token->type = T_FLOAT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
         fprintf(stderr, "Success, float exp is %s\n", token->content.str);
         token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
     }
 }
 
@@ -431,7 +451,7 @@ int escapeAllowed(token_t * token) {
             return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
         }
         symbol = getc(stdin);
-        return hex(token);
+        return hex(token);// \u{dd}
     } else {
         return printErrorAndReturn("Lexical error in escapeAllowed in scanner", LEX_ERR);
     }
@@ -637,7 +657,7 @@ int startState(token_t * token) {
             }
         }
     } else {
-        if (isOper(token)) {
+        if (isOper(token) || isAcc) {
             symbol = getc(stdin);
             return NO_ERR;
         }
