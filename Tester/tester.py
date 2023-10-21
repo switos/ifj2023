@@ -17,6 +17,9 @@ def run_tests(compiler_path, test_folder):
     # Get a list of files with test inputs and sort them
     test_inputs = sorted([file for file in os.listdir(test_folder) if file.endswith(".in")])
 
+    passed_tests = 0
+    failed_tests = 0
+
     for test_input in test_inputs:
         input_path = os.path.join(test_folder, test_input)
         expected_output_path = os.path.join(
@@ -52,6 +55,8 @@ def run_tests(compiler_path, test_folder):
             if result.returncode == expected_return_code and result.stdout.strip() == expected_output.strip():
                 test_result = colorize("PASSED", GREEN)
                 print(f"{test_name} {test_result}")
+
+                passed_tests += 1
             else:
 
                 # Print expected program output and return code in case of failure
@@ -64,8 +69,17 @@ def run_tests(compiler_path, test_folder):
                 print(f"\n\t Your Output:\n\t {result.stdout}")
                 print(f"\t Your Return Code: {result.returncode}")
 
+                failed_tests += 1
         except subprocess.CalledProcessError as e:
             print(f"{test_name} ERROR: {e.output}")
+
+            failed_tests += 1
+
+    # Output the summary of passed and failed tests
+    print(f"==========\n")
+    print(f"{passed_tests} {colorize('PASSED', GREEN)}")
+    print(f"{failed_tests} {colorize('FAILED', RED)}")
+    print(f"\n==========")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Tests the compiler using test data.")
