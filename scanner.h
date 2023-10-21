@@ -22,6 +22,6 @@ bool isKeyword(token_t * token);
 bool isType(token_t * token);
 bool isAcc();
 bool isCommi();
-
+bool isOper(token_t * token);
 
 #endif

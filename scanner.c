@@ -4,6 +4,13 @@ string tokenContent;
 
 char symbol;
 
+/**
+ * @brief checks if lesem is type
+ * 
+ * @param token 
+ * @return true 
+ * @return false 
+ */
 bool isType(token_t * token) {
     if (!str_cmp_const_str(&token->content, "Double")) {
         token->type = T_DOUBLE;
@@ -18,6 +25,13 @@ bool isType(token_t * token) {
     return false;
 }
 
+/**
+ * @brief checks if lexem is keyword or type
+ * 
+ * @param token 
+ * @return true 
+ * @return false 
+ */
 bool isKeyword(token_t * token) {
     if (isType(token)) {
         return true;
@@ -51,6 +65,12 @@ bool isKeyword(token_t * token) {
     return false;
 }
 
+/**
+ * @brief checks if it's comment
+ * 
+ * @return true 
+ * @return false 
+ */
 bool isCommi() {
     if (symbol == '/') {
         symbol = getc(stdin);
@@ -78,11 +98,23 @@ bool isCommi() {
                 }
             }
             return true;
+        } else {
+            // fprintf(stderr, "hi from commi\n");
+            ungetc('/', stdin);
+            symbol = getc(stdin);
+            // return isOper(token);
         }
     }
+    // fprintf(stderr, "hi from commi 2\n");
     return false;
 }
 
+/**
+ * @brief checks if symbol could be after lexem
+ * 
+ * @return true 
+ * @return false 
+ */
 bool isAcc() {
     if (isspace(symbol) || symbol == EOF) {
         return true;
@@ -90,6 +122,104 @@ bool isAcc() {
         return isCommi();
     }
     return false;
+}
+
+/**
+ * @brief checks if symbol is operator
+ * 
+ * @return true 
+ * @return false 
+ */
+bool isOper(token_t * token) {
+    // fprintf(stderr, "symbol : %d\n", symbol);
+    if (symbol == '{') {
+        fprintf(stderr, "Success, oper is {\n");
+        token->type = T_OP_BRACE;
+    } else if (symbol == '}') {
+        fprintf(stderr, "Success, oper is }\n");
+        token->type = T_CL_BRACE;
+    } else if (symbol == '(') {
+        fprintf(stderr, "Success, oper is (\n");
+        token->type = T_OP_PAR;
+    } else if (symbol == ')') {
+        fprintf(stderr, "Success, oper is )\n");
+        token->type = T_CL_PAR;
+    } else if (symbol == '*') {
+        fprintf(stderr, "Success, oper is *\n");
+        token->type = T_ASTER;
+    } else if (symbol == '/') {
+        fprintf(stderr, "Success, oper is /\n");
+        token->type = T_SLASH;
+    } else if (symbol == '+') {
+        fprintf(stderr, "Success, oper is +\n");
+        token->type = T_PLUS;
+    } else if (symbol == '-') {
+        if ((symbol = getc(stdin)) != '>') {
+            fprintf(stderr, "Success, oper is -\n");
+            ungetc(symbol, stdin);
+            token->type = T_MINUS;
+        } else {
+            fprintf(stderr, "Success, oper is ->\n");
+            token->type = T_ARROW;
+        }
+    } else if (symbol == '=') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is =\n");
+            ungetc(symbol, stdin);
+            token->type = T_EQUAL;
+        } else {
+            fprintf(stderr, "Success, oper is ==\n");
+            token->type = T_ASSING;
+        }
+    } else if (symbol == '!') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is !\n");
+            ungetc(symbol, stdin);
+            token->type = T_NOT;
+        } else {
+            fprintf(stderr, "Success, oper is !=\n");
+            token->type = T_NOT_EQUAL;
+        }
+    } else if (symbol == '<') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is <\n");
+            ungetc(symbol, stdin);
+            token->type = T_LESS;
+        } else {
+            fprintf(stderr, "Success, oper is <=\n");
+            token->type = T_LESS_EQUAL;
+        }
+    } else if (symbol == '>') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is >\n");
+            ungetc(symbol, stdin);
+            token->type = T_GREATER;
+        } else {
+            fprintf(stderr, "Success, oper is >=\n");
+            token->type = T_GREATER_EQUAL;
+        }
+    } else if (symbol == '?') {
+        if ((symbol = getc(stdin)) != '?') {
+            fprintf(stderr, "Success, oper is ?\n");
+            ungetc(symbol, stdin);
+            token->type = T_COND_TERN;
+        } else {
+            fprintf(stderr, "Success, oper is ??\n");
+            token->type = T_NIL_COAL;
+        }
+    } else if (symbol == ':') {
+        fprintf(stderr, "Success, oper is :\n");
+        token->type = T_COLON;
+    } else if (symbol == ',') {
+        fprintf(stderr, "Success, oper is ,\n");
+        token->type = T_COMMA;
+    } else if (symbol == ';') {
+        fprintf(stderr, "Success, oper is ;\n");
+        token->type = T_SEMICOLON;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -168,7 +298,7 @@ int intState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
         }
-    } else if (symbol == 'E' || symbol == 'e') { // an Exponet part of integer
+    } else if (symbol == 'E' || symbol == 'e') { // an Exponent part of integer
         if (!str_add_char(&token->content, symbol))
             return printErrorAndReturn("Enternal error in intState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
@@ -426,20 +556,35 @@ int startState(token_t * token) {
     } else if (symbol == '\"') {
         symbol = getc(stdin);
         return oneQuoteState(token);
-    } else if (symbol == '=') {
-        symbol = getc(stdin);
-        if (isspace(symbol) || symbol == EOF) {
-            fprintf(stderr, "Success in = state\n");
-            token->type = T_EQUAL;
-        }
-    } else if (symbol == EOF) {
+    } 
+    // else if (symbol == '=') {
+    //     symbol = getc(stdin);
+    //     if (isspace(symbol) || symbol == EOF) {
+    //         fprintf(stderr, "Success in = state\n");
+    //         token->type = T_EQUAL;
+    //     }
+    // }
+     else if (symbol == EOF) {
         token->type = T_EOF;
         fprintf(stderr, "Success, EOF is found\n");
     } else if (symbol == '/') {
-        return isCommi(token);
+        if (isCommi(token)) {
+            return NO_ERR;
+        } else {
+            if (isOper(token)) {
+                // fprintf(stderr, "hi\n");
+                symbol = getc(stdin);
+                return NO_ERR;
+            } else {
+                return printErrorAndReturn("Lexical error in startState in scanner (commi)", LEX_ERR);
+            }
+        }
     } else {
-        fprintf(stderr, "LEXERR in startState\n");
-        return LEX_ERR;
+        if (isOper(token)) {
+            symbol = getc(stdin);
+            return NO_ERR;
+        }
+        return printErrorAndReturn("Lexical error in startState in scanner (last else)", LEX_ERR);
     }
     return 0;
 }
