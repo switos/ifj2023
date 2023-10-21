@@ -29,16 +29,14 @@ typedef enum {
     T_ASSING,
     T_COLON,
     T_EQUAL,
-    T_NOT,
+    T_EXCL,
     T_NOT_EQUAL,
     T_LESS,
     T_LESS_EQUAL,
     T_GREATER,
     T_GREATER_EQUAL,
-    T_COND_TERN,
     T_NIL_COAL,
     T_COMMA,
-    T_SEMICOLON,
 } token_type;
 
 /**
