@@ -1,8 +1,0 @@
-func generateCrash() {
-    let a = 1
-    let b = 0
-    let result = a / b
-    print("Result: \(result)")
-}
-
-generateCrash()
