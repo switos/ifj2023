@@ -2,7 +2,7 @@
 
 The tester runs the compiler program, inputs `.in` files from the tests folder to `stdin`, and then compares `stdout` with the expected output in the form of `.out` files, including the return code.
 
-0. Check `Tests` folder for an example test
+0. Check `Tests` folder
 
 1. Make sure your compiler has been made using the `make` command
 

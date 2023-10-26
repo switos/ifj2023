@@ -1,0 +1,21 @@
+print("Hello, World!")
+
+# END OF TEST #
+import Foundation
+
+print("Введите ваше имя: ", terminator: "")
+
+if let name = readLine() {
+    print("Привет, \(name)!")
+} else {
+    print("Не удалось прочитать имя.")
+}
+
+# END OF TEST #
+var sum = 0
+for number in 1...10 {
+    sum += number
+}
+print("Сумма чисел от 1 до 10: \(sum)")
+
+# END OF TEST #
