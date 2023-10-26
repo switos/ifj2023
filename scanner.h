@@ -22,6 +22,8 @@ bool isKeyword(token_t * token);
 bool isType(token_t * token);
 bool isAcc();
 bool isCommi();
-
+bool isOper(token_t * token);
+int escapeAllowed(token_t * token);
+int hex(token_t * token);
 
 #endif
