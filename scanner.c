@@ -509,13 +509,9 @@ int stringState(token_t * token) {
         return stringState(token);
     } else if (symbol == '\"') {
         symbol = getc(stdin);
-        if (isspace(symbol) || symbol == EOF) {
-            fprintf(stderr, "Success, string content is %s\n", token->content.str);
-            token->type = T_STRING_LIT;
-            return NO_ERR; // success, return the string, clean buffer 
-        } else {
-            return printErrorAndReturn("Lexical error in stringState in scanner after final quote", LEX_ERR);
-        }
+        fprintf(stderr, "Success, string content is %s\n", token->content.str);
+        token->type = T_STRING_LIT;
+        return NO_ERR; // success, return the string, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in stringState in scanner during parse", LEX_ERR);
     }
