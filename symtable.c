@@ -200,31 +200,24 @@ void symtable_free(symtable_t* table) {
     }
 
     for (int i = 0; i < table->sizeAllocated; i++) {
-        htab_item_t* current = table->array[i];
+        htab_item_t* tmp = table->array[i];
 
-        while (current != NULL) {
-            htab_item_t* tmp = current;
-            current = NULL; 
+        if (tmp->data != NULL) {
 
-            if (tmp->data != NULL) {
-
-                if (tmp->data->argumentsInArray > 0) {
-                    for (int j = 0; j < tmp->data->argumentsInArray; j++) {
-                        free(tmp->data->param[j].identifier);
-                        free(tmp->data->param[j].name);
-                        free(tmp->data->param[j].type);
-                    }
-                    free(tmp->data->param);
+            if (tmp->data->argumentsInArray > 0) {
+                for (int j = 0; j < tmp->data->argumentsInArray; j++) {
+                    free(tmp->data->param[j].identifier);
+                    free(tmp->data->param[j].name);
+                    free(tmp->data->param[j].type);
                 }
-                free(tmp->data->name);
-                free(tmp->data->type);
-                free(tmp->data);
+                free(tmp->data->param);
             }
-            free(tmp->key);
-            free(tmp);
-            
-            unsigned int index = (i + 1) % table->sizeAllocated; 
+            free(tmp->data->name);
+            free(tmp->data->type);
+            free(tmp->data);
         }
+        free(tmp->key);
+        free(tmp);        
     }
     
     free(table->array);
