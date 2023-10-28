@@ -19,118 +19,120 @@ symtable_t* symtable_init() {
     table->sizeAllocated = INIT_SIZE;
     table->sizeUsed = 0;
 
-    table->bucket = (htab_item_t**)calloc(INIT_SIZE, sizeof(htab_item_t*));
-    if(table->bucket == NULL) {
+    table->array = (htab_item_t**)calloc(INIT_SIZE, sizeof(htab_item_t*));
+    if(table->array == NULL) {
         fprintf(stderr, "Failed to allocate memory");
     }
 
     for(int i = 0; i < INIT_SIZE; i++) {
-        table->bucket[i] = NULL;
+        table->array[i] = NULL;
     }
     return table;
 }
 
 symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
-   htab_item_t** newBucket = (htab_item_t**)calloc(newTableSize, sizeof(htab_item_t*));
-   if(newBucket == NULL) {
+    htab_item_t** newArray = (htab_item_t**)calloc(newTableSize, sizeof(htab_item_t*));
+    if (newArray == NULL) {
         fprintf(stderr, "Failed to allocate memory");
+        return NULL;
     }
 
-    for(int i = 0; i < table->sizeAllocated; i++) {
-        htab_item_t* tmp = table->bucket[i];
-        while(tmp != NULL) {
-            htab_item_t* tmpNext = tmp->next;
-            unsigned int index = get_hash(tmp->key, newTableSize);
-            tmp->next = newBucket[index];
-            newBucket[index] = tmp;
-            tmp = tmpNext;
+    for (int i = 0; i < table->sizeAllocated; i++) {
+        htab_item_t* tmp = table->array[i];   
+        unsigned int index = get_hash(tmp->key, newTableSize);
+            
+        while (newArray[index] != NULL) {
+            index = (index + 1) % newTableSize;
         }
+        newArray[index] = tmp;
+        
     }
+    
     symtable_t* newTable = (symtable_t*)malloc(sizeof(symtable_t));
     if (newTable == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(newBucket);
+        free(newArray);
         return NULL;
     }
 
     newTable->sizeAllocated = newTableSize;
     newTable->sizeUsed = table->sizeUsed;
-    newTable->bucket = newBucket;
+    newTable->array = newArray;
 
-    
-    symtable_free(table);
     return newTable;
 }
 
 htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char* name, bool defined, bool constant, int argumentAmount) {
-    if(table->sizeUsed / table->sizeAllocated > THRESHOLD) {
+    if (table->sizeUsed / table->sizeAllocated > THRESHOLD) {
         table = symtable_resize(table, table->sizeAllocated * 2);
     }
     
     unsigned int index = get_hash(key, table->sizeAllocated);
+    unsigned int original_index = index;
+    unsigned int probes = 0;
 
-    htab_item_t* newBucket = (htab_item_t*)malloc(sizeof(htab_item_t));
-    if(newBucket == NULL) {
+    htab_item_t* newSlot = (htab_item_t*)malloc(sizeof(htab_item_t));
+    if (newSlot == NULL) {
         fprintf(stderr, "Failed to allocate memory");
         return NULL;
     }
 
-    newBucket->data = (htab_data_t*)malloc(sizeof(htab_data_t));
-    if(newBucket->data == NULL) {
+    newSlot->key = (char*)malloc(strlen(key) + 1);
+    newSlot->data = (htab_data_t*)malloc(sizeof(htab_data_t));
+    newSlot->data->name = (char*)malloc(strlen(name) + 1);
+    newSlot->data->type = (char*)malloc(strlen(type) + 1);
+
+    if (newSlot->key == NULL || newSlot->data == NULL || newSlot->data->name == NULL || newSlot->data->type == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(newBucket); 
-        return NULL; 
-    }
-    
-    newBucket->key = (htab_data_t*)malloc(strlen(key) + 1);
-    if(newBucket->key == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data);
-        free(newBucket); 
-        return NULL; 
+        free(newSlot->key);
+        free(newSlot->data->name);
+        free(newSlot->data->type);
+        free(newSlot->data);
+        free(newSlot);
+        return NULL;
     }
 
-    newBucket->data->name = (htab_data_t*)malloc(strlen(name) + 1);
-    if(newBucket->data->name == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data);
-        free(newBucket->key);
-        free(newBucket); 
-        return NULL; 
-    }
-
-    newBucket->data->type = (htab_data_t*)malloc(strlen(type) + 1);
-    if(newBucket->data->type == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->name);
-        free(newBucket->data);
-        free(newBucket->key);
-        free(newBucket); 
-        return NULL; 
-    }
-
-    if(argumentAmount != 0) {
-        newBucket->data->param = (data_param_t*)malloc(sizeof(data_param_t) * argumentAmount);
-        if(newBucket->data->param == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(newBucket->data->name);
-        free(newBucket->data->type);
-        free(newBucket->data);
-        free(newBucket->key);
-        free(newBucket); 
-        return NULL; 
+    if (argumentAmount != 0) {
+        newSlot->data->param = (data_param_t*)malloc(sizeof(data_param_t) * argumentAmount);
+        if (newSlot->data->param == NULL) {
+            fprintf(stderr, "Failed to allocate memory");
+            free(newSlot->key);
+            free(newSlot->data->name);
+            free(newSlot->data->type);
+            free(newSlot->data);
+            free(newSlot);
+            return NULL;
         }
     }
-    strcpy(newBucket->key, key);
-    strcpy(newBucket->data->name, name);
-    strcpy(newBucket->data->type, type);
 
-    newBucket->data->argumentAmount = argumentAmount;
-    newBucket->data->argumentsInArray = 0;
-    newBucket->data->constant = constant;
-    newBucket->data->defined = defined;
+    strcpy(newSlot->key, key);
+    strcpy(newSlot->data->name, name);
+    strcpy(newSlot->data->type, type);
 
-    return newBucket->data;
+    newSlot->data->argumentAmount = argumentAmount;
+    newSlot->data->argumentsInArray = 0;
+    newSlot->data->constant = constant;
+    newSlot->data->defined = defined;
+
+    while (table->array[index] != NULL) {
+        index = (index + 1) % table->sizeAllocated;
+        probes++;
+
+        if (probes >= table->sizeAllocated) {
+            fprintf(stderr, "Hash table is full.");
+            free(newSlot->key);
+            free(newSlot->data->name);
+            free(newSlot->data->type);
+            free(newSlot->data);
+            free(newSlot);
+            return NULL;
+        }
+    }
+
+    table->array[index] = newSlot;
+    table->sizeUsed++;
+
+    return newSlot->data;
 }
 
 
@@ -167,41 +169,50 @@ bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, cha
     func->argumentsInArray++;
     return true;
 }
-
-htab_data_t* symtable_search (symtable_t* table, char* key) {
-    if(table == NULL || key == NULL) {
+htab_data_t* symtable_search(symtable_t* table, char* key) {
+    if (table == NULL || key == NULL) {
         return NULL;
     }
 
-    unsigned int index = get_hash(key, table->sizeAllocated);    
-    htab_item_t* tmp = table->bucket[index];
-    
-    while(tmp != NULL) {
-        if(tmp->key != NULL) {
-            if(!strcmp(tmp->key, key)) {
-                printf("Got it\n");
-                return &tmp->data;
-            }
+    unsigned int index = get_hash(key, table->sizeAllocated);
+    unsigned int original_index = index;
+
+    while (table->array[index] != NULL) {
+        htab_item_t* tmp = table->array[index];
+
+        if (tmp->key != NULL && !strcmp(tmp->key, key)) {
+            printf("Got it\n");
+            return &tmp->data;
         }
-        
-        tmp = tmp->next;
+
+        index = (index + 1) % table->sizeAllocated;
+        if (index == original_index) {
+            break;
+        }
     }
+
     return NULL;
 }
 
-void symtable_free (symtable_t* table) {
-    for(int i = 0; i < table->sizeAllocated; i++) {
-        htab_item_t* current = table->bucket[i];
-        while(current != NULL) {
-            htab_item_t* tmp = current;
-            current = current->next;
-            if(tmp->data != NULL) {
+void symtable_free(symtable_t* table) {
+    if (table == NULL) {
+        return;
+    }
 
-                if(tmp->data->argumentsInArray > 0) {
-                    for(int i = 0; i < tmp->data->argumentsInArray; i++) {
-                        free(tmp->data->param[i].identifier);
-                        free(tmp->data->param[i].name);
-                        free(tmp->data->param[i].type);
+    for (int i = 0; i < table->sizeAllocated; i++) {
+        htab_item_t* current = table->array[i];
+
+        while (current != NULL) {
+            htab_item_t* tmp = current;
+            current = NULL; 
+
+            if (tmp->data != NULL) {
+
+                if (tmp->data->argumentsInArray > 0) {
+                    for (int j = 0; j < tmp->data->argumentsInArray; j++) {
+                        free(tmp->data->param[j].identifier);
+                        free(tmp->data->param[j].name);
+                        free(tmp->data->param[j].type);
                     }
                     free(tmp->data->param);
                 }
@@ -212,9 +223,10 @@ void symtable_free (symtable_t* table) {
             free(tmp->key);
             free(tmp);
             
+            unsigned int index = (i + 1) % table->sizeAllocated; 
         }
     }
     
-    free(table->bucket);
+    free(table->array);
     free(table);
 }

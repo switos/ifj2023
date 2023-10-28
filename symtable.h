@@ -28,12 +28,11 @@ typedef struct {
 
 typedef struct htab_item{
     htab_data_t* data;
-    struct htab_item* next;
     char* key;
 }htab_item_t;
 
 typedef struct {
-    htab_item_t** bucket;
+    htab_item_t** array;
     int sizeAllocated;
     int sizeUsed;
 }symtable_t;
