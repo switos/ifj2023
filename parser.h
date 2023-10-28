@@ -1,4 +1,7 @@
-#include "scanner.c"
+#include "expressionAnalyser.c"
 
-int parse();
-int bottomtotop();
+int globalParse();
+int localParse();
+int funCall();
+int parList();
+int parListId();
