@@ -24,7 +24,7 @@ void getTokenWrapped() {
 
 int assigmentRule() {
     if (litCheck() || token.type == T_ID) {
-        expAnalyse(&token);
+        // expAnalyse(&token);
         fprintf(stderr, "Succes, assigments rule is parsed\n");
         getTokenWrapped();
         return parse();
@@ -77,7 +77,7 @@ int parse() {
     if(token.type == T_LET || token.type == T_VAR) {
         return variableDefRule();
     } else if(token.type == T_EOF) {
-        fprintf(stderr, "Succes, EOF parsed\n");
+        fprintf(stderr, "Success, EOF parsed\n");
         return NO_ERR;
     } else {
         return printErrorAndReturn("Syntaxe error in parse rule", SYNTAX_ERR);
