@@ -181,7 +181,6 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
         htab_item_t* tmp = table->array[index];
 
         if (tmp->key != NULL && !strcmp(tmp->key, key)) {
-            printf("Got it\n");
             return &tmp->data;
         }
 
