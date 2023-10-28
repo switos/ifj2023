@@ -10,6 +10,14 @@ int litCheck(){
     }
 } 
 
+int typeCheck(){
+    if (token.type == T_DOUBLE || token.type == T_STRING || token.type == T_INT) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void exitAndFree(int etype) {
     str_free(&token.content);
     fprintf(stderr,"exit code is %d\n", etype);
@@ -23,11 +31,22 @@ void getTokenWrapped() {
 }
 
 int expression() {
-    if (token.type == T_ID || litCheck()) {
-        fprintf(stderr, "Succes, expAnalyse is parsed\n");
-        return expAnalyse(&token);
-    } else if (token.type == T_FNAME) {
-        return funCall();
+    if (litCheck()) {
+        fprintf(stderr, "Success, expAnalyse is parsed\n");
+        return expAnalyse(&token, NULL);
+    } else if (token.type == T_ID) {
+        token_t tmpToken;
+        str_init(&(tmpToken.content));
+        str_copy_string(&(tmpToken.content), &(token.content));
+        tmpToken.type = token.type;
+        getTokenWrapped();
+        if( token.type == T_OP_PAR){
+            return funCall();
+        } else {
+            int result = expAnalyse(&token, &tmpToken);
+            str_free(&(tmpToken.content));
+            return result;
+        }
     }
     return printErrorAndReturn("Syntaxe error has occured in expression or function rule", SYNTAX_ERR);
 }
@@ -35,18 +54,19 @@ int expression() {
 int id() {
     //save id;
     getTokenWrapped();
-    if (token.type == T_EQUAL) {
+    if (token.type == T_ASSING) {
         getTokenWrapped();
         return expression();
-    } else if (token.type = T_LEFT_BRAC) {
-        funCall();
+    } else if (token.type = T_OP_PAR) {
+        return funCall();
     }
+    printf("%d\n", token.type);
     return printErrorAndReturn("Syntaxe error has occured in id", SYNTAX_ERR);
     
 }
 
 int varDefItem() {
-    if(token.type == T_EQUAL) {
+    if(token.type == T_ASSING) {
             getTokenWrapped();
             return expression();
     } else {
@@ -58,11 +78,11 @@ int varDefItem() {
 int varDefList() {
     if(token.type == T_COLON) {
             getTokenWrapped();
-            if(token.type == T_DOUBLE || token.type == T_INT || token.type == T_STRING) {
+            if(typeCheck()) {
                 getTokenWrapped();
                 return varDefItem();
             }
-    } else if(token.type == T_EQUAL) {
+    } else if(token.type == T_ASSING) {
             getTokenWrapped();
             return expression();
     } 
@@ -84,13 +104,15 @@ int varDef() {
 }
 
 int funDefType() {
-    if (token.type == T_LEFT_CBRAC) {
+    if (token.type == T_OP_BRACE) {
+        getTokenWrapped();
         return localParse();
     } else if (token.type == T_ARROW ){
         getTokenWrapped();
-        if (token.type == T_DOUBLE || token.type == T_INT || token.type == T_STRING) {
+        if (typeCheck()) {
             getTokenWrapped();
-            if (token.type == T_LEFT_CBRAC)
+            if (token.type == T_OP_BRACE)
+                getTokenWrapped();
                 return localParse();
         }
     }
@@ -104,10 +126,16 @@ int funDefItem() {
             getTokenWrapped();
             if(token.type == T_ID || token.type == T_UNDER) {
                 getTokenWrapped();
-                return funDefItem();
+                if (token.type == T_COLON) {
+                    getTokenWrapped();
+                    if (typeCheck()) {
+                        getTokenWrapped();
+                        return funDefItem();
+                    }
+                }
             }
         }
-    } else if (token.type == T_RIGHT_BRAC) {
+    } else if (token.type == T_CL_PAR) {
         getTokenWrapped();
         return funDefType();
     }
@@ -115,14 +143,20 @@ int funDefItem() {
 }
 
 int funDefPlist() {
-    if (token.type == T_RIGHT_BRAC){
+    if (token.type == T_CL_PAR){
         getTokenWrapped();
         return funDefType();
     } else if(token.type == T_ID || token.type == T_UNDER) {
         getTokenWrapped();
         if(token.type == T_ID || token.type == T_UNDER) {
             getTokenWrapped();
-            return funDefItem();
+            if (token.type == T_COLON) {
+                getTokenWrapped();
+                if (typeCheck()) {
+                    getTokenWrapped();
+                    return funDefItem();
+                }
+            }
         }
     }
     return printErrorAndReturn("Syntaxe error has occured in funDefPlist", SYNTAX_ERR);
@@ -132,7 +166,7 @@ int funDef() {
     getTokenWrapped();
     if (token.type == T_ID) {
         getTokenWrapped();
-        if(token.type == T_LEFT_BRAC) {
+        if(token.type == T_OP_PAR) {
             getTokenWrapped();
             return funDefPlist();
         }
@@ -140,13 +174,11 @@ int funDef() {
     return printErrorAndReturn("Syntax error has occured in funDef", SYNTAX_ERR);
 }
  
-int ret() {
-    getTokenWrapped();
-    return expression();
-}
-
 int parItem(){
-    if (token.type == T_ID || litCheck()) {
+    if (token.type == T_ID) {
+        getTokenWrapped();
+        return parListId();
+    } else if (litCheck()) {
         getTokenWrapped();
         return parList();
     }
@@ -154,31 +186,84 @@ int parItem(){
 }
 
 int parList() {
-    if (token.type == T_COLON) {
-        getTokenWrapped();
-        if (token.type == T_ID) {
-            getTokenWrapped();
-            return parList();
-        }
-    } else if (token.type == T_COMMA) {
+    if (token.type == T_COMMA) {
         getTokenWrapped();
         return parItem();       
-    } else if (token.type == T_RIGHT_BRAC) {
+    } else if (token.type == T_CL_PAR) {
+        getTokenWrapped();
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in parList", SYNTAX_ERR);
     
 }
 
+int parListId() {
+    if (token.type == T_COLON ){
+        getTokenWrapped();
+        if (token.type == T_ID || litCheck()) {
+            getTokenWrapped();
+            return parList();
+        }
+    } else if ( token.type == T_COMMA || token.type == T_CL_PAR) {
+        return parList();
+    }
+    return printErrorAndReturn("Syntax error has occured in parListId", SYNTAX_ERR);
+}
+
 int funCall() {
     getTokenWrapped();
-    if (token.type == T_RIGHT_BRAC) {
+    if (token.type == T_CL_PAR) {
+        getTokenWrapped();
         return NO_ERR;
-    } else if (token.type == T_ID || litCheck()) {
+    } else if (token.type == T_ID) {
+        getTokenWrapped();
+        return parListId();
+    } else if (litCheck()) {
         getTokenWrapped();
         return parList();
     }
     return printErrorAndReturn("Syntax error has occured in funCall", SYNTAX_ERR);
+}
+
+int ifItem(){
+    if (token.type == T_OP_BRACE) {
+        getTokenWrapped();
+        int result = localParse();
+        if (result)
+            return result;
+        if (token.type == T_ELSE) {
+            getTokenWrapped();
+            if (token.type == T_OP_BRACE) {
+                getTokenWrapped();
+                return localParse();
+            }
+        }
+    }
+    return printErrorAndReturn("Syntaxe error in IfItem", SYNTAX_ERR);
+}
+
+int ifList(){
+    if (token.type == T_OP_PAR){
+        int result = expAnalyse(&token, NULL);
+        if (result)
+            return result;
+        return ifItem();
+    } else if (token.type == T_LET) {
+        getTokenWrapped();
+        if (token.type == T_ID) {
+            getTokenWrapped();
+            return ifItem();
+        }
+    }
+    return printErrorAndReturn("Syntaxe error in IfList", SYNTAX_ERR);
+}
+
+int whl() {
+    if (token.type == T_OP_BRACE) {
+        getTokenWrapped();
+        return localParse();
+    }
+    return printErrorAndReturn("Syntaxe error in whl", SYNTAX_ERR);
 }
 
 int parseInstruction() {
@@ -188,14 +273,22 @@ int parseInstruction() {
         return id();
     } else if (token.type == T_FUNC) {
         return funDef();
+    } else if (token.type == T_WHILE) {
+        getTokenWrapped();
+        return whl();
+    } else if (token.type == T_IF) {
+        getTokenWrapped();
+        return ifList();
     } else if (token.type == T_RETURN) {
-        return ret();
+        getTokenWrapped();
+        return expression();
     } 
+    printf("%d\n%s\n",token.type,token.content.str);
     return printErrorAndReturn("Syntaxe error in parseInstruction", SYNTAX_ERR);
 }
 
 int globalParse () {
-    getTokenWrapped();
+    printf("%s\n",token.content.str);
     if (token.type != T_EOF) {
         int result = parseInstruction();
         if (result) 
@@ -205,23 +298,27 @@ int globalParse () {
         fprintf(stderr, "Succes, EOF parsed\n");
         return NO_ERR;
     }
+    return printErrorAndReturn("Syntax error has occured in globalParse", SYNTAX_ERR);
 }
 
 int localParse () {
-    getTokenWrapped();
-    if (token.type != T_RIGHT_CBRAC) {
+    if (token.type != T_CL_BRACE) {
         int result = parseInstruction();
         if (result) 
             return result;
         return localParse();
     } else {
         fprintf(stderr, "Succes, RIGHT CURVY HORE parsed\n");
+        //ne line mode on
+        getTokenWrapped();
         return NO_ERR;
     }
+    return printErrorAndReturn("Syntax error has occured in localParse", SYNTAX_ERR);
 }
 
 int main() {
         str_init(&token.content);
+        getTokenWrapped();
         int result = globalParse();
         str_free(&token.content);
         if (result){

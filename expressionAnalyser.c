@@ -1,4 +1,25 @@
 #include "expressionAnalyser.h"
+token_t* tokenExpr = NULL;
+int tokenFlag = 0;
+
+int setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp) {
+    if (tokenTmp == NULL) {
+        tokenExpr = tokenGlobal;
+    } else {
+        tokenExpr = tokenTmp;
+        tokenFlag = 1;
+    }
+}
+
+int getTokenExpr(token_t* tokenGlobal, token_t* tokenTmp) {
+    if (tokenFlag == 1){
+        tokenExpr = tokenGlobal;
+        tokenFlag = 2;
+        return 0;
+    } else {
+        return getToken(tokenGlobal);
+    }
+} 
 
 int findCatch(precedenceStackNode_t** top, int* count) {
     precedenceStackNode_t* current = (*top);
@@ -56,28 +77,31 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
     return printErrorAndReturn("Syntax Error has occured in reduce by rule", SYNTAX_ERR);
 }
 
-int expAnalyse (token_t* token) {
+int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp) {
     precedenceStackNode_t* stack = NULL; 
     int stackItemsCounter = 0;
     prcStackPush(&stack, ES_END, ES_UNDEFINED);
     int result = 0;
+    setTokenExpr(tokenGlobal, tokenTmp);
     do {
         precedenceStackNode_t* stackTerminal = prcStackGetTerminal(&stack);
-        switch (precedenceTable[stackTerminal->symbol][getSymbolFromToken(token)])
+        switch (precedenceTable[stackTerminal->symbol][getSymbolFromToken(tokenExpr)])
         {
         case '=':
-            /* code */
+            prcStackPush(&stack, getSymbolFromToken(tokenExpr), ES_UNDEFINED);
+            if (getTokenExpr(tokenGlobal, tokenTmp))
+                result =  printErrorAndReturn("Lexical error has occured while expression analysing", LEX_ERR);
             break;
         case 'l':
-            fprintf(stderr,"in case less with token %d\nterminal on stack is %d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
+            fprintf(stderr,"in case less with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED);
-            prcStackPush(&stack, getSymbolFromToken(token), ES_UNDEFINED);
-            if (getToken(token))
+            prcStackPush(&stack, getSymbolFromToken(tokenExpr), ES_UNDEFINED);
+            if (getTokenExpr(tokenGlobal, tokenTmp))
                 result =  printErrorAndReturn("Lexical error has occured while expression analysing", LEX_ERR);
             break;
 
         case 'g':
-            fprintf(stderr,"in case great with token %d\nterminal on stack is %d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
+            fprintf(stderr,"in case great with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             if( ! (findCatch(&stack, &stackItemsCounter)) ) {
                 result = reduceByRule(&stack, &stackItemsCounter);
             } else { 
@@ -88,8 +112,8 @@ int expAnalyse (token_t* token) {
             result = printErrorAndReturn("Syntax error has occured in expression analyser\n", SYNTAX_ERR);
             break;
         }
-        fprintf(stderr,"%d\n%d\n",getSymbolFromToken(token), prcStackGetTerminal(&stack)->symbol);
-    } while (((getSymbolFromToken(token) != ES_END) || (prcStackGetTerminal(&stack)->symbol != ES_END)) && result == 0 );
+        fprintf(stderr,"%d\n%d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
+    } while (((getSymbolFromToken(tokenExpr) != ES_END) || (prcStackGetTerminal(&stack)->symbol != ES_END)) && result == 0 );
     prcStackFree(&stack);
     return result;
 }

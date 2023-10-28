@@ -1,15 +1,15 @@
 #include "scanner.c"
 
 char precedenceTable [16][16] = { 
-        //  +    -    *    /    ==  !=    <   >     <=   >=   ??   !    (    )    id   $
+        //  +    -    *    /    ==  !=    <    >    <=   >=   ??   !    (    )    id   $
    /*+*/  {'g', 'g', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
    /*-*/  {'g', 'g', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
    /***/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
    /*/*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
   /*==*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
   /*!=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-   /*>*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
    /*<*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
+   /*>*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
   /*<=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
   /*>=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
   /*??*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'g', 'l', 'g'},
@@ -25,7 +25,16 @@ typedef enum {
     ES_MINUS,
     ES_MUL,
     ES_DIV,
-    ES_EX,
+    ES_EQ,
+    ES_NEQ,
+    ES_LESS,
+    ES_GR,
+    ES_LESSEQ,
+    ES_GREQ,
+    ES_NIL_COAL, // ??
+    ES_EX, // !
+    ES_OP_PAR, // ( 
+    ES_CL_PAR, // )
     ES_ID = 14,
     ES_END,
     ES_CATCH,
@@ -38,8 +47,14 @@ typedef enum {
     R_PLUS,
     R_MINUS,
     R_MUL,
-
     R_DIV,
+    R_EQ,
+    R_NEQ,
+    R_L,
+    R_G,
+    R_LEQ,
+    R_GEQ,
+    R_NILCON,
     R_UNAR,
     R_ERROR
 } R_RULE;

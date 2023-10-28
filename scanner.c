@@ -158,10 +158,10 @@ bool isOper(token_t * token) {
         if ((symbol = getc(stdin)) != '=') {
             fprintf(stderr, "Success, oper is =\n");
             ungetc(symbol, stdin);
-            token->type = T_EQUAL;
+            token->type = T_ASSING;
         } else {
             fprintf(stderr, "Success, oper is ==\n");
-            token->type = T_ASSING;
+            token->type = T_EQUAL;
         }
     } else if (symbol == '!') {
         if ((symbol = getc(stdin)) != '=') {
@@ -627,7 +627,13 @@ int startState(token_t * token) {
         if (!str_add_char(&token->content, symbol))
             return printErrorAndReturn("Enternal error in startState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        return underscoreState(token);
+        if (isalnum(symbol)) 
+            return underscoreState(token);
+        else {
+            token->type = T_UNDER;
+            return NO_ERR;
+        }
+             
     } else if (isalpha(symbol)) { // no underscore
         if (!str_add_char(&token->content, symbol))
             return printErrorAndReturn("Enternal error in startState in scanner", ERROR_INTERNAL);
