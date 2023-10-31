@@ -259,9 +259,14 @@ int ifList(){
 }
 
 int whl() {
-    if (token.type == T_OP_BRACE) {
-        getTokenWrapped();
-        return localParse();
+    if (token.type == T_OP_PAR) { 
+        int result = expAnalyse(&token, NULL);
+        if(result) 
+            return result;
+        if (token.type == T_OP_BRACE) {
+            getTokenWrapped();
+            return localParse();
+        }
     }
     return printErrorAndReturn("Syntaxe error in whl", SYNTAX_ERR);
 }

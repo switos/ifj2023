@@ -46,22 +46,19 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
             rule = R_ERROR;
         } 
     } else if ( (*cnt) == 2) { 
+        fprintf(stderr,"I am Here\n");
         if ((*top)->symbol == ES_EX){
             rule = R_UNAR;
         }
     } else if ((*cnt) == 3) {
-        if ((*top)->next->symbol == ES_PLUS){
-            rule = R_PLUS;
-            fprintf(stderr,"Plus rule is parsed\n");
-        } else if ((*top)->next->symbol == ES_MINUS) {
-            rule = R_MINUS;
-        } else if  ((*top)->next->symbol == ES_MUL) {
-            rule = R_MUL;
-        } else if  ((*top)->next->symbol == ES_DIV) {
-            rule = R_DIV;
-        }
-        else { 
-            rule = R_ERROR;
+        if (((*top)->next->next->symbol == ES_OP_PAR) && ((*top)->next->symbol == ES_NONTER) && ((*top)->symbol == ES_CL_PAR)) {
+            rule =  R_PAR;
+        } else if ( (*top)->next->next->symbol == ES_NONTER && (*top)->symbol == ES_NONTER ) {
+            if ((*top)->next->symbol < 11){
+                rule = (*top)->next->symbol;
+            } else { 
+                rule = R_ERROR;
+            }
         }
     } else {
         rule = R_ERROR;
@@ -78,6 +75,8 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
 }
 
 int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp) {
+    token_t endToken;
+    endToken.type = T_EOF; 
     precedenceStackNode_t* stack = NULL; 
     int stackItemsCounter = 0;
     prcStackPush(&stack, ES_END, ES_UNDEFINED);
@@ -110,6 +109,9 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp) {
             break;
         case 'e':
             result = printErrorAndReturn("Syntax error has occured in expression analyser\n", SYNTAX_ERR);
+            break;
+        case 'f':
+            tokenExpr = &endToken;
             break;
         }
         fprintf(stderr,"%d\n%d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);

@@ -3,7 +3,7 @@ make
 echo -e "to run on testFile: push 1\nto run on puthon3 tester:push 2"
 read input
 if [ "$input" != "" ]; then
-    ./compiler < testcases/test$input
+    ./compiler < testFile
 else
     python3 ./Tester/tester.py ./compiler ./Tester/Tests
 fi

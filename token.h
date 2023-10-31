@@ -66,4 +66,5 @@ typedef struct token
 {
     string content;
     token_type type;
+    bool newLineFlag;
 } token_t;

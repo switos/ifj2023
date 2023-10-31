@@ -16,7 +16,7 @@ char precedenceTable [16][16] = {
    /*!*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'e', 'g', 'e', 'g'},
    /*(*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'e', 'l', '=', 'l', 'e'},
    /*)*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'e', 'g', 'e', 'g'},
-  /*id*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'e', 'g', 'e', 'g'},
+  /*id*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'g', 'f', 'g'},
    /*$*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'e', 'l', 'e'},
 };
 
@@ -43,7 +43,6 @@ typedef enum {
 } ES_SYMBOL;
 
 typedef enum {
-    R_ID,
     R_PLUS,
     R_MINUS,
     R_MUL,
@@ -56,6 +55,8 @@ typedef enum {
     R_GEQ,
     R_NILCON,
     R_UNAR,
+    R_PAR,
+    R_ID,
     R_ERROR
 } R_RULE;
 
