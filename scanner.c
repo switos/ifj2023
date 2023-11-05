@@ -295,17 +295,14 @@ int intState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
         }
-    } 
-    // else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
-    //     fprintf(stderr, "Success, int is %s\n", token->content.str);
-    //     token->type = T_INT_LIT;
-    //     return NO_ERR; // success, return the identifier, clean buffer 
-    // } 
-    else {
-        fprintf(stderr, "Success, int is %s\n", token->content.str);
-        token->type = T_INT_LIT;
-        return NO_ERR; // success, return the identifier, clean buffer 
-        // return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
+    } else {
+        if (isalpha(symbol)) {
+            return printErrorAndReturn("Lexical error (alpha after) in intState in scanner", LEX_ERR);
+        } else {
+            fprintf(stderr, "Success, int is %s\n", token->content.str);
+            token->type = T_INT_LIT;
+            return NO_ERR; // success, return the identifier, clean buffer 
+        }
     }
 }
 
@@ -606,6 +603,13 @@ int multilineStringState(token_t * token) {
  */
 int startState(token_t * token) {
     if (isspace(symbol)) { // White symbols
+        if (token->newLineFlag) {
+            if (symbol == '\n') {
+                token->type = T_NL;
+                symbol = getc(stdin);
+                return NO_ERR;
+            }
+        }
         symbol = getc(stdin);
         return startState(token);
     } else if (symbol == '_') { // underscore
@@ -647,7 +651,7 @@ int startState(token_t * token) {
             }
         }
     } else {
-        if (isOper(token) || isAcc) {
+        if (isOper(token) || isAcc()) {
             symbol = getc(stdin);
             return NO_ERR;
         }

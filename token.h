@@ -38,6 +38,7 @@ typedef enum {
     T_ASSING,
     T_COLON,
     T_COMMA,
+    T_NL,   // \n
 } token_type;
 
 /**
