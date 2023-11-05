@@ -222,17 +222,7 @@ int identifierState(token_t * token) {
         }
         symbol = getc(stdin);
         return identifierState(token);
-    } 
-    // else if (isAcc()) { // white symbol or EOF
-    //     fprintf(stderr, "Success, identifier is %s\n", token->content.str);
-    //     if (!isKeyword(token)){
-    //         token->type = T_ID;
-    //     } else {
-    //         fprintf(stderr, "Success, it is a keyword\n");
-    //     }
-    //     return NO_ERR; // success, return the identifier, clean buffer 
-    // } 
-    else if (symbol == '?') {
+    } else if (symbol == '?') {
         if (isType(token)) {
             symbol = getc(stdin);
             if (isAcc()) {
@@ -251,7 +241,6 @@ int identifierState(token_t * token) {
             fprintf(stderr, "Success, it is a keyword\n");
         }
         return NO_ERR; // success, return the identifier, clean buffer 
-        // return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
     }
 }
 
@@ -648,10 +637,9 @@ int startState(token_t * token) {
         fprintf(stderr, "Success, EOF is found\n");
     } else if (symbol == '/') {
         if (isCommi()) {
-            return NO_ERR;
+            startState(token);
         } else {
             if (isOper(token)) {
-                // fprintf(stderr, "hi\n");
                 symbol = getc(stdin);
                 return NO_ERR;
             } else {
@@ -665,7 +653,7 @@ int startState(token_t * token) {
         }
         return printErrorAndReturn("Lexical error in startState in scanner (last else)", LEX_ERR);
     }
-    return 0;
+    return NO_ERR;
 }
 
 /**
