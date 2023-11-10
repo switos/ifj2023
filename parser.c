@@ -2,12 +2,17 @@
 token_t token;
 precedenceStackNode_t* prcStack;
 
-int litCheck(){
-    if (token.type == T_FLOAT_LIT || token.type == T_STRING_LIT || token.type == T_INT_LIT) {
+int newLineCheck(){
+    if (token.newLineFlag == false)
         return 1;
-    } else {
-        return 0;
-    }
+    return 0;
+}
+
+int litCheck(){
+    if (token.type == T_FLOAT_LIT || token.type == T_STRING_LIT || token.type == T_INT_LIT) 
+        return 1;
+    return 0;
+
 } 
 
 int typeCheck(){
@@ -60,7 +65,7 @@ int id() {
     } else if (token.type = T_OP_PAR) {
         return funCall();
     }
-    printf("%d\n", token.type);
+    fprintf(stderr,"%d\n", token.type);
     return printErrorAndReturn("Syntaxe error has occured in id", SYNTAX_ERR);
     
 }
@@ -106,6 +111,7 @@ int varDef() {
 int funDefType() {
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
+        tFlagS(&token);
         return localParse();
     } else if (token.type == T_ARROW ){
         getTokenWrapped();
@@ -113,6 +119,7 @@ int funDefType() {
             getTokenWrapped();
             if (token.type == T_OP_BRACE)
                 getTokenWrapped();
+                tFlagS(&token);
                 return localParse();
         }
     }
@@ -228,6 +235,7 @@ int funCall() {
 int ifItem(){
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
+        tFlagS(&token);
         int result = localParse();
         if (result)
             return result;
@@ -235,6 +243,7 @@ int ifItem(){
             getTokenWrapped();
             if (token.type == T_OP_BRACE) {
                 getTokenWrapped();
+                tFlagS(&token);
                 return localParse();
             }
         }
@@ -265,6 +274,7 @@ int whl() {
             return result;
         if (token.type == T_OP_BRACE) {
             getTokenWrapped();
+            tFlagS(&token);
             return localParse();
         }
     }
@@ -288,13 +298,15 @@ int parseInstruction() {
         getTokenWrapped();
         return expression();
     } 
-    printf("%d\n%s\n",token.type,token.content.str);
+    fprintf(stderr, "%d\n%s\n",token.type,token.content.str);
     return printErrorAndReturn("Syntaxe error in parseInstruction", SYNTAX_ERR);
 }
 
 int globalParse () {
-    printf("%s\n",token.content.str);
+    fprintf(stderr, "%s\n",token.content.str);
     if (token.type != T_EOF) {
+        if (newLineCheck())
+            return printErrorAndReturn("Syntax error has occured in globalParse, while newLineCheck", SYNTAX_ERR);
         int result = parseInstruction();
         if (result) 
             return result;
@@ -308,6 +320,8 @@ int globalParse () {
 
 int localParse () {
     if (token.type != T_CL_BRACE) {
+        if (newLineCheck())
+            return printErrorAndReturn("Syntax error has occured in localParse, while newLineCheck", SYNTAX_ERR);
         int result = parseInstruction();
         if (result) 
             return result;
@@ -324,6 +338,7 @@ int localParse () {
 int main() {
         str_init(&token.content);
         getTokenWrapped();
+        tFlagS(&token);
         int result = globalParse();
         str_free(&token.content);
         if (result){

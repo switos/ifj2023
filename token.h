@@ -68,3 +68,10 @@ typedef struct token
     token_type type;
     bool newLineFlag;
 } token_t;
+
+void tFlagS(token_t * token) {
+    token->newLineFlag = true;
+}
+void tFlagR(token_t * token) {
+    token->newLineFlag = false;
+} 
