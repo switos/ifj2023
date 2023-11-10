@@ -603,12 +603,11 @@ int multilineStringState(token_t * token) {
  */
 int startState(token_t * token) {
     if (isspace(symbol)) { // White symbols
-        if (token->newLineFlag) {
-            if (symbol == '\n') {
-                token->type = T_NL;
-                symbol = getc(stdin);
-                return NO_ERR;
-            }
+        if (symbol == '\n') {
+            fprintf(stderr, "New line is parsed after %d \n", token->type);
+            tFlagS(token);
+            symbol = getc(stdin);
+            return startState(token);
         }
         symbol = getc(stdin);
         return startState(token);
@@ -668,6 +667,7 @@ int startState(token_t * token) {
  */
 int getToken(token_t * token) {
     str_clear(&token->content);
+    tFlagR(token);
     symbol = getc(stdin);
     int returnCode = startState(token);
     ungetc(symbol, stdin);
