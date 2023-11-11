@@ -1,0 +1,1 @@
+var result: Int = 5 ## 3  // Lexical error: '##' is not a recognized symbol in IFJ23
