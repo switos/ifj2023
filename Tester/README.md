@@ -8,4 +8,4 @@ The tester runs the compiler program, inputs `.in` files from the tests folder t
 
 2. Run the test script as `python tester.py /path/to/compiler /path/to/tests/folder` or alternatively as `python3 tester.py /path/to/compiler /path/to/tests/folder`
 
-For example: `python3 tester.py ../parser ./Tests`
+For example: `python3 tester.py ../compiler ./Tests`
