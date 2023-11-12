@@ -18,5 +18,12 @@ int twoQuotesStringState(token_t * token);
 int multilineStringState(token_t * token);
 int oneQuoteState(token_t * token);
 void endOfMultilineStringDetector(char * temp);
+bool isKeyword(token_t * token);
+bool isType(token_t * token);
+bool isAcc();
+bool isCommi();
+bool isOper(token_t * token);
+int escapeAllowed(token_t * token);
+int hex(token_t * token);
 
 #endif

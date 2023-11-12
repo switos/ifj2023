@@ -1,8 +1,213 @@
 #include "scanner.h"
 
 string tokenContent;
-token_t token;
+
 char symbol;
+
+/**
+ * @brief checks if lesem is type
+ * 
+ * @param token 
+ * @return true 
+ * @return false 
+ */
+bool isType(token_t * token) {
+    if (!str_cmp_const_str(&token->content, "Double")) {
+        token->type = T_DOUBLE;
+    } else if (!str_cmp_const_str(&token->content, "String")) {
+        token->type = T_STRING;
+    }  else if (!str_cmp_const_str(&token->content, "Int")) {
+        token->type = T_INT;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @brief checks if lexem is keyword or type
+ * 
+ * @param token 
+ * @return true 
+ * @return false 
+ */
+bool isKeyword(token_t * token) {
+    if (isType(token)) {
+        return true;
+    }
+
+    if (!str_cmp_const_str(&token->content, "let")) {
+        token->type = T_LET;
+    } else if (!str_cmp_const_str(&token->content, "var")) {
+        token->type = T_VAR;
+    } else if (!str_cmp_const_str(&token->content, "else")) {
+        token->type = T_ELSE;
+    } else if (!str_cmp_const_str(&token->content, "func")) {
+        token->type = T_FUNC;
+    } else if (!str_cmp_const_str(&token->content, "if")) {
+        token->type = T_IF;
+    } else if (!str_cmp_const_str(&token->content, "nil")) {
+        token->type = T_NIL;
+    } else if (!str_cmp_const_str(&token->content, "return")) {
+        token->type = T_RETURN;
+    } else if (!str_cmp_const_str(&token->content, "while")) {
+        token->type = T_WHILE;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @brief checks if it's comment
+ * 
+ * @return true 
+ * @return false 
+ */
+bool isCommi() {
+    if (symbol == '/') {
+        symbol = getc(stdin);
+        if (symbol == '/') {
+            while((symbol = getc(stdin)) != '\n' && symbol != EOF);
+            return true;
+        } else if (symbol == '*') {
+            int nestedCounter = 1;
+            while(nestedCounter) {
+                symbol = getc(stdin);
+                if (symbol == '*') {
+                    symbol = getc(stdin);
+                    if (symbol == '/') {
+                        nestedCounter--;
+                        if (!nestedCounter) {
+                            symbol = getc(stdin);
+                        }
+                    } else {
+                        ungetc(symbol, stdin);
+                    }
+                } else if (symbol == '/') {
+                    symbol = getc(stdin);
+                    if (symbol == '*') {
+                        nestedCounter++;
+                    } else {
+                        ungetc(symbol, stdin);
+                    }
+                }
+            }
+            return true;
+        } else {
+            ungetc('/', stdin);
+            symbol = getc(stdin);
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief checks if symbol could be after lexem
+ * 
+ * @return true 
+ * @return false 
+ */
+bool isAcc() {
+    if (isspace(symbol) || symbol == EOF) {
+        return true;
+    } else if (symbol == '/') {
+        return isCommi();
+    }
+    return false;
+}
+
+/**
+ * @brief checks if symbol is operator
+ * 
+ * @return true 
+ * @return false 
+ */
+bool isOper(token_t * token) {
+    if (symbol == '{') {
+        fprintf(stderr, "Success, oper is {\n");
+        token->type = T_OP_BRACE;
+    } else if (symbol == '}') {
+        fprintf(stderr, "Success, oper is }\n");
+        token->type = T_CL_BRACE;
+    } else if (symbol == '(') {
+        fprintf(stderr, "Success, oper is (\n");
+        token->type = T_OP_PAR;
+    } else if (symbol == ')') {
+        fprintf(stderr, "Success, oper is )\n");
+        token->type = T_CL_PAR;
+    } else if (symbol == '*') {
+        fprintf(stderr, "Success, oper is *\n");
+        token->type = T_ASTER;
+    } else if (symbol == '/') {
+        fprintf(stderr, "Success, oper is /\n");
+        token->type = T_SLASH;
+    } else if (symbol == '+') {
+        fprintf(stderr, "Success, oper is +\n");
+        token->type = T_PLUS;
+    } else if (symbol == '-') {
+        if ((symbol = getc(stdin)) != '>') {
+            fprintf(stderr, "Success, oper is -\n");
+            ungetc(symbol, stdin);
+            token->type = T_MINUS;
+        } else {
+            fprintf(stderr, "Success, oper is ->\n");
+            token->type = T_ARROW;
+        }
+    } else if (symbol == '=') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is =\n");
+            ungetc(symbol, stdin);
+            token->type = T_ASSING;
+        } else {
+            fprintf(stderr, "Success, oper is ==\n");
+            token->type = T_EQUAL;
+        }
+    } else if (symbol == '!') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is !\n");
+            ungetc(symbol, stdin);
+            token->type = T_EXCL;
+        } else {
+            fprintf(stderr, "Success, oper is !=\n");
+            token->type = T_NOT_EQUAL;
+        }
+    } else if (symbol == '<') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is <\n");
+            ungetc(symbol, stdin);
+            token->type = T_LESS;
+        } else {
+            fprintf(stderr, "Success, oper is <=\n");
+            token->type = T_LESS_EQUAL;
+        }
+    } else if (symbol == '>') {
+        if ((symbol = getc(stdin)) != '=') {
+            fprintf(stderr, "Success, oper is >\n");
+            ungetc(symbol, stdin);
+            token->type = T_GREATER;
+        } else {
+            fprintf(stderr, "Success, oper is >=\n");
+            token->type = T_GREATER_EQUAL;
+        }
+    } else if (symbol == '?') {
+        if ((symbol = getc(stdin)) == '?') {
+            fprintf(stderr, "Success, oper is ??\n");
+            token->type = T_NIL_COAL;
+        } else {
+            return false;
+        }
+    } else if (symbol == ':') {
+        fprintf(stderr, "Success, oper is :\n");
+        token->type = T_COLON;
+    } else if (symbol == ',') {
+        fprintf(stderr, "Success, oper is ,\n");
+        token->type = T_COMMA;
+    } else {
+        return false;
+    }
+    return true;
+}
 
 /**
  * @brief function for identifier state
@@ -17,12 +222,25 @@ int identifierState(token_t * token) {
         }
         symbol = getc(stdin);
         return identifierState(token);
-    } else if (isspace(symbol) || symbol == EOF) { // white symbol or EOF
-        printf("Success, identifier is %s\n", token->content.str);
-        token->type = T_ID;
-        return NO_ERR; // success, return the identifier, clean buffer 
+    } else if (symbol == '?') {
+        if (isType(token)) {
+            symbol = getc(stdin);
+            if (isAcc()) {
+                return NO_ERR;
+            } else {
+                return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
+            }
+        } else {
+            return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
+        }
     } else {
-        return printErrorAndReturn("Lexical error in identiferState in scanner", LEX_ERR);
+        fprintf(stderr, "Success, identifier is %s\n", token->content.str);
+        if (!isKeyword(token)){
+            token->type = T_ID;
+        } else {
+            fprintf(stderr, "Success, it is a keyword\n");
+        }
+        return NO_ERR; // success, return the identifier, clean buffer 
     }
 }
 
@@ -65,7 +283,7 @@ int intState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
         }
-    } else if (symbol == 'E' || symbol == 'e') { // an Exponet part of integer
+    } else if (symbol == 'E' || symbol == 'e') { // an Exponent part of integer
         if (!str_add_char(&token->content, symbol))
             return printErrorAndReturn("Enternal error in intState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
@@ -77,12 +295,14 @@ int intState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
         }
-    } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
-        printf("Success, int is %s\n", token->content.str);
-        token->type = T_INT;
-        return NO_ERR; // success, return the identifier, clean buffer 
     } else {
-        return printErrorAndReturn("Lexical error in intState in scanner", LEX_ERR);
+        if (isalpha(symbol)) {
+            return printErrorAndReturn("Lexical error (alpha after) in intState in scanner", LEX_ERR);
+        } else {
+            fprintf(stderr, "Success, int is %s\n", token->content.str);
+            token->type = T_INT_LIT;
+            return NO_ERR; // success, return the identifier, clean buffer 
+        }
     }
 }
 
@@ -110,12 +330,17 @@ int floatState(token_t * token) {
         } else {
             return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
         }
-    } else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
-        printf("Success, float is %s\n", token->content.str);
-        token->type = T_FLOAT;
+    } 
+    // else if (isspace(symbol) || symbol == EOF) { // EOF or white symbol
+    //     fprintf(stderr, "Success, float is %s\n", token->content.str);
+    //     token->type = T_FLOAT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
+        fprintf(stderr, "Success, float is %s\n", token->content.str);
+        token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in floatState in scanner", LEX_ERR);
     }
 }
 
@@ -131,12 +356,17 @@ int intExpState(token_t * token) {
             return printErrorAndReturn("Enternal error in intExpState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
         return intExpState(token);
-    } else if (isspace(symbol) || symbol == EOF) {
-        printf("Success, int exp is %s\n", token->content.str);
-        token->type = T_INT_EXP;
+    } 
+    // else if (isspace(symbol) || symbol == EOF) {
+    //     fprintf(stderr, "Success, int exp is %s\n", token->content.str);
+    //     token->type = T_FLOAT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
+        fprintf(stderr, "Success, int exp is %s\n", token->content.str);
+        token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in intExpState in scanner", LEX_ERR);
     }
 }
 
@@ -152,12 +382,17 @@ int floatExpState(token_t * token) {
             return printErrorAndReturn("Enternal error in floatExpState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
         return floatExpState(token);
-    } else if (isspace(symbol) || symbol == EOF) {
-        printf("Success, float exp is %s\n", token->content.str);
-        token->type = T_FLOAT_EXP;
+    } 
+    // else if (isspace(symbol) || symbol == EOF) {
+    //     fprintf(stderr, "Success, float exp is %s\n", token->content.str);
+    //     token->type = T_FLOAT_LIT;
+    //     return NO_ERR; // success, return the identifier, clean buffer 
+    // } 
+    else {
+        fprintf(stderr, "Success, float exp is %s\n", token->content.str);
+        token->type = T_FLOAT_LIT;
         return NO_ERR; // success, return the identifier, clean buffer 
-    } else {
-        return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
+        // return printErrorAndReturn("Lexical error in floatExpState in scanner", LEX_ERR);
     }
 }
 
@@ -176,6 +411,68 @@ int oneQuoteState(token_t * token) {
     }
 }
 
+int escapeAllowed(token_t * token) {
+    if (symbol == '\"') {
+        if (!str_add_char(&token->content, '\"')) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+    } else if (symbol == 'n') {
+        if (!str_add_char(&token->content, '\n')) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+    } else if (symbol == 'r') {
+        if (!str_add_char(&token->content, '\r')) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+    } else if (symbol == 't') {
+        if (!str_add_char(&token->content, '\t')) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+    }  else if (symbol == '\\') {
+        if (!str_add_char(&token->content, '\\')) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+    } else if (symbol == 'u') {
+        if (!str_add_more_chars(&token->content, "\\u")) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+        symbol = getc(stdin);
+        return hex(token);// \u{dd}
+    } else {
+        return printErrorAndReturn("Lexical error in escapeAllowed in scanner", LEX_ERR);
+    }
+    return NO_ERR;
+}
+
+int hex(token_t * token) {
+    if (symbol == '{') {
+        if (!str_add_char(&token->content, symbol)) {
+            return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+        }
+        symbol = getc(stdin);
+        if (isxdigit(symbol)) {
+            if (!str_add_char(&token->content, symbol)) {
+                return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+            }
+            symbol = getc(stdin);
+            if (isxdigit(symbol)) {
+                if (!str_add_char(&token->content, symbol)) {
+                    return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+                }
+                symbol = getc(stdin);
+                if (symbol == '}') {
+                    if (!str_add_char(&token->content, symbol)) {
+                        return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
+                    }
+                    symbol = getc(stdin);
+                    return NO_ERR;
+                }
+            }
+        }
+    }
+    return printErrorAndReturn("Lexical error in hex in scanner", LEX_ERR);
+}
+
 /**
  * @brief function for string state
  * 
@@ -184,20 +481,23 @@ int oneQuoteState(token_t * token) {
  */
 int stringState(token_t * token) {
     if (symbol > 31 && symbol != '\"') {
-        if (!str_add_char(&token->content, symbol)) {
-            return printErrorAndReturn("Enternal error in stringState in scanner", ERROR_INTERNAL);
+        if (symbol == '\\') {
+            symbol = getc(stdin);
+            if (escapeAllowed(token)) {
+                return printErrorAndReturn("Lexical error in stringState in scanner in escape", LEX_ERR);
+            }
+        } else {
+            if (!str_add_char(&token->content, symbol)) {
+                return printErrorAndReturn("Enternal error in stringState in scanner", ERROR_INTERNAL);
+            }
         }
         symbol = getc(stdin);
         return stringState(token);
     } else if (symbol == '\"') {
         symbol = getc(stdin);
-        if (isspace(symbol) || symbol == EOF) {
-            printf("Success, string content is %s\n", token->content.str);
-            token->type = T_STRING;
-            return NO_ERR; // success, return the string, clean buffer 
-        } else {
-            return printErrorAndReturn("Lexical error in stringState in scanner after final quote", LEX_ERR);
-        }
+        fprintf(stderr, "Success, string content is %s\n", token->content.str);
+        token->type = T_STRING_LIT;
+        return NO_ERR; // success, return the string, clean buffer 
     } else {
         return printErrorAndReturn("Lexical error in stringState in scanner during parse", LEX_ERR);
     }
@@ -211,8 +511,8 @@ int stringState(token_t * token) {
  */
 int twoQuotesStringState(token_t * token) {
     if (symbol == EOF || isspace(symbol)) {
-        printf("Success, empty string detected\n");
-        token->type = T_STRING;
+        fprintf(stderr, "Success, empty string detected\n");
+        token->type = T_STRING_LIT;
         return NO_ERR; // success, return the empty string, clean buffer 
     } else if (symbol == '\"') {
         symbol = getc(stdin);
@@ -231,25 +531,24 @@ int twoQuotesStringState(token_t * token) {
  * @return char* saved content of original string (in case if it's not the end)
  */
 void endOfMultilineStringDetector(char* temp) {
-    // char returnValue[6];
-    // returnValue[0] = symbol;
     temp[0] = symbol;
-    // printf("symbol is #%c#\n", symbol);
     for (int i = 0; i < 3; i++) {
         symbol = getc(stdin);
-        // returnValue[i+1] = symbol;
         temp[i+1] = symbol;
         if (symbol != '\"') { // if symbol is not quote, then we can put value of parsed part into main string token
-            // returnValue[i+2] = '\0';
-            temp[i+2] = '\0';
+            if (symbol == '\n') {
+                ungetc(symbol, stdin);
+                temp[i+1] = '\0';
+                symbol = getc(stdin);
+            } else {
+                temp[i+2] = '\0';
+                symbol = getc(stdin);
+            }
             return;
-            // return returnValue;
         }
     }
-    // returnValue[0] = '\0';
     temp[0] = '\0';
     return;
-    // return returnValue;
 }
 
 /**
@@ -264,24 +563,21 @@ int multilineStringState(token_t * token) {
     temp[0] = '\0';
     if (symbol > 31) { // get content of multiline string, excluding '\n' because it might be before the final three quotes
         if (symbol == '\"') { // if quote detected, we need to check if we have 3 quotes in order without new line, this means lexical error
-            // *temp = endOfMultilineStringDetector();
             endOfMultilineStringDetector(temp);
-            printf("temp : #%s#\n", temp);
             if (temp[0] == '\"' && temp[1] == '\"' && temp[2] == '\"') {
                 return printErrorAndReturn("Lexical error in multilineStringState in scanner", LEX_ERR);
             } else {
                 if (!str_add_more_chars(&token->content, temp))
                     return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
             }
+        } else {
+            if (!str_add_char(&token->content, symbol))
+                return printErrorAndReturn("Enternal error in multilineStringState in scanner", ERROR_INTERNAL);
+            symbol = getc(stdin);
         }
-        if (!str_add_char(&token->content, symbol))
-            return printErrorAndReturn("Enternal error in multilineStringState in scanner", ERROR_INTERNAL);
-        symbol = getc(stdin);
         return multilineStringState(token);
     } else if (symbol == '\n') { // now we should check if it's the end of the multiline string or not
-        // *temp = endOfMultilineStringDetector();
         endOfMultilineStringDetector(temp);
-        printf("temp : #%s#\n", temp);
         if (temp[0] != '\0') { // check if it were not final 3 quotes
             if (!str_add_more_chars(&token->content, temp))
                 return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
@@ -289,8 +585,8 @@ int multilineStringState(token_t * token) {
         } else {
             symbol = getc(stdin);
             if (symbol == '\n' || symbol == EOF) {
-                printf("Success, multistring content is @@%s@@\n", token->content.str);
-                token->type = T_STRING;
+                fprintf(stderr, "Success, multistring content is @@%s@@\n", token->content.str);
+                token->type = T_STRING_LIT;
                 return NO_ERR; // success, return the string, clean buffer 
             } else {
                 return printErrorAndReturn("Lexical error in multilineStringState in scanner after final 3 quotes", LEX_ERR);
@@ -307,11 +603,25 @@ int multilineStringState(token_t * token) {
  */
 int startState(token_t * token) {
     if (isspace(symbol)) { // White symbols
+        if (symbol == '\n') {
+            fprintf(stderr, "New line is parsed after %d \n", token->type);
+            tFlagS(token);
+            symbol = getc(stdin);
+            return startState(token);
+        }
         symbol = getc(stdin);
         return startState(token);
     } else if (symbol == '_') { // underscore
+        if (!str_add_char(&token->content, symbol))
+            return printErrorAndReturn("Enternal error in startState in scanner", ERROR_INTERNAL);
         symbol = getc(stdin);
-        return underscoreState(token);
+        if (isalnum(symbol)) 
+            return underscoreState(token);
+        else {
+            token->type = T_UNDER;
+            return NO_ERR;
+        }
+             
     } else if (isalpha(symbol)) { // no underscore
         if (!str_add_char(&token->content, symbol))
             return printErrorAndReturn("Enternal error in startState in scanner", ERROR_INTERNAL);
@@ -326,9 +636,27 @@ int startState(token_t * token) {
         symbol = getc(stdin);
         return oneQuoteState(token);
     } else if (symbol == EOF) {
-        token->type = 0;
-        printf("Success, EOF is found\n");
+        token->type = T_EOF;
+        fprintf(stderr, "Success, EOF is found\n");
+    } else if (symbol == '/') {
+        if (isCommi()) {
+            startState(token);
+        } else {
+            if (isOper(token)) {
+                symbol = getc(stdin);
+                return NO_ERR;
+            } else {
+                return printErrorAndReturn("Lexical error in startState in scanner (commi)", LEX_ERR);
+            }
+        }
+    } else {
+        if (isOper(token) || isAcc()) {
+            symbol = getc(stdin);
+            return NO_ERR;
+        }
+        return printErrorAndReturn("Lexical error in startState in scanner (last else)", LEX_ERR);
     }
+    return NO_ERR;
 }
 
 /**
@@ -338,9 +666,10 @@ int startState(token_t * token) {
  * @return int 
  */
 int getToken(token_t * token) {
+    str_clear(&token->content);
+    tFlagR(token);
     symbol = getc(stdin);
     int returnCode = startState(token);
     ungetc(symbol, stdin);
-    str_clear(&token->content);
     return returnCode;
 }
