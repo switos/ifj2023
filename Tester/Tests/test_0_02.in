@@ -1,0 +1,6 @@
+var sum = 0
+while (number != 10){
+    sum = sem + number
+    number = number + 1
+}
+write("abcd")
