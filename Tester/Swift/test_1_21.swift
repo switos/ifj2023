@@ -1,0 +1,3 @@
+func main() {
+    var amount: Double = .1234  // Lexical error: Misplaced decimal point in a floating-point literal
+}

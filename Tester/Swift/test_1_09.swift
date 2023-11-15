@@ -1,0 +1,3 @@
+func main() {
+    var 2count: Int = 10  // Lexical error: '2count' starts with a digit
+}

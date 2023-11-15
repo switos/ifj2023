@@ -158,18 +158,19 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
 
     unsigned int index = get_hash(key, table->sizeAllocated);
     unsigned int original_index = index;
-
+    
     do {
         htab_item_t* tmp = table->array[index];
 
-        if (tmp->key != NULL && !strcmp(tmp->key, key)) {
-            return tmp->data;
+        if(tmp != NULL) {
+            if (tmp->key != NULL) {
+                if (!strcmp(tmp->key, key)) {
+                    return tmp->data;
+                }
+            }
         }
-
+        
         index = (index + 1) % table->sizeAllocated;
-        if (index == original_index) {
-            break;
-        }
     } while(index != original_index);
 
     return NULL;
@@ -238,7 +239,6 @@ void symtable_stack_free (symtable_stack_t* stack) {
     while(stack->top != NULL) {
         symtable_stack_pop(stack);
     }
-    free(stack);
 }
 
 stack_level_t* symtable_stack_push (symtable_stack_t* stack) {

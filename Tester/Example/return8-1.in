@@ -1,0 +1,6 @@
+func add(a: Int, b: Int) {
+    let sum = a + b
+    print("Sum is \(sum)")
+}
+
+add(a: 5, b: 10)
