@@ -1,4 +1,5 @@
 #include "scanner.c"
+#include "symtable.c"
 
 char precedenceTable [16][16] = { 
         //  +    -    *    /    ==  !=    <    >    <=   >=   ??   !    (    )    id   $
@@ -41,6 +42,8 @@ typedef enum {
     ES_NONTER,
     ES_UNDEFINED,
 } ES_SYMBOL;
+
+
 
 typedef enum {
     R_PLUS,

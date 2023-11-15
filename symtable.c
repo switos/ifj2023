@@ -138,7 +138,6 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char
     return newSlot->data;
 }
 
-
 bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, char* type) {
     if(func->argumentsInArray >= func->argumentAmount) {
         return false;
@@ -172,6 +171,7 @@ bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, cha
     func->argumentsInArray++;
     return true;
 }
+
 htab_data_t* symtable_search(symtable_t* table, char* key) {
     if (table == NULL || key == NULL) {
         return NULL;
