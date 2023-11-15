@@ -37,6 +37,17 @@ typedef struct {
     int sizeUsed;
 }symtable_t;
 
+typedef struct stack_level {
+    symtable_t* table;
+    struct stack_level* next;
+    struct stack_level* prev;
+}stack_level_t;
+
+typedef struct symtable_stack {
+    stack_level_t* top;
+    stack_level_t* active;
+}symtable_stack_t;
+
 unsigned int get_hash (char *key, int tableSize);
 
 symtable_t* symtable_init();
@@ -50,5 +61,13 @@ bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, cha
 void symtable_free (symtable_t* table);
 
 htab_data_t* symtable_search (symtable_t* table, char* key);
+
+void symtable_stack_init (symtable_stack_t* stack);
+
+void symtable_stack_free (symtable_stack_t* stack);
+
+stack_level_t* symtable_stack_push (symtable_stack_t* stack);
+
+void symtable_stack_pop (symtable_stack_t* stack);
 
 #endif

@@ -36,14 +36,17 @@ symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
         fprintf(stderr, "Failed to allocate memory");
         return NULL;
     }
-
+    
     for (int i = 0; i < table->sizeAllocated; i++) {
+        if(table->array[i] == NULL) {
+            continue;
+        }
         htab_item_t* tmp = table->array[i];   
         unsigned int index = get_hash(tmp->key, newTableSize);
-            
         while (newArray[index] != NULL) {
             index = (index + 1) % newTableSize;
         }
+        
         newArray[index] = tmp;
         
     }
@@ -76,7 +79,7 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char
         fprintf(stderr, "Failed to allocate memory");
         return NULL;
     }
-
+    
     newSlot->key = (char*)malloc(strlen(key) + 1);
     newSlot->data = (htab_data_t*)malloc(sizeof(htab_data_t));
     newSlot->data->name = (char*)malloc(strlen(name) + 1);
@@ -181,7 +184,7 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
         htab_item_t* tmp = table->array[index];
 
         if (tmp->key != NULL && !strcmp(tmp->key, key)) {
-            return &tmp->data;
+            return tmp->data;
         }
 
         index = (index + 1) % table->sizeAllocated;
@@ -199,10 +202,13 @@ void symtable_free(symtable_t* table) {
     }
 
     for (int i = 0; i < table->sizeAllocated; i++) {
+        if(table->array[i] == NULL) {
+            continue;
+        }
         htab_item_t* tmp = table->array[i];
 
         if (tmp->data != NULL) {
-
+            
             if (tmp->data->argumentsInArray > 0) {
                 for (int j = 0; j < tmp->data->argumentsInArray; j++) {
                     free(tmp->data->param[j].identifier);
@@ -211,6 +217,7 @@ void symtable_free(symtable_t* table) {
                 }
                 free(tmp->data->param);
             }
+            
             free(tmp->data->name);
             free(tmp->data->type);
             free(tmp->data);
@@ -221,4 +228,75 @@ void symtable_free(symtable_t* table) {
     
     free(table->array);
     free(table);
+}
+
+void symtable_stack_init (symtable_stack_t* stack) {
+    stack->top = NULL;
+    stack->active = NULL;
+}
+
+void symtable_stack_pop (symtable_stack_t* stack) {
+    if (stack == NULL || stack->top == NULL) {
+        return;
+    }
+
+    stack_level_t* current = stack->top;
+
+    if (current->prev != NULL) {
+        current->prev->next = NULL;
+        stack->top = current->prev;
+        if(stack->active == current) {
+            stack->active = current->prev;
+        }
+    }
+    else {
+        stack->top = NULL;
+        stack->active = NULL;
+    }
+
+    symtable_free(current->table);
+    free(current);
+}
+
+void symtable_stack_free (symtable_stack_t* stack) {
+    if (stack == NULL || stack->top == NULL) {
+        return;
+    }
+
+    while(stack->top != NULL) {
+        symtable_stack_pop(stack);
+    }
+    free(stack);
+}
+
+stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
+    if(stack == NULL) {
+        return NULL;
+    }
+
+    stack_level_t* newElement = (stack_level_t*)malloc(sizeof(stack_level_t));
+    if(newElement == NULL) {
+        return NULL;
+    }
+    newElement->next = NULL;
+    newElement->table = symtable_init();
+    if(newElement->table == NULL) {
+        free(newElement);
+        return NULL;
+    }
+
+    if(stack->top == NULL) {
+        stack->top = newElement;
+        stack->top->prev = NULL;
+    }
+    else {
+        stack_level_t* current = stack->top;
+
+        stack->top = newElement;
+        stack->top->prev = current;
+        current->next = newElement;
+    }
+
+    return stack->top;
+
 }
