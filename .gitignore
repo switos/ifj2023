@@ -1,0 +1,6 @@
+.vscode/
+local/
+old/
+compiler
+testFile
+ifj_fine_automata.drawio
