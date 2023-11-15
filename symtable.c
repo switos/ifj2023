@@ -124,7 +124,7 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
 }
 
 
-bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, char* type) {
+bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type) {
     if(func->argumentsInArray >= func->argumentAmount) {
         return false;
     }
@@ -271,18 +271,4 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
 
     return stack->top;
 
-}
-
-int main() {
-
-    symtable_t* table;
-    table = symtable_init();
-    printf("%d\n", table->sizeAllocated);
-    symtable_insert_data(table, "auauau", 2, "o holero", true, true, 0);
-    htab_data_t* tmp = symtable_search(table, "auauau");
-    if(tmp != NULL) {
-        printf("norm\n");
-    }
-    symtable_free(table);
-    return 0;
 }
