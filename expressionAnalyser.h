@@ -112,6 +112,7 @@ int prcStackPush(precedenceStackNode_t** top, int symbol, int type) {
         new->next = (*top);
         (*top) = new;
     }
+    return 0;
 }
 int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
     if ((*node) == NULL) {
@@ -123,6 +124,7 @@ int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
         (*node)->next = new;
         (*node)->symbol = symbol;
         (*node)->type = type;
+        return 0;
     }
 }
 
@@ -132,7 +134,7 @@ int prcStackPop(precedenceStackNode_t** top){
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
         free(tmp);
-        tmp == NULL;
+        tmp = NULL;
         return 0;
     } else {
         fprintf(stderr,"stack is empty\n");

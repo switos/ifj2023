@@ -2,7 +2,7 @@
 token_t* tokenExpr = NULL;
 int tokenFlag = 0;
 
-int setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp) {
+void setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp) {
     if (tokenTmp == NULL) {
         tokenExpr = tokenGlobal;
     } else {
@@ -40,7 +40,7 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
     int rule;
     if ((*cnt) == 1) {
         if((*top)->symbol == ES_ID){
-            rule == R_ID;
+            rule = R_ID;
             fprintf(stderr,"Id rule is parsed\n");
         } else {
             rule = R_ERROR;

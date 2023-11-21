@@ -272,3 +272,24 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
     return stack->top;
 
 }
+
+htab_data_t* symtable_stack_search(symtable_stack_t* stack, char* key){
+    if (stack == NULL || key == NULL) {
+        return NULL;
+    }
+
+    stack_level_t* current = stack->top;
+
+    while (current != NULL) {
+        
+        htab_data_t* result = symtable_search(current->table, key);
+        if (result != NULL) {
+            return result;  // Key found in the current level of the stack.
+        }
+
+        current = current->prev;  // Move to the previous level in the stack.
+    }
+
+    return NULL;  // Key not found in any level of the stack.
+
+}

@@ -1,2 +1,2 @@
 run:
-	gcc -std=c99 -o compiler parser.c error.c
+	gcc -Wall -std=c99 -o compiler parser.c error.c

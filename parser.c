@@ -5,7 +5,7 @@ symtable_stack_t symStack;
 string name;
 string type;
 
-int newLineCheck(){
+int newLineCheck() {
     if (token.newLineFlag == false)
         return 1;
     return 0;
@@ -65,7 +65,7 @@ int id() {
     if (token.type == T_ASSING) {
         getTokenWrapped();
         return expression();
-    } else if (token.type = T_OP_PAR) {
+    } else if (token.type == T_OP_PAR) {
         return funCall();
     }
     fprintf(stderr,"%d\n", token.type);
@@ -97,7 +97,7 @@ int varDefList(bool modified) {
 }
 
 int varDef() {
-    bool modified;
+    bool modified = false;
     if(token.type == T_LET) {
         bool modified = true;
     } else {
@@ -124,11 +124,12 @@ int funDefType() {
         getTokenWrapped();
         if (typeCheck()) {
             getTokenWrapped();
-            if (token.type == T_OP_BRACE)
+            if (token.type == T_OP_BRACE) {
                 getTokenWrapped();
                 tFlagS(&token);
                 symtable_stack_push(&symStack);
                 return localParse();
+            }
         }
     }
     return printErrorAndReturn("Syntax error has occured in funDefType", SYNTAX_ERR);
