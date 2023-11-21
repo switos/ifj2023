@@ -1,3 +1,4 @@
+
 #include "symtable.h"
 
 //Division Hashing (Modulo Hashing)
@@ -65,14 +66,13 @@ symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
     return newTable;
 }
 
-htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char* name, bool defined, bool constant, int argumentAmount) {
+htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* name, bool defined, bool constant, int argumentAmount) {
     if (table->sizeUsed / table->sizeAllocated > THRESHOLD) {
         table = symtable_resize(table, table->sizeAllocated * 2);
     }
     
     unsigned int index = get_hash(key, table->sizeAllocated);
     unsigned int original_index = index;
-    unsigned int probes = 0;
 
     htab_item_t* newSlot = (htab_item_t*)malloc(sizeof(htab_item_t));
     if (newSlot == NULL) {
@@ -83,13 +83,11 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char
     newSlot->key = (char*)malloc(strlen(key) + 1);
     newSlot->data = (htab_data_t*)malloc(sizeof(htab_data_t));
     newSlot->data->name = (char*)malloc(strlen(name) + 1);
-    newSlot->data->type = (char*)malloc(strlen(type) + 1);
 
-    if (newSlot->key == NULL || newSlot->data == NULL || newSlot->data->name == NULL || newSlot->data->type == NULL) {
+    if (newSlot->key == NULL || newSlot->data == NULL || newSlot->data->name == NULL) {
         fprintf(stderr, "Failed to allocate memory");
         free(newSlot->key);
         free(newSlot->data->name);
-        free(newSlot->data->type);
         free(newSlot->data);
         free(newSlot);
         return NULL;
@@ -101,7 +99,6 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char
             fprintf(stderr, "Failed to allocate memory");
             free(newSlot->key);
             free(newSlot->data->name);
-            free(newSlot->data->type);
             free(newSlot->data);
             free(newSlot);
             return NULL;
@@ -110,27 +107,16 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char
 
     strcpy(newSlot->key, key);
     strcpy(newSlot->data->name, name);
-    strcpy(newSlot->data->type, type);
 
     newSlot->data->argumentAmount = argumentAmount;
     newSlot->data->argumentsInArray = 0;
     newSlot->data->constant = constant;
     newSlot->data->defined = defined;
+    newSlot->data->type = type;
 
-    while (table->array[index] != NULL) {
+    do {
         index = (index + 1) % table->sizeAllocated;
-        probes++;
-
-        if (probes >= table->sizeAllocated) {
-            fprintf(stderr, "Hash table is full.");
-            free(newSlot->key);
-            free(newSlot->data->name);
-            free(newSlot->data->type);
-            free(newSlot->data);
-            free(newSlot);
-            return NULL;
-        }
-    }
+    } while(original_index != index);
 
     table->array[index] = newSlot;
     table->sizeUsed++;
@@ -139,7 +125,7 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, char* type, char
 }
 
 
-bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, char* type) {
+bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type) {
     if(func->argumentsInArray >= func->argumentAmount) {
         return false;
     }
@@ -158,20 +144,14 @@ bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, cha
         return false;
     }
 
-    func->param[pos].type = (char*)malloc(strlen(type) + 1);
-    if(func->param[pos].type == NULL) {
-        fprintf(stderr, "Failed to allocate memory");
-        free(func->param->name);
-        free(func->param->identifier);
-        return false;
-    }
+    func->param[pos].type = type;
 
     strcpy(func->param[pos].identifier, identifier);
     strcpy(func->param[pos].name, name);
-    strcpy(func->param[pos].type, type);
     func->argumentsInArray++;
     return true;
 }
+
 htab_data_t* symtable_search(symtable_t* table, char* key) {
     if (table == NULL || key == NULL) {
         return NULL;
@@ -179,19 +159,20 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
 
     unsigned int index = get_hash(key, table->sizeAllocated);
     unsigned int original_index = index;
-
-    while (table->array[index] != NULL) {
+    
+    do {
         htab_item_t* tmp = table->array[index];
 
-        if (tmp->key != NULL && !strcmp(tmp->key, key)) {
-            return tmp->data;
+        if(tmp != NULL) {
+            if (tmp->key != NULL) {
+                if (!strcmp(tmp->key, key)) {
+                    return tmp->data;
+                }
+            }
         }
-
+        
         index = (index + 1) % table->sizeAllocated;
-        if (index == original_index) {
-            break;
-        }
-    }
+    } while(index != original_index);
 
     return NULL;
 }
@@ -213,13 +194,11 @@ void symtable_free(symtable_t* table) {
                 for (int j = 0; j < tmp->data->argumentsInArray; j++) {
                     free(tmp->data->param[j].identifier);
                     free(tmp->data->param[j].name);
-                    free(tmp->data->param[j].type);
                 }
                 free(tmp->data->param);
             }
             
             free(tmp->data->name);
-            free(tmp->data->type);
             free(tmp->data);
         }
         free(tmp->key);
@@ -232,7 +211,6 @@ void symtable_free(symtable_t* table) {
 
 void symtable_stack_init (symtable_stack_t* stack) {
     stack->top = NULL;
-    stack->active = NULL;
 }
 
 void symtable_stack_pop (symtable_stack_t* stack) {
@@ -245,13 +223,9 @@ void symtable_stack_pop (symtable_stack_t* stack) {
     if (current->prev != NULL) {
         current->prev->next = NULL;
         stack->top = current->prev;
-        if(stack->active == current) {
-            stack->active = current->prev;
-        }
     }
     else {
         stack->top = NULL;
-        stack->active = NULL;
     }
 
     symtable_free(current->table);
@@ -266,7 +240,6 @@ void symtable_stack_free (symtable_stack_t* stack) {
     while(stack->top != NULL) {
         symtable_stack_pop(stack);
     }
-    free(stack);
 }
 
 stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
@@ -298,5 +271,26 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
     }
 
     return stack->top;
+
+}
+
+htab_data_t* symtable_stack_search(symtable_stack_t* stack, char* key){
+    if (stack == NULL || key == NULL) {
+        return NULL;
+    }
+
+    stack_level_t* current = stack->top;
+
+    while (current != NULL) {
+        
+        htab_data_t* result = symtable_search(current->table, key);
+        if (result != NULL) {
+            return result;  // Key found in the current level of the stack.
+        }
+
+        current = current->prev;  // Move to the previous level in the stack.
+    }
+
+    return NULL;  // Key not found in any level of the stack.
 
 }

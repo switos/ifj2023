@@ -1,4 +1,5 @@
 #include "scanner.c"
+#include "symtable.c"
 
 char precedenceTable [16][16] = { 
         //  +    -    *    /    ==  !=    <    >    <=   >=   ??   !    (    )    id   $
@@ -42,6 +43,17 @@ typedef enum {
     ES_UNDEFINED,
 } ES_SYMBOL;
 
+typedef enum { 
+    ET_NIL = 18,
+    ET_DOUBLE,
+    ET_INT,
+    ET_STRING,
+    ET_DOUBLEN,
+    ET_INTN,
+    ET_STRINGN,
+    ET_UNDEFINED,
+} ET_TYPE;
+
 typedef enum {
     R_PLUS,
     R_MINUS,
@@ -60,10 +72,12 @@ typedef enum {
     R_ERROR
 } R_RULE;
 
+
+
 int getSymbolFromToken(token_t* token) {
     if(token->type < T_ID) {
         return token->type;
-    } else if (token->type < T_EOF) {
+    } else if (token->type <= T_NIL) {
         return ES_ID;
     } else {
         return ES_END;
@@ -109,6 +123,7 @@ int prcStackPush(precedenceStackNode_t** top, int symbol, int type) {
         new->next = (*top);
         (*top) = new;
     }
+    return 0;
 }
 int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
     if ((*node) == NULL) {
@@ -120,6 +135,7 @@ int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
         (*node)->next = new;
         (*node)->symbol = symbol;
         (*node)->type = type;
+        return 0;
     }
 }
 
@@ -129,7 +145,7 @@ int prcStackPop(precedenceStackNode_t** top){
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
         free(tmp);
-        tmp == NULL;
+        tmp = NULL;
         return 0;
     } else {
         fprintf(stderr,"stack is empty\n");

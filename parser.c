@@ -1,8 +1,10 @@
 #include "parser.h"
 token_t token;
 precedenceStackNode_t* prcStack;
+symtable_stack_t symStack;
+string name;
 
-int newLineCheck(){
+int newLineCheck() {
     if (token.newLineFlag == false)
         return 1;
     return 0;
@@ -35,7 +37,7 @@ void getTokenWrapped() {
     }
 }
 
-int expression() {
+int expression(int *expType) {
     if (litCheck()) {
         fprintf(stderr, "Success, expAnalyse is parsed\n");
         return expAnalyse(&token, NULL);
@@ -61,8 +63,9 @@ int id() {
     getTokenWrapped();
     if (token.type == T_ASSING) {
         getTokenWrapped();
-        return expression();
-    } else if (token.type = T_OP_PAR) {
+        int expType;
+        return expression(&expType);
+    } else if (token.type == T_OP_PAR) {
         return funCall();
     }
     fprintf(stderr,"%d\n", token.type);
@@ -70,40 +73,49 @@ int id() {
     
 }
 
-int varDefItem() {
+int varDefItem(bool modified, int type) {
+    int result;
     if(token.type == T_ASSING) {
             getTokenWrapped();
-            return expression();
+            int expType = ET_UNDEFINED;
+            if ((result = expression(&expType)))
+                return result;
+            if((result = VarDefAssignSemanticCheck(&type, expType)))
+                return result;
+            return NO_ERR;
     } else {
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in varDefItem", SYNTAX_ERR);
 } 
 
-int varDefList() {
+int varDefList(bool modified) {
     if(token.type == T_COLON) {
             getTokenWrapped();
             if(typeCheck()) {
                 getTokenWrapped();
-                return varDefItem();
+                return varDefItem(modified, token.type);
             }
     } else if(token.type == T_ASSING) {
-            getTokenWrapped();
-            return expression();
+            return varDefItem(modified, ET_UNDEFINED);
     } 
     return printErrorAndReturn("Syntaxe error in VarDefList", SYNTAX_ERR);
 }
 
 int varDef() {
+    bool modified;
     if(token.type == T_LET) {
-        //int varTypeTmp = UNMUTABLE_T
+        modified = true;
     } else {
-        //int varTypeTmp = MUTABLE_T
+        modified = false;
     }
     getTokenWrapped();
     if(token.type ==  T_ID) {
+        str_copy_string(&name, &(token.content));
+        if(symtable_search(symStack.top->table, name.str) != NULL)
+            return printErrorAndReturn("Sematic error in VarDef, redefinition", SEM_ERR_UNDEFINED_FUNCTION);
         getTokenWrapped();
-        return varDefList();
+        return varDefList(modified);
     }
     return printErrorAndReturn("Syntaxe error in VarDef", SYNTAX_ERR);
 }
@@ -112,15 +124,18 @@ int funDefType() {
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
         tFlagS(&token);
+        symtable_stack_push(&symStack);
         return localParse();
     } else if (token.type == T_ARROW ){
         getTokenWrapped();
         if (typeCheck()) {
             getTokenWrapped();
-            if (token.type == T_OP_BRACE)
+            if (token.type == T_OP_BRACE) {
                 getTokenWrapped();
                 tFlagS(&token);
+                symtable_stack_push(&symStack);
                 return localParse();
+            }
         }
     }
     return printErrorAndReturn("Syntax error has occured in funDefType", SYNTAX_ERR);
@@ -236,6 +251,7 @@ int ifItem(){
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
         tFlagS(&token);
+        symtable_stack_push(&symStack);
         int result = localParse();
         if (result)
             return result;
@@ -244,6 +260,7 @@ int ifItem(){
             if (token.type == T_OP_BRACE) {
                 getTokenWrapped();
                 tFlagS(&token);
+                symtable_stack_push(&symStack);
                 return localParse();
             }
         }
@@ -275,6 +292,7 @@ int whl() {
         if (token.type == T_OP_BRACE) {
             getTokenWrapped();
             tFlagS(&token);
+            symtable_stack_push(&symStack);
             return localParse();
         }
     }
@@ -296,7 +314,8 @@ int parseInstruction() {
         return ifList();
     } else if (token.type == T_RETURN) {
         getTokenWrapped();
-        return expression();
+        int expType;
+        return expression(&expType);
     } 
     fprintf(stderr, "%d\n%s\n",token.type,token.content.str);
     return printErrorAndReturn("Syntaxe error in parseInstruction", SYNTAX_ERR);
@@ -327,8 +346,8 @@ int localParse () {
             return result;
         return localParse();
     } else {
+        symtable_stack_pop(&symStack);
         fprintf(stderr, "Succes, RIGHT CURVY HORE parsed\n");
-        //ne line mode on
         getTokenWrapped();
         return NO_ERR;
     }
@@ -337,10 +356,15 @@ int localParse () {
 
 int main() {
         str_init(&token.content);
+        str_init(&name);
+        symtable_stack_init(&symStack);
+        symtable_stack_push(&symStack);
         getTokenWrapped();
         tFlagS(&token);
         int result = globalParse();
+        symtable_stack_free(&symStack);
         str_free(&token.content);
+        str_free(&name);
         if (result){
             fprintf(stderr,"exit code in main is %d\n",result);
             exit(result);
