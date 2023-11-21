@@ -80,8 +80,8 @@ int varDefItem(bool modified, int type) {
             int expType = ET_UNDEFINED;
             if ((result = expression(&expType)))
                 return result;
-            if((result = VarDefAssignSemanticCheck(&type, expType)))
-                return result;
+            // if((result = VarDefAssignSemanticCheck(&type, expType)))
+            //     return result;
             return NO_ERR;
     } else {
         return NO_ERR;
