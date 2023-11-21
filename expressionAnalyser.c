@@ -1,4 +1,4 @@
-#include "expressionAnalyser.h"
+#include "semantic.c"
 token_t* tokenExpr = NULL;
 int tokenFlag = 0;
 

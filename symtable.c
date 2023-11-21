@@ -1,3 +1,4 @@
+
 #include "symtable.h"
 
 //Division Hashing (Modulo Hashing)

@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
     int type;
     char* name;
+    //defined need to be changed on initialized
     bool defined;
     bool constant;
     int argumentAmount;

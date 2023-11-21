@@ -3,7 +3,6 @@ token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
 string name;
-string type;
 
 int newLineCheck() {
     if (token.newLineFlag == false)
@@ -38,7 +37,7 @@ void getTokenWrapped() {
     }
 }
 
-int expression() {
+int expression(int *expType) {
     if (litCheck()) {
         fprintf(stderr, "Success, expAnalyse is parsed\n");
         return expAnalyse(&token, NULL);
@@ -64,7 +63,8 @@ int id() {
     getTokenWrapped();
     if (token.type == T_ASSING) {
         getTokenWrapped();
-        return expression();
+        int expType;
+        return expression(&expType);
     } else if (token.type == T_OP_PAR) {
         return funCall();
     }
@@ -73,10 +73,16 @@ int id() {
     
 }
 
-int varDefItem(bool modified, string* typePointer) {
+int varDefItem(bool modified, int type) {
+    int result;
     if(token.type == T_ASSING) {
             getTokenWrapped();
-            return expression();
+            int expType = ET_UNDEFINED;
+            if ((result = expression(&expType)))
+                return result;
+            if((result = VarDefAssignSemanticCheck(&type, expType)))
+                return result;
+            return NO_ERR;
     } else {
         return NO_ERR;
     }
@@ -88,20 +94,20 @@ int varDefList(bool modified) {
             getTokenWrapped();
             if(typeCheck()) {
                 getTokenWrapped();
-                return varDefItem(modified, &type);
+                return varDefItem(modified, token.type);
             }
     } else if(token.type == T_ASSING) {
-            return varDefItem(modified, NULL);
+            return varDefItem(modified, ET_UNDEFINED);
     } 
     return printErrorAndReturn("Syntaxe error in VarDefList", SYNTAX_ERR);
 }
 
 int varDef() {
-    bool modified = false;
+    bool modified;
     if(token.type == T_LET) {
-        bool modified = true;
+        modified = true;
     } else {
-        bool modified = false;
+        modified = false;
     }
     getTokenWrapped();
     if(token.type ==  T_ID) {
@@ -308,7 +314,8 @@ int parseInstruction() {
         return ifList();
     } else if (token.type == T_RETURN) {
         getTokenWrapped();
-        return expression();
+        int expType;
+        return expression(&expType);
     } 
     fprintf(stderr, "%d\n%s\n",token.type,token.content.str);
     return printErrorAndReturn("Syntaxe error in parseInstruction", SYNTAX_ERR);
@@ -355,6 +362,7 @@ int main() {
         getTokenWrapped();
         tFlagS(&token);
         int result = globalParse();
+        symtable_stack_free(&symStack);
         str_free(&token.content);
         str_free(&name);
         if (result){

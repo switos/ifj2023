@@ -43,7 +43,16 @@ typedef enum {
     ES_UNDEFINED,
 } ES_SYMBOL;
 
-
+typedef enum { 
+    ET_NIL = 18,
+    ET_DOUBLE,
+    ET_INT,
+    ET_STRING,
+    ET_DOUBLEN,
+    ET_INTN,
+    ET_STRINGN,
+    ET_UNDEFINED,
+} ET_TYPE;
 
 typedef enum {
     R_PLUS,
@@ -63,10 +72,12 @@ typedef enum {
     R_ERROR
 } R_RULE;
 
+
+
 int getSymbolFromToken(token_t* token) {
     if(token->type < T_ID) {
         return token->type;
-    } else if (token->type < T_EOF) {
+    } else if (token->type <= T_NIL) {
         return ES_ID;
     } else {
         return ES_END;
