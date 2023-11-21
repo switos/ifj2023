@@ -92,6 +92,9 @@ bool isCommi() {
                         ungetc(symbol, stdin);
                     }
                 }
+                if (symbol == EOF) {
+                    return false;
+                }
             }
             return true;
         } else {
@@ -640,7 +643,7 @@ int startState(token_t * token) {
         fprintf(stderr, "Success, EOF is found\n");
     } else if (symbol == '/') {
         if (isCommi()) {
-            startState(token);
+            return startState(token);
         } else {
             if (isOper(token)) {
                 symbol = getc(stdin);
