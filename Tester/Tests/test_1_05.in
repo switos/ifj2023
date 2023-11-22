@@ -1,0 +1,3 @@
+func main() {
+    var hello-world: Int = 5  // Lexical error: 'hello-world' contains a hyphen
+}

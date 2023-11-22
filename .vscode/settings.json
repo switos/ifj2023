@@ -5,7 +5,14 @@
     "stdlib.h": "c",
     "string.h": "c",
     "str.c": "cpp",
-    "expressionanalyser.h": "c"
+    "expressionanalyser.h": "c",
+    "random": "c",
+    "array": "c",
+    "compare": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp_Runner.msvcBatchPath": "",

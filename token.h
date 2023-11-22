@@ -28,6 +28,9 @@ typedef enum {
     T_DOUBLE,
     T_INT,
     T_STRING,
+    T_DOUBLEN,
+    T_INTN,
+    T_STRINGN,
     T_ELSE,
     T_FUNC,
     T_IF,
@@ -38,7 +41,6 @@ typedef enum {
     T_ASSING,
     T_COLON,
     T_COMMA,
-    T_NL,   // \n
 } token_type;
 
 /**
@@ -69,3 +71,10 @@ typedef struct token
     token_type type;
     bool newLineFlag;
 } token_t;
+
+void tFlagS(token_t * token) {
+    token->newLineFlag = true;
+}
+void tFlagR(token_t * token) {
+    token->newLineFlag = false;
+} 
