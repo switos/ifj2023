@@ -1,8 +1,8 @@
-#include "expressionAnalyser.h"
+#include "semantic.c"
 token_t* tokenExpr = NULL;
 int tokenFlag = 0;
 
-int setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp) {
+void setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp) {
     if (tokenTmp == NULL) {
         tokenExpr = tokenGlobal;
     } else {
@@ -36,25 +36,87 @@ int findCatch(precedenceStackNode_t** top, int* count) {
     return 1;
 }
 
-int reduceByRule(precedenceStackNode_t** top, int* cnt){
+int literalSemCheck(precedenceStackNode_t *first,  precedenceStackNode_t *second) {
+}
+
+int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule) {
+        
+        precedenceStackNode_t *first = NULL;
+        precedenceStackNode_t *second = NULL;
+        precedenceStackNode_t *operator = NULL;
+        
+        if ( cnt == 3){
+            precedenceStackNode_t *first = (*top)->next->next;
+            precedenceStackNode_t *second = (*top);
+            precedenceStackNode_t *operator = (*top);
+        } else if ( cnt == 2) {
+            precedenceStackNode_t *first = (*top)->next;
+            precedenceStackNode_t *operator = (*top);
+        } else {
+            precedenceStackNode_t *first = (*top);
+        }
+        switch (rule) {
+            case R_PLUS:
+            case R_MINUS:
+            case R_MUL:
+            case R_DIV:
+                if( (first->type > T_NIL && first->type < T_STRING) && (second->type > T_NIL && second->type < T_STRING)  ){
+                    if (first->type == second->type) {
+                        (*type) == first->type;
+                        return NO_ERR;
+                    }
+                } else if (rule != R_DIV) {
+                        if ( (first->type == ET_DOUBLE && second->type == ET_INT) || (first->type ==  ET_INT && second->type == ET_DOUBLE) ) {
+                            if(first->lit && first->type == ET_INT) {
+                                (*type) == ET_DOUBLE;
+                                return NO_ERR;
+                            } else if (second->lit && second->type == ET_INT) {
+                                (*type) == ET_DOUBLE;
+                                return NO_ERR;
+                            }
+                        } else if (rule == R_PLUS) {
+                            if( first->type == ET_STRING && second->type == ET_STRING ){
+                                (*type) == ET_STRING;
+                                return NO_ERR;
+                            }
+                        }
+                }
+                return printErrorAndReturn("Semantic error occured while reducing rule", SEM_ERR_TYPE_COMPAT);
+                break;
+            case R_EQ:
+            case R_NILCON:
+
+            case R_UNAR:
+                if (first->type >= T_DOUBLEN && first->type <= T_STRINGN) 
+                    (*type) == first->type - 3;
+                return NO_ERR;
+                
+            default:
+                break;
+        }
+
+}
+
+int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type){
     int rule;
     if ((*cnt) == 1) {
         if((*top)->symbol == ES_ID){
-            rule == R_ID;
+            rule = R_ID;
             fprintf(stderr,"Id rule is parsed\n");
         } else {
             rule = R_ERROR;
         } 
     } else if ( (*cnt) == 2) { 
-        fprintf(stderr,"I am Here\n");
         if ((*top)->symbol == ES_EX){
             rule = R_UNAR;
+        } else { 
+                rule = R_ERROR;
         }
     } else if ((*cnt) == 3) {
         if (((*top)->next->next->symbol == ES_OP_PAR) && ((*top)->next->symbol == ES_NONTER) && ((*top)->symbol == ES_CL_PAR)) {
             rule =  R_PAR;
         } else if ( (*top)->next->next->symbol == ES_NONTER && (*top)->symbol == ES_NONTER ) {
-            if ((*top)->next->symbol < 11){
+            if ((*top)->next->symbol < R_UNAR){
                 rule = (*top)->next->symbol;
             } else { 
                 rule = R_ERROR;
@@ -64,17 +126,18 @@ int reduceByRule(precedenceStackNode_t** top, int* cnt){
         rule = R_ERROR;
     }
     if (rule != R_ERROR ) {
+        //checkExprSemantic(top, cnt, type, rule);
         for(int i = 0; i <= (*cnt); i++){
             prcStackPop(top);
         }
-        prcStackPush(top, ES_NONTER, ES_UNDEFINED);
+        prcStackPush(top, ES_NONTER, (*type));
         return NO_ERR;
     }
 
     return printErrorAndReturn("Syntax Error has occured in reduce by rule", SYNTAX_ERR);
 }
 
-int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp) {
+int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp, int *type) {
     token_t endToken;
     endToken.type = T_EOF; 
     precedenceStackNode_t* stack = NULL; 
@@ -87,14 +150,14 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp) {
         switch (precedenceTable[stackTerminal->symbol][getSymbolFromToken(tokenExpr)])
         {
         case '=':
-            prcStackPush(&stack, getSymbolFromToken(tokenExpr), ES_UNDEFINED);
+            prcStackPush(&stack, getSymbolFromToken(tokenExpr), tokenExpr->type);
             if (getTokenExpr(tokenGlobal, tokenTmp))
                 result =  printErrorAndReturn("Lexical error has occured while expression analysing", LEX_ERR);
             break;
         case 'l':
             fprintf(stderr,"in case less with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED);
-            prcStackPush(&stack, getSymbolFromToken(tokenExpr), ES_UNDEFINED);
+            prcStackPush(&stack, getSymbolFromToken(tokenExpr),  tokenExpr->type);
             if (getTokenExpr(tokenGlobal, tokenTmp))
                 result =  printErrorAndReturn("Lexical error has occured while expression analysing", LEX_ERR);
             break;
@@ -102,7 +165,7 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp) {
         case 'g':
             fprintf(stderr,"in case great with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             if( ! (findCatch(&stack, &stackItemsCounter)) ) {
-                result = reduceByRule(&stack, &stackItemsCounter);
+                result = reduceByRule(&stack, &stackItemsCounter, type);
             } else { 
                 result = printErrorAndReturn("Syntax error has occured in expression analyser while findCatch\n", SYNTAX_ERR);
             }
