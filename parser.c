@@ -38,9 +38,9 @@ void getTokenWrapped() {
 }
 
 int expression(int *expType) {
-    if (litCheck()) {
+    if (litCheck() || token.type == T_OP_PAR) {
         fprintf(stderr, "Success, expAnalyse is parsed\n");
-        return expAnalyse(&token, NULL);
+        return expAnalyse(&token, NULL, expType);
     } else if (token.type == T_ID) {
         token_t tmpToken;
         str_init(&(tmpToken.content));
@@ -50,7 +50,7 @@ int expression(int *expType) {
         if( token.type == T_OP_PAR){
             return funCall();
         } else {
-            int result = expAnalyse(&token, &tmpToken);
+            int result = expAnalyse(&token, &tmpToken, expType);
             str_free(&(tmpToken.content));
             return result;
         }
@@ -269,8 +269,9 @@ int ifItem(){
 }
 
 int ifList(){
-    if (token.type == T_OP_PAR){
-        int result = expAnalyse(&token, NULL);
+    int expType = ET_UNDEFINED;
+    if (token.type != T_LET){
+        int result = expAnalyse(&token, NULL, &expType);
         if (result)
             return result;
         return ifItem();
@@ -285,18 +286,25 @@ int ifList(){
 }
 
 int whl() {
-    if (token.type == T_OP_PAR) { 
-        int result = expAnalyse(&token, NULL);
-        if(result) 
-            return result;
-        if (token.type == T_OP_BRACE) {
-            getTokenWrapped();
-            tFlagS(&token);
-            symtable_stack_push(&symStack);
-            return localParse();
-        }
+    int expType = ET_UNDEFINED;
+    int result = expAnalyse(&token, NULL, &expType);
+    if(result) 
+        return result;
+    if (token.type == T_OP_BRACE) {
+        getTokenWrapped();
+        tFlagS(&token);
+        symtable_stack_push(&symStack);
+        return localParse();
     }
     return printErrorAndReturn("Syntaxe error in whl", SYNTAX_ERR);
+}
+
+int returnR () {
+    int expType;
+    if (token.type == T_ID || litCheck() || token.type == T_OP_PAR) {
+        return expression(&expType);
+    }
+    return NO_ERR;
 }
 
 int parseInstruction() {
@@ -313,10 +321,10 @@ int parseInstruction() {
         getTokenWrapped();
         return ifList();
     } else if (token.type == T_RETURN) {
+        //check if we are in function defenition scope
         getTokenWrapped();
-        int expType;
-        return expression(&expType);
-    } 
+        return returnR();
+    }
     fprintf(stderr, "%d\n%s\n",token.type,token.content.str);
     return printErrorAndReturn("Syntaxe error in parseInstruction", SYNTAX_ERR);
 }
