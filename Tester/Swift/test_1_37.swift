@@ -1,0 +1,1 @@
+var total/amount: Int = 100  // Lexical error: Slash '/' is not valid in an identifier

@@ -27,7 +27,6 @@ void str_clear(string* s) {
 
 bool str_add_char(string* s, char c) {
     if (s->length + 1 >= s->allocSize) { // this means we need more memory
-    // printf("PIZDA TUT\n");
         if ((s->str = (char *) realloc(s->str, s->length + STR_LEN_INC)) == NULL) {
             return false;
         }
