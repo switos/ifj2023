@@ -18,7 +18,7 @@ int litCheck(){
 } 
 
 int typeCheck(){
-    if (token.type == T_DOUBLE || token.type == T_STRING || token.type == T_INT) {
+    if (token.type > T_NIL && token.type <= T_STRINGN) {
         return 1;
     } else {
         return 0;
