@@ -88,6 +88,7 @@ typedef struct precedenceStackNode
 {
     int symbol;
     int type;
+    int lit;
     struct precedenceStackNode* next;
 } precedenceStackNode_t;
 
