@@ -1,24 +1,25 @@
 #include "scanner.c"
 #include "symtable.c"
 
-char precedenceTable [16][16] = { 
-        //  +    -    *    /    ==  !=    <    >    <=   >=   ??   !    (    )    id   $
-   /*+*/  {'g', 'g', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-   /*-*/  {'g', 'g', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-   /***/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-   /*/*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-  /*==*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-  /*!=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-   /*<*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-   /*>*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-  /*<=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-  /*>=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'g'},
-  /*??*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'g', 'l', 'g'},
-   /*!*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'e', 'g', 'e', 'g'},
-   /*(*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', '=', 'l', 'e'},
-   /*)*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'e', 'g', 'e', 'g'},
-  /*id*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'g', 'f', 'g'},
-   /*$*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'e', 'l', 'e'},
+char precedenceTable [17][17] = { 
+        //  +    -    *    /    ==  !=    <    >    <=   >=   ??   !    (    )    id  lit   $
+   /*+*/  {'g', 'g', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+   /*-*/  {'g', 'g', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+   /***/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+   /*/*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+  /*==*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+  /*!=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+   /*<*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+   /*>*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+  /*<=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+  /*>=*/  {'l', 'l', 'l', 'l', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'l', 'g', 'l', 'l', 'g'},
+  /*??*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'g', 'l', 'l', 'g'},
+   /*!*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'e', 'g', 'e', 'e', 'g'},
+   /*(*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', '=', 'l', 'l', 'e'},
+   /*)*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'l', 'e', 'g', 'e', 'e', 'g'},
+  /*id*/  {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'g', 'f', 'f', 'g'},
+  /*lit*/ {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'e', 'g', 'f', 'f', 'g'},
+   /*$*/  {'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'e', 'l', 'l', 'e'},
 };
 
 typedef enum { 
@@ -37,6 +38,7 @@ typedef enum {
     ES_OP_PAR, // ( 
     ES_CL_PAR, // )
     ES_ID = 14,
+    ES_LIT,
     ES_END,
     ES_CATCH,
     ES_NONTER,
@@ -44,14 +46,13 @@ typedef enum {
 } ES_SYMBOL;
 
 typedef enum { 
-    ET_NIL = 18,
+    ET_INT = 15,
     ET_DOUBLE,
-    ET_INT,
     ET_STRING,
-    ET_DOUBLEN,
     ET_INTN,
+    ET_DOUBLEN,
     ET_STRINGN,
-    ET_UNDEFINED,
+    ET_UNDEFINED = 95,
 } ET_TYPE;
 
 typedef enum {
@@ -74,11 +75,25 @@ typedef enum {
 
 
 
+int getTypeFromToken(token_t* token, symtable_stack_t *symStack) {
+    if(token->type >= T_INT_LIT && token->type <= T_STRING_LIT ) {
+        return token->type;
+    } else if (token->type == T_ID){
+        symtable_stack_search(symStack, token->content.str)->type;
+    } else {
+        return ET_UNDEFINED;
+    }
+}
+
 int getSymbolFromToken(token_t* token) {
     if(token->type < T_ID) {
         return token->type;
-    } else if (token->type <= T_NIL) {
+
+    } else if (token->type <= T_ID) {
         return ES_ID;
+    } 
+    else if (token->type <= T_NIL) {
+        return ES_LIT;
     } else {
         return ES_END;
     }
@@ -88,7 +103,6 @@ typedef struct precedenceStackNode
 {
     int symbol;
     int type;
-    int lit;
     struct precedenceStackNode* next;
 } precedenceStackNode_t;
 
@@ -110,7 +124,6 @@ int prcStackFree(precedenceStackNode_t** top) {
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
         free(tmp);
-        fprintf(stderr,"i am free\n");
     }
     return 0;
 }
@@ -142,7 +155,6 @@ int prcStackPushAfter(precedenceStackNode_t** node, int symbol, int type) {
 
 int prcStackPop(precedenceStackNode_t** top){
     if((*top) != NULL){
-        fprintf(stderr,"let's go\n");
         precedenceStackNode_t* tmp = (*top);
         (*top) = (*top)->next;
         free(tmp);

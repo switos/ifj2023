@@ -40,7 +40,7 @@ void getTokenWrapped() {
 int expression(int *expType) {
     if (litCheck() || token.type == T_OP_PAR) {
         fprintf(stderr, "Success, expAnalyse is parsed\n");
-        return expAnalyse(&token, NULL, expType);
+        return expAnalyse(&token, NULL, expType, &symStack);
     } else if (token.type == T_ID) {
         token_t tmpToken;
         str_init(&(tmpToken.content));
@@ -50,7 +50,7 @@ int expression(int *expType) {
         if( token.type == T_OP_PAR){
             return funCall();
         } else {
-            int result = expAnalyse(&token, &tmpToken, expType);
+            int result = expAnalyse(&token, &tmpToken, expType, &symStack);
             str_free(&(tmpToken.content));
             return result;
         }
@@ -74,14 +74,17 @@ int id() {
 }
 
 int varDefItem(bool modified, int type) {
+    int typetmp = type;
     int result;
     if(token.type == T_ASSING) {
             getTokenWrapped();
             int expType = ET_UNDEFINED;
             if ((result = expression(&expType)))
                 return result;
-            // if((result = VarDefAssignSemanticCheck(&type, expType)))
-            //     return result;
+            printf("TOKEN TYPE %d %d\n", type, typetmp);
+            if((result = VarDefAssignSemanticCheck(&typetmp, expType)))
+                return result;
+            varDefiner(&symStack, typetmp, name.str, true, modified);
             return NO_ERR;
     } else {
         return NO_ERR;
@@ -93,8 +96,10 @@ int varDefList(bool modified) {
     if(token.type == T_COLON) {
             getTokenWrapped();
             if(typeCheck()) {
+                int type = token.type;
+                printf("TOKEN TYPE %d \n",token.type);
                 getTokenWrapped();
-                return varDefItem(modified, token.type);
+                return varDefItem(modified, type);
             }
     } else if(token.type == T_ASSING) {
             return varDefItem(modified, ET_UNDEFINED);
@@ -271,7 +276,7 @@ int ifItem(){
 int ifList(){
     int expType = ET_UNDEFINED;
     if (token.type != T_LET){
-        int result = expAnalyse(&token, NULL, &expType);
+        int result = expAnalyse(&token, NULL, &expType, &symStack);
         if (result)
             return result;
         return ifItem();
@@ -287,7 +292,7 @@ int ifList(){
 
 int whl() {
     int expType = ET_UNDEFINED;
-    int result = expAnalyse(&token, NULL, &expType);
+    int result = expAnalyse(&token, NULL, &expType, &symStack);
     if(result) 
         return result;
     if (token.type == T_OP_BRACE) {

@@ -20,11 +20,11 @@ typedef enum {
     T_FLOAT_LIT,
     T_STRING_LIT,
     T_NIL,
-    T_DOUBLE,
     T_INT,
+    T_DOUBLE,
     T_STRING,
-    T_DOUBLEN,
     T_INTN,
+    T_DOUBLEN,
     T_STRINGN,
     T_EOF,
     T_OP_BRACE, //{
