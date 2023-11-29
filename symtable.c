@@ -113,6 +113,7 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
     newSlot->data->constant = constant;
     newSlot->data->initialized = initialized;
     newSlot->data->type = type;
+    newSlot->data->nil =false;
 
     do {
         index = (index + 1) % table->sizeAllocated;
@@ -183,6 +184,11 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
     } while(index != original_index);
 
     return NULL;
+}
+
+void symtable_set_nil (symtable_t* table, char* key, bool nil) {
+    htab_data_t* tmp_data = symtable_search(table, key);
+    tmp_data->nil = nil;
 }
 
 void symtable_free(symtable_t* table) {
