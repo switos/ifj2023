@@ -3,7 +3,7 @@
 
 //Division Hashing (Modulo Hashing)
 unsigned int get_hash (char *key, int tableSize) {
-    unsigned int hash;
+    unsigned int hash = 0;
     for(int i = 0; key[i] != '\0'; i++) {
         hash = (hash * 31 + key[i]) % tableSize;
     }
@@ -66,7 +66,7 @@ symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
     return newTable;
 }
 
-htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* name, bool defined, bool constant, int argumentAmount) {
+htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* name, bool initialized, bool constant, int argumentAmount) {
     if (table->sizeUsed / table->sizeAllocated > THRESHOLD) {
         table = symtable_resize(table, table->sizeAllocated * 2);
     }
@@ -93,8 +93,8 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
         return NULL;
     }
 
-    if (argumentAmount != 0) {
-        newSlot->data->param = (data_param_t*)malloc(sizeof(data_param_t) * argumentAmount);
+    if (argumentAmount > 0) {
+        newSlot->data->param = (data_param_t**)malloc(sizeof(data_param_t*) * argumentAmount);
         if (newSlot->data->param == NULL) {
             fprintf(stderr, "Failed to allocate memory");
             free(newSlot->key);
@@ -111,7 +111,7 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
     newSlot->data->argumentAmount = argumentAmount;
     newSlot->data->argumentsInArray = 0;
     newSlot->data->constant = constant;
-    newSlot->data->defined = defined;
+    newSlot->data->initialized = initialized;
     newSlot->data->type = type;
 
     do {
@@ -126,29 +126,37 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
 
 
 bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type) {
-    if(func->argumentsInArray >= func->argumentAmount) {
+    if(func->argumentAmount <= 0 || func->argumentsInArray >= func->argumentAmount) {
         return false;
     }
     int pos = func->argumentsInArray;
     
-    func->param[pos].identifier = (char*)malloc(strlen(identifier) + 1);
-    if(func->param[pos].identifier == NULL) {
+    func->param[pos] = (data_param_t*)malloc(sizeof(data_param_t));
+    if (func->param[pos] == NULL) {
+        fprintf(stderr, "Failed to allocate memory for parameter");
+        return false;
+    }
+    
+    func->param[pos]->identifier = (char*)malloc(strlen(identifier) + 1);
+    if(func->param[pos]->identifier == NULL) {
         fprintf(stderr, "Failed to allocate memory");
         return false;
     }
-
-    func->param[pos].name = (char*)malloc(strlen(name) + 1);
-    if(func->param[pos].name == NULL) {
+    
+    func->param[pos]->name = (char*)malloc(strlen(name) + 1);
+    if(func->param[pos]->name == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(func->param->identifier);
+        free(func->param[pos]->identifier);
         return false;
     }
+    
+    func->param[pos]->type = type;
 
-    func->param[pos].type = type;
-
-    strcpy(func->param[pos].identifier, identifier);
-    strcpy(func->param[pos].name, name);
+    strcpy(func->param[pos]->identifier, identifier);
+    strcpy(func->param[pos]->name, name);
+    
     func->argumentsInArray++;
+    
     return true;
 }
 
@@ -192,8 +200,9 @@ void symtable_free(symtable_t* table) {
             
             if (tmp->data->argumentsInArray > 0) {
                 for (int j = 0; j < tmp->data->argumentsInArray; j++) {
-                    free(tmp->data->param[j].identifier);
-                    free(tmp->data->param[j].name);
+                    free(tmp->data->param[j]->identifier);
+                    free(tmp->data->param[j]->name);
+                    free(tmp->data->param[j]);
                 }
                 free(tmp->data->param);
             }

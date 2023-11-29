@@ -19,12 +19,11 @@ typedef struct {
 typedef struct {
     int type;
     char* name;
-    //defined need to be changed on initialized
-    bool defined;
+    bool initialized;
     bool constant;
     int argumentAmount;
     int argumentsInArray;
-    data_param_t* param;
+    data_param_t** param;
 }htab_data_t;
 
 typedef struct htab_item{
@@ -54,7 +53,7 @@ symtable_t* symtable_init();
 
 symtable_t* symtable_resize(symtable_t* table, int newTableSize);
 
-htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* name, bool defined, bool constant, int argumentAmount);
+htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* name, bool initialized, bool constant, int argumentAmount);
 
 bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type);
 
