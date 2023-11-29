@@ -29,6 +29,27 @@ int varDefiner(symtable_stack_t *symStack, int type, char* name, bool inicialize
     return 0;
 }
 
+int checkDefinition(symtable_stack_t *symStack, char* name ) {
+    htab_data_t *data = symtable_stack_search(symStack, name);
+    if (data == NULL)
+        return printErrorAndReturn("Undefined variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
+    return 0;
+}
+
+int checkInitialization(symtable_stack_t *symStack, char* name ) {
+    htab_data_t *data = symtable_stack_search(symStack, name);
+    if (data == NULL)
+        return printErrorAndReturn("Undefined variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
+    if (data->initialized != true) 
+        return printErrorAndReturn("Uninitialized variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
+    return 0;
+}
+
+void setType(symtable_stack_t *symStack, char* name, int type) {
+    htab_data_t *data = symtable_stack_search(symStack, name);
+    data->type = type;
+    data->initialized = true;
+}
 
 int VarDefAssignSemanticCheck(int *type, int exp){
 

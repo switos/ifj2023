@@ -26,7 +26,9 @@ int typeCheck(){
 }
 
 void exitAndFree(int etype) {
+    symtable_stack_free(&symStack);
     str_free(&token.content);
+    str_free(&name);
     fprintf(stderr,"exit code is %d\n", etype);
     exit(etype);
 }
@@ -39,7 +41,6 @@ void getTokenWrapped() {
 
 int expression(int *expType) {
     if (litCheck() || token.type == T_OP_PAR) {
-        fprintf(stderr, "Success, expAnalyse is parsed\n");
         return expAnalyse(&token, NULL, expType, &symStack);
     } else if (token.type == T_ID) {
         token_t tmpToken;
@@ -59,18 +60,22 @@ int expression(int *expType) {
 }
 
 int id() {
-    //save id;
+    int result = 0;
+    str_copy_string(&name, &(token.content)); //save id
     getTokenWrapped();
     if (token.type == T_ASSING) {
+        if ((result = checkDefinition(&symStack, name.str))) 
+            return result;
         getTokenWrapped();
         int expType;
-        return expression(&expType);
+        result = expression(&expType);
+        if (result == 0)
+            setType(&symStack, name.str, expType);
+        return result;
     } else if (token.type == T_OP_PAR) {
         return funCall();
     }
-    fprintf(stderr,"%d\n", token.type);
     return printErrorAndReturn("Syntaxe error has occured in id", SYNTAX_ERR);
-    
 }
 
 int varDefItem(bool modified, int type) {
@@ -81,12 +86,16 @@ int varDefItem(bool modified, int type) {
             int expType = ET_UNDEFINED;
             if ((result = expression(&expType)))
                 return result;
-            printf("TOKEN TYPE %d %d\n", type, typetmp);
+            fprintf(stderr,"TOKEN TYPE %d %d name is %s\n", type, expType, name.str);
             if((result = VarDefAssignSemanticCheck(&typetmp, expType)))
                 return result;
             varDefiner(&symStack, typetmp, name.str, true, modified);
+            if (symtable_stack_search(&symStack, name.str) == NULL) {
+                fprintf(stderr,"Var definer dont work in varDefItem\n");
+            }
             return NO_ERR;
     } else {
+        varDefiner(&symStack, typetmp, name.str, false, modified);
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in varDefItem", SYNTAX_ERR);
@@ -94,16 +103,16 @@ int varDefItem(bool modified, int type) {
 
 int varDefList(bool modified) {
     if(token.type == T_COLON) {
+        getTokenWrapped();
+        if(typeCheck()) {
+            int type = token.type;
+            fprintf(stderr,"TOKEN TYPE %d \n",token.type);
             getTokenWrapped();
-            if(typeCheck()) {
-                int type = token.type;
-                printf("TOKEN TYPE %d \n",token.type);
-                getTokenWrapped();
-                return varDefItem(modified, type);
-            }
+            return varDefItem(modified, type);
+        }
     } else if(token.type == T_ASSING) {
-            return varDefItem(modified, ET_UNDEFINED);
-    } 
+        return varDefItem(modified, ET_UNDEFINED);
+    }
     return printErrorAndReturn("Syntaxe error in VarDefList", SYNTAX_ERR);
 }
 

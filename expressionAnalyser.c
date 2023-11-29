@@ -11,11 +11,7 @@ int setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp, symtable_stack_t *symS
         tokenFlag = 1;
     }
     if (tokenExpr->type == T_ID) {        
-        htab_data_t *data = symtable_stack_search(symStack, tokenExpr->content.str);
-        if (data == NULL)
-            return printErrorAndReturn("Undefined variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
-        if (data->defined != true) 
-            return printErrorAndReturn("Uninitialized variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
+        return checkInitialization(symStack, tokenExpr->content.str);
     }
     return NO_ERR;
 }
@@ -32,11 +28,7 @@ int getTokenExpr(token_t* tokenGlobal, token_t* tokenTmp, symtable_stack_t *symS
     if (result)
         return result;
     if (tokenExpr->type == T_ID) {        
-        htab_data_t *data = symtable_stack_search(symStack, tokenExpr->content.str);
-        if (data == NULL)
-            return printErrorAndReturn("Undefined variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
-        if (data->defined != true) 
-            return printErrorAndReturn("Uninitialized variable in expAnalyse", SEM_ERR_UNDEFINED_VAR);
+        return checkInitialization(symStack, tokenExpr->content.str);
     }
     return NO_ERR;
     
@@ -59,7 +51,7 @@ int findCatch(precedenceStackNode_t** top, int* count) {
 
 
 int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule) {
-    
+
     switch (rule) {
         case R_PLUS:
         case R_MINUS:
@@ -106,13 +98,13 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
         case R_G:
         case R_LEQ:
         case R_GEQ:
-            if( ((*top)->next->next->type == (*top)->type) && ((*top)->next->next->type < ET_INTN && (*top)->type < ET_INTN ) ) {
+            if( ((*top)->next->next->type == (*top)->type) && ( ( (*top)->next->next->type < ET_INTN ) && ( (*top)->type < ET_INTN ) ) ) {
                 return NO_ERR;
             }
             return printErrorAndReturn("Semantic error occured while reducing rule", SEM_ERR_TYPE_COMPAT);
             break;
         case R_UNAR:
-            if ((*top)->next->type >= T_DOUBLEN && (*top)->next->type <= T_STRINGN) 
+            if ((*top)->next->type >= T_DOUBLEN && (*top)->next->type <= T_STRINGN)
                 (*type) = (*top)->next->type - 3;
             return NO_ERR;
         case R_ID:
@@ -185,17 +177,16 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp, int *type, symtable_sta
         {
         case '=':
             prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack));
-            if (getTokenExpr(tokenGlobal, tokenTmp, symStack))
-                result =  printErrorAndReturn("Lexical error has occured while expression analysing", LEX_ERR);
+            if ((result = getTokenExpr(tokenGlobal, tokenTmp, symStack)) != 0)
+                printErrorAndReturn("Lexical error has occured while expression analysing", result);
             break;
         case 'l':
             fprintf(stderr,"in case less with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED);
             prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack));
-            if (getTokenExpr(tokenGlobal, tokenTmp, symStack))
-                result =  printErrorAndReturn("Lexical error has occured while expression analysing", LEX_ERR);
+            if ((result = getTokenExpr(tokenGlobal, tokenTmp, symStack)) != 0)
+                printErrorAndReturn("Lexical error has occured while expression analysing", result);
             break;
-
         case 'g':
             fprintf(stderr,"in case great with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             if( ! (findCatch(&stack, &stackItemsCounter)) ) {

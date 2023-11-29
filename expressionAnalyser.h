@@ -79,7 +79,7 @@ int getTypeFromToken(token_t* token, symtable_stack_t *symStack) {
     if(token->type >= T_INT_LIT && token->type <= T_STRING_LIT ) {
         return token->type;
     } else if (token->type == T_ID){
-        symtable_stack_search(symStack, token->content.str)->type;
+        return symtable_stack_search(symStack, token->content.str)->type;
     } else {
         return ET_UNDEFINED;
     }
