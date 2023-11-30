@@ -3,6 +3,9 @@ token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
 string name;
+string arg_name;
+string arg_id;
+bool functionBodyFlag;
 
 int newLineCheck() {
     if (token.newLineFlag == false)
@@ -29,6 +32,8 @@ void exitAndFree(int etype) {
     symtable_stack_free(&symStack);
     str_free(&token.content);
     str_free(&name);
+    str_free(&arg_name);
+    str_free(&arg_id);
     fprintf(stderr,"exit code is %d\n", etype);
     exit(etype);
 }
@@ -63,14 +68,14 @@ int id() {
     int result = 0;
     str_copy_string(&name, &(token.content)); //save id
     getTokenWrapped();
+    if ((result = idCheck(&symStack, name.str))) 
+        return result;
     if (token.type == T_ASSING) {
-        if ((result = checkDefinition(&symStack, name.str))) 
-            return result;
         getTokenWrapped();
         int expType;
         result = expression(&expType);
         if (result == 0)
-            setType(&symStack, name.str, expType);
+            idCheckType(&symStack, name.str, expType);
         return result;
     } else if (token.type == T_OP_PAR) {
         return funCall();
@@ -183,12 +188,15 @@ int funDefPlist() {
         getTokenWrapped();
         return funDefType();
     } else if(token.type == T_ID || token.type == T_UNDER) {
+        str_copy_string(&arg_name, &token.content);
         getTokenWrapped();
         if(token.type == T_ID || token.type == T_UNDER) {
+            str_copy_string(&arg_id, &token.content);
             getTokenWrapped();
             if (token.type == T_COLON) {
                 getTokenWrapped();
                 if (typeCheck()) {
+                    
                     getTokenWrapped();
                     return funDefItem();
                 }
@@ -200,9 +208,11 @@ int funDefPlist() {
 
 int funDef() {
     getTokenWrapped();
-    if (token.type == T_ID) {
+    if (token.type == T_ID) {   
+        str_copy_string(&name, &(token.content)); //save id
         getTokenWrapped();
         if(token.type == T_OP_PAR) {
+            
             getTokenWrapped();
             return funDefPlist();
         }
@@ -376,9 +386,27 @@ int localParse () {
     return printErrorAndReturn("Syntax error has occured in localParse", SYNTAX_ERR);
 }
 
+int first_analyse() {
+    while (token.type != T_EOF)
+    {
+        if (token.type == T_FUNC) {
+            funDef();
+        } else {
+            getTokenWrapped();
+        } 
+    }
+    if (fseek(stdin, 0L, SEEK_SET)) {
+        perror("stdin");
+        return(EXIT_FAILURE);
+    }
+    set_source(stdin);
+}
+
 int main() {
         str_init(&token.content);
         str_init(&name);
+        str_init(&arg_name);
+        str_init(&arg_id);
         symtable_stack_init(&symStack);
         symtable_stack_push(&symStack);
         getTokenWrapped();
@@ -387,6 +415,8 @@ int main() {
         symtable_stack_free(&symStack);
         str_free(&token.content);
         str_free(&name);
+        str_free(&arg_name);
+        str_free(&arg_id);
         if (result){
             fprintf(stderr,"exit code in main is %d\n",result);
             exit(result);

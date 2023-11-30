@@ -52,6 +52,7 @@ typedef enum {
     ET_INTN,
     ET_DOUBLEN,
     ET_STRINGN,
+    ET_NIL,
     ET_UNDEFINED = 95,
 } ET_TYPE;
 

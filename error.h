@@ -9,7 +9,8 @@
 #define SEM_ERR_UNDEFINED_VAR           5
 #define SEM_ERR_WRONG_RET               6
 #define SEM_ERR_TYPE_COMPAT             7
-#define SEM_ERR_OTHER                   8
+#define SEM_ERR_TYPE_GETTING            8
+#define SEM_ERR_OTHER                   9
 #define ERROR_INTERNAL                  99
 
 int printErrorAndReturn(char * text, int code);
