@@ -1,3 +1,3 @@
 func main() {
-    var amount: Double = .1234  // Lexical error: Misplaced decimal point in a floating-point literal
+    var text : String = "Line1 \g Line2"  // Lexical error: '\g' is not a valid escape sequence
 }

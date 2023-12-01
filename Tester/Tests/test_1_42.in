@@ -1,1 +1,0 @@
-var +speed: Int = 60  // Lexical error: Plus '+' sign used incorrectly in variable declaration

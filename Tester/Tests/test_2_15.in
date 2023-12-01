@@ -1,0 +1,2 @@
+x : Int let = 20
+// Variable declaration with misplaced let

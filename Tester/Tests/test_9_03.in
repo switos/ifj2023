@@ -1,0 +1,6 @@
+let x : Int = 3
+if (x > 5) {
+    let y = 10
+}
+let result = y + 5
+// 'y' is used outside of its scope

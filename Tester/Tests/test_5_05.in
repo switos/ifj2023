@@ -1,0 +1,5 @@
+func getValue() -> Int {
+    let num : Int
+    return num
+}
+// 'num' is uninitialized

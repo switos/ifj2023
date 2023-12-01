@@ -1,0 +1,55 @@
+func calculate(a : Int, b : Int) -> Int {
+    return a + b
+}
+func calculate(a : Int, b : Int) -> Int {
+    return a * b
+}
+// Redefinition of 'calculate'
+
+# END OF TEST #
+return 5
+// Return statement not inside a function
+
+# END OF TEST #
+func checkPositive(num : Int) -> Int {
+    if (num > 0) {
+        return 1
+    }
+}
+// Missing return statement for when condition is false
+
+# END OF TEST #
+let x : Int = 3
+if (x > 5) {
+    let y = 10
+}
+let result = y + 5
+// 'y' is used outside of its scope
+
+# END OF TEST #
+let constant : Int = 10
+constant = 15
+// Trying to change a constant value
+
+# END OF TEST #
+let x : Int = 10
+let result = x(5)
+// Incorrectly using 'x' as if it were a function
+
+# END OF TEST #
+var str : String = "Hello"
+str = 100
+// Assigning an integer to a string variable
+
+# END OF TEST #
+let x = 5
+let x = 10
+// Illegal shadowing
+
+# END OF TEST #
+while (let x : Int = 5) {
+    // Some code
+}
+// Incorrect use of 'let' in a while condition
+
+# END OF TEST #

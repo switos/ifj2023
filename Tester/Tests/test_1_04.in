@@ -1,4 +1,1 @@
-func main() {
-    var text: String = "Hello World  // Lexical error: Missing closing quotation mark
-    write(text)
-}
+var number.. : Int = 10  // Lexical error: Consecutive dots '..' are not a valid token

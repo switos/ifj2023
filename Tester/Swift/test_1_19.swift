@@ -1,3 +1,0 @@
-func main() {
-    var char: String = "\u{1Z34}"  // Lexical error: 'Z' is not valid in a Unicode escape sequence
-}

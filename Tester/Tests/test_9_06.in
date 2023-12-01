@@ -1,0 +1,3 @@
+var str : String = "Hello"
+str = 100
+// Assigning an integer to a string variable

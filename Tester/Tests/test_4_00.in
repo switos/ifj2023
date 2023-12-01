@@ -1,0 +1,5 @@
+func sum(a : Int, b : Int) -> Int {
+    return a + b
+}
+let result = sum(5)
+// Only one parameter provided instead of two

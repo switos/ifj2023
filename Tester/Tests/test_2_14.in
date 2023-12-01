@@ -1,0 +1,2 @@
+func calculate(a: Int, b: Int) -> Int
+// Function declared without a body

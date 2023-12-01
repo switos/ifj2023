@@ -1,0 +1,33 @@
+let result = x + 5
+// 'x' is not defined
+
+# END OF TEST #
+let x : Int
+let result = x + 5
+// 'x' is declared but not initialized
+
+# END OF TEST #
+func calculate() -> Int {
+    return a + 10
+}
+// 'a' is not defined in the function scope
+
+# END OF TEST #
+let x : Int
+if (x > 0) {
+    let y = x + 1
+}
+// 'x' is uninitialized
+
+# END OF TEST #
+let y = unknownVar * 2
+// 'unknownVar' is not declared
+
+# END OF TEST #
+func getValue() -> Int {
+    let num : Int
+    return num
+}
+// 'num' is uninitialized
+
+# END OF TEST #

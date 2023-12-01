@@ -1,0 +1,37 @@
+func sum(a : Int, b : Int) -> Int {
+    return a + b
+}
+let result = sum(5)
+// Only one parameter provided instead of two
+
+# END OF TEST #
+func multiply(a : Int, b : Int) -> Int {
+    return a * b
+}
+let result = multiply("3", b : 4)
+// Passing a string instead of an int for 'a'
+
+# END OF TEST #
+func getMax(a : Int, b : Int) -> Int {
+    if a > b {
+        return a
+    }
+    return "b"
+}
+// Returning a string instead of an int
+
+# END OF TEST #
+func getFlag() -> String {
+    return 1
+}
+// Returning an int instead of a string
+
+# END OF TEST #
+let name : String = "IFJ23"
+func processNumber(num : Int) -> Int {
+    return num * 2
+}
+let result = processNumber(name)
+// Passing a string to a function expecting an int
+
+# END OF TEST #

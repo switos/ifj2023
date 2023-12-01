@@ -1,0 +1,132 @@
+let num : Int# = 5 // Appending invalid character to a type identifier
+
+# END OF TEST #
+let maybeString : String?? = nil // Incorrectly formatted optional type
+
+# END OF TEST #
+let str : String = "Invalid sequence \m here" // Including invalid escape sequences in strings for specific types
+
+# END OF TEST #
+var příklad : Int = 5  // Lexical error: Non-ASCII characters in the identifier 'příklad'
+
+# END OF TEST #
+var number.. : Int = 10  // Lexical error: Consecutive dots '..' are not a valid token
+
+# END OF TEST #
+var @name : String = "IFJ23"  // Lexical error: At-symbol '@' is not valid at the beginning of an identifier
+
+# END OF TEST #
+var value : Int = 123.  // Lexical error: Misplaced decimal point at the end of an integer
+
+# END OF TEST #
+var text : String = "Hello, \xWorld"  // Lexical error: Unrecognized escape sequence '\x'
+
+# END OF TEST #
+var result : Int = 5 ## 3  // Lexical error: '##' is not a recognized symbol in IFJ23
+
+# END OF TEST #
+var color : Int = 0xZZ123  // Lexical error: Invalid characters 'ZZ' in a hexadecimal literal
+
+# END OF TEST #
+var 9number : Int = 10  // Lexical error: Identifier starting with a digit '
+
+# END OF TEST #
+var item;Name : String = "Widget"  // Lexical error: Semicolon ';' used within an identifier
+
+# END OF TEST #
+var path : String = "C:\Program Files"  // Lexical error: Backslash '\' used without an escape sequence
+
+# END OF TEST #
+var 4x4wheel : Int = 4  // Lexical error: Identifier starting with a digit followed by alphabetic characters
+
+# END OF TEST #
+func main() {
+    var value : Int = 12a4  // Lexical error: '12a4' is not a valid number literal
+    write(value)
+}
+
+# END OF TEST #
+func main() {
+    var _count : Int = 5
+    write(_c@unt)  // Lexical error: '_c@unt' contains an invalid character '@'
+}
+
+# END OF TEST #
+func main() {
+    var value : Int = 10
+    write(val$ue)  // Lexical error: 'val$ue' contains an invalid character '$'
+}
+
+# END OF TEST #
+func main() {
+    var num : Double = 3.14.15  // Lexical error: '3.14.15' is not a valid floating-point literal
+}
+
+# END OF TEST #
+func main() {
+    var data_value : Int = 10
+    write(data#value)  // Lexical error: 'data#value' contains an invalid character '#'
+}
+
+# END OF TEST #
+func main() {
+    var count : Int = 01abc  // Lexical error: '01abc' is not a valid number literal
+}
+
+# END OF TEST #
+func main() {
+    var 2count : Int = 10  // Lexical error: '2count' starts with a digit
+}
+
+# END OF TEST #
+func main() {
+    var text : String = "Line1 \g Line2"  // Lexical error: '\g' is not a valid escape sequence
+}
+
+# END OF TEST #
+func main() {
+    var text : String = "Hello, \ "  // Lexical error: Incomplete escape sequence '\ '
+}
+
+# END OF TEST #
+func main() {
+    var num : Double = 1.5e  // Lexical error: Incomplete exponent 'e' in floating-point literal
+}
+
+# END OF TEST #
+func main() {
+    var color : Int = 0xG1AB  // Lexical error: 'G' is not a valid hexadecimal character
+}
+
+# END OF TEST #
+func main() {
+    var sum : Int = 5 ^^ 3  // Lexical error: '^^' is an unrecognized operator in IFJ23
+}
+
+# END OF TEST #
+func main() {
+    var char : String = "\u{1Z34}"  // Lexical error: 'Z' is not valid in a Unicode escape sequence
+}
+
+# END OF TEST #
+func main() {
+    var amount : Double = .1234  // Lexical error: Misplaced decimal point in a floating-point literal
+}
+
+# END OF TEST #
+func calculate(1num : Int, 2num : Int) -> Int {  // Lexical error: Parameter names start with digits
+    return 1num + 2num
+}
+
+# END OF TEST #
+#include <stdio.h>  // Lexical error: Preprocessor directives are not part of IFJ23
+
+# END OF TEST #
+let x : Int = 10
+let y : Int = 10
+if (x > && y < 10) {
+    let z = x + y
+}
+// Using incorrect operators or malformed logic in conditions
+
+# END OF TEST #

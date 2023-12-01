@@ -1,0 +1,1 @@
+let stringVar : string = "IFJ23" // 'string' should be 'String'

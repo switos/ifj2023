@@ -1,1 +1,6 @@
-var text: String = "Hello, \xWorld"  // Lexical error: Unrecognized escape sequence '\x'
+let x : Int = 10
+let y : Int = 10
+if (x > && y < 10) {
+    let z = x + y
+}
+// Using incorrect operators or malformed logic in conditions

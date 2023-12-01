@@ -1,0 +1,4 @@
+while (let x : Int = 5) {
+    // Some code
+}
+// Incorrect use of 'let' in a while condition

@@ -1,0 +1,2 @@
+let result : Int = 3 * "Hello"
+// Multiplying a string by an integer

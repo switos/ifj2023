@@ -1,0 +1,1 @@
+var status : Int = nil;! // Lexical error: Invalid punctuation combination ';!'

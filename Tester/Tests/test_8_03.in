@@ -1,0 +1,3 @@
+let condition : Int = 1
+let x = condition ?? "String" : 100
+// Cannot infer if 'x' is a String or an Int

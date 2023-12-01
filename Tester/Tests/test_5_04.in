@@ -1,0 +1,2 @@
+let y = unknownVar * 2
+// 'unknownVar' is not declared

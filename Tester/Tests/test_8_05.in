@@ -1,0 +1,2 @@
+let sum = a + b
+// If 'a' and 'b' do not have specified types

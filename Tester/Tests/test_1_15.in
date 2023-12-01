@@ -1,3 +1,4 @@
 func main() {
-    var price: Double = 99,99  // Lexical error: Comma ',' used instead of period '.' in decimal number
+    var _count : Int = 5
+    write(_c@unt)  // Lexical error: '_c@unt' contains an invalid character '@'
 }

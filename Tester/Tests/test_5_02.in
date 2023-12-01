@@ -1,0 +1,4 @@
+func calculate() -> Int {
+    return a + 10
+}
+// 'a' is not defined in the function scope

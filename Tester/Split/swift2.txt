@@ -1,0 +1,169 @@
+{
+    let x : Int = 10
+    return x
+}
+// A function without a proper header
+
+# END OF TEST #
+func add a : Int, b : Int -> Int {
+    return a + b
+}
+// Function declared without parentheses around parameters
+
+# END OF TEST #
+let x : Int = 10
+if x > 5 
+    let y = x
+// An if statement without parentheses around the condition
+
+# END OF TEST #
+let x : Int = 1
+while (x < 5) 
+    x = x + 1
+// A while loop with incorrect syntax
+
+# END OF TEST #
+let x
+// Variable declaration missing a type or initialization
+
+# END OF TEST #
+func add(a : Int, b : Int) -> Int {
+    return a + b
+// Mismatched or missing braces in function bodies or control structures
+
+# END OF TEST #
+let x = (5 + - * 2)
+// Incorrect operator usage or malformed expressions
+
+# END OF TEST #
+let x : = 10
+// Assigning a value using an incorrect syntax
+
+# END OF TEST #
+let x : Int = 10
+if (x > 5) {
+    let y = x
+else {
+    let y = 0
+}
+// Using braces incorrectly in if-else statements
+
+# END OF TEST #
+func divide(a : Int b : Int) -> Int {
+    return a / b
+}
+// Comma missing between function parameters
+
+# END OF TEST #
+let while : Int = 10
+// Using a keyword in an inappropriate context
+
+# END OF TEST #
+let x : Int = 10
+while {
+    x = x + 1
+}
+// Incorrect while loop syntax, such as missing condition
+
+# END OF TEST #
+let result = 5 + * 3
+// Using operators inappropriately or in the wrong order
+
+# END OF TEST #
+let x : Int = (5 + (3 * 2)
+// Unbalanced parentheses in expressions or statements
+
+# END OF TEST #
+func calculate(a: Int, b: Int) -> Int
+// Function declared without a body
+
+# END OF TEST #
+x : Int let = 20
+// Variable declaration with misplaced let
+
+# END OF TEST #
+let x : Int = 11
+if (x > 10) x = x + 1
+// An if statement without a required block
+
+# END OF TEST #
+let x : Int = 2
+let y : Int = 1
+if (x > 0) {
+    while y < x {
+        y = y + 1
+    }
+}
+// Nested loops or conditionals with incorrect syntax
+
+# END OF TEST #
+let stringVar : string = "IFJ23" // 'string' should be 'String'
+
+# END OF TEST #
+let customType : MyType = nil // 'MyType' is not a valid IFJ23 type
+
+# END OF TEST #
+let complex : Double Int = 5.0 // Mixing two types in a declaration
+
+# END OF TEST #
+Int let : number = 5 // Misplacing the type qualifier in variable declarations
+
+# END OF TEST #
+var time :: Int = 10  // Lexical error: Double colons '::' are not a valid token
+
+# END OF TEST #
+var danger!Level : Int = 5  // Lexical error: Exclamation mark '!' is not valid in an identifier
+
+# END OF TEST #
+var number : Int = 123e+4z5  // Lexical error: Invalid character 'z' in a numeric literal
+
+# END OF TEST #
+var status : Int = nil;! // Lexical error: Invalid punctuation combination ';!'
+
+# END OF TEST #
+var total/amount : Int = 100  // Lexical error: Slash '/' is not valid in an identifier
+
+# END OF TEST #
+var +speed : Int = 60  // Lexical error: Plus '+' sign used incorrectly in variable declaration
+
+# END OF TEST #
+func main() {
+    var hello-world : Int = 5  // Lexical error: 'hello-world' contains a hyphen
+}
+
+# END OF TEST #
+func main() {
+    var my*Var : Int = 7  // Lexical error: 'my*Var' contains an invalid character '*'
+}
+
+# END OF TEST #
+func main() {
+    var price : Double = 99,99  // Lexical error: Comma ',' used instead of period '.' in decimal number
+}
+
+# END OF TEST #
+func main() {
+    var result/value : Int = 10  // Lexical error: Slash '/' is not valid in an identifier
+}
+
+# END OF TEST #
+func main() {
+    var count : Int = 10
+    while count > 0 {
+        write(cou#nt) // Lexical error: 'cou#nt' contains an invalid character '#'
+        count -= 1
+    }
+}
+
+# END OF TEST #
+func setNumber(num : In$t) {  // Lexical error: 'In$t' contains an invalid character '$'
+    // Function body
+}
+
+# END OF TEST #
+fun getMax(a : Int) -> Int {
+    return a
+}
+// 'fun' instead of 'func'
+
+# END OF TEST #

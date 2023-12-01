@@ -1,0 +1,2 @@
+let name : String = "Age: " + 30
+// Concatenating string with an integer

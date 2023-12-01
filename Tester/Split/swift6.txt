@@ -1,0 +1,25 @@
+func sum(a : Int, b : Int) -> Int {
+    return
+}
+// Missing expression in return statement
+
+# END OF TEST #
+func printMessage() {
+    return "Message"
+}
+// Return expression in a void function
+
+# END OF TEST #
+func getMax(a : Int, b : Int) -> Int {
+    return a, b
+}
+// Multiple expressions in return statement
+
+# END OF TEST #
+func getNumber() -> Int {
+    // Some code here
+    return
+}
+// Empty return in a function that should return an int
+
+# END OF TEST #
