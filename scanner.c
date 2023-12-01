@@ -11,13 +11,25 @@ char symbol;
  * @return true 
  * @return false 
  */
-bool isType(token_t * token) {
+bool isType(token_t * token, bool qFlag) {
     if (!str_cmp_const_str(&token->content, "Double")) {
-        token->type = T_DOUBLE;
+        if (qFlag) {
+            token->type = T_DOUBLEN;
+        } else {
+            token->type = T_DOUBLE;
+        }
     } else if (!str_cmp_const_str(&token->content, "String")) {
-        token->type = T_STRING;
+        if (qFlag) {
+            token->type = T_STRINGN;
+        } else {
+            token->type = T_STRING;
+        }
     }  else if (!str_cmp_const_str(&token->content, "Int")) {
-        token->type = T_INT;
+        if (qFlag) {
+            token->type = T_INTN;
+        } else {
+            token->type = T_INT;
+        }
     } else {
         return false;
     }
@@ -32,7 +44,7 @@ bool isType(token_t * token) {
  * @return false 
  */
 bool isKeyword(token_t * token) {
-    if (isType(token)) {
+    if (isType(token, false)) {
         return true;
     }
 
@@ -91,6 +103,9 @@ bool isCommi() {
                     } else {
                         ungetc(symbol, stdin);
                     }
+                }
+                if (symbol == EOF) {
+                    return false;
                 }
             }
             return true;
@@ -223,7 +238,7 @@ int identifierState(token_t * token) {
         symbol = getc(stdin);
         return identifierState(token);
     } else if (symbol == '?') {
-        if (isType(token)) {
+        if (isType(token, true)) {
             symbol = getc(stdin);
             if (isAcc()) {
                 return NO_ERR;
@@ -404,6 +419,7 @@ int floatExpState(token_t * token) {
  */
 int oneQuoteState(token_t * token) {
     if (symbol == '\"') {
+        // fprintf(stderr, "second\n");
         symbol = getc(stdin);
         return twoQuotesStringState(token);
     } else if (symbol > 31) {
@@ -450,23 +466,19 @@ int hex(token_t * token) {
             return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
         }
         symbol = getc(stdin);
-        if (isxdigit(symbol)) {
+        while (isxdigit(symbol)) {
             if (!str_add_char(&token->content, symbol)) {
                 return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
             }
             symbol = getc(stdin);
-            if (isxdigit(symbol)) {
+            if (symbol == '}') {
                 if (!str_add_char(&token->content, symbol)) {
                     return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
                 }
-                symbol = getc(stdin);
-                if (symbol == '}') {
-                    if (!str_add_char(&token->content, symbol)) {
-                        return printErrorAndReturn("Enternal error in escapeAllowed in scanner", ERROR_INTERNAL);
-                    }
-                    symbol = getc(stdin);
-                    return NO_ERR;
-                }
+                // fprintf(stderr, "first symbol : %c\n", symbol);
+                // symbol = getc(stdin);
+                // fprintf(stderr, "second symbol : %c\n", symbol);
+                return NO_ERR;
             }
         }
     }
@@ -495,7 +507,7 @@ int stringState(token_t * token) {
         return stringState(token);
     } else if (symbol == '\"') {
         symbol = getc(stdin);
-        fprintf(stderr, "Success, string content is %s\n", token->content.str);
+        fprintf(stderr, "Success, string content is @@%s@@\n", token->content.str);
         token->type = T_STRING_LIT;
         return NO_ERR; // success, return the string, clean buffer 
     } else {
@@ -515,8 +527,10 @@ int twoQuotesStringState(token_t * token) {
         token->type = T_STRING_LIT;
         return NO_ERR; // success, return the empty string, clean buffer 
     } else if (symbol == '\"') {
+        // fprintf(stderr, "third\n");
         symbol = getc(stdin);
         if (symbol == '\n') { // we should check if it's multiline string (starts with 3 quotes and new line)
+            // fprintf(stderr, "fourth\n");
             symbol = getc(stdin);
             return multilineStringState(token);
         } else {
@@ -528,14 +542,21 @@ int twoQuotesStringState(token_t * token) {
 /**
  * @brief helper function to make sure this is the end of multiline string
  * 
- * @return char* saved content of original string (in case if it's not the end)
+ * @return char* saves content of original string (in case if it's not the end)
  */
 void endOfMultilineStringDetector(char* temp) {
+    // fprintf(stderr, "fifth\n");
     temp[0] = symbol;
     for (int i = 0; i < 3; i++) {
         symbol = getc(stdin);
+        while(isspace(symbol)) {
+            // fprintf(stderr, "zigagiga\n");
+            symbol = getc(stdin);
+        }
+        // fprintf(stderr, "cur2 symbol : %c\n", symbol);
         temp[i+1] = symbol;
         if (symbol != '\"') { // if symbol is not quote, then we can put value of parsed part into main string token
+            // fprintf(stderr, "sixth\n");
             if (symbol == '\n') {
                 ungetc(symbol, stdin);
                 temp[i+1] = '\0';
@@ -558,6 +579,7 @@ void endOfMultilineStringDetector(char* temp) {
  * @return int 
  */
 int multilineStringState(token_t * token) {
+    fprintf(stderr, "cur symbol : %c\n", symbol);
     char temp[6];   // we need this variable to store content of the original string from stream in case of repeating quotes 
                     // (either final of string or error if 3 quotes are without '\n')
     temp[0] = '\0';
@@ -565,7 +587,7 @@ int multilineStringState(token_t * token) {
         if (symbol == '\"') { // if quote detected, we need to check if we have 3 quotes in order without new line, this means lexical error
             endOfMultilineStringDetector(temp);
             if (temp[0] == '\"' && temp[1] == '\"' && temp[2] == '\"') {
-                return printErrorAndReturn("Lexical error in multilineStringState in scanner", LEX_ERR);
+                return printErrorAndReturn("First lexical error in multilineStringState in scanner", LEX_ERR);
             } else {
                 if (!str_add_more_chars(&token->content, temp))
                     return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
@@ -583,13 +605,14 @@ int multilineStringState(token_t * token) {
                 return printErrorAndReturn("Enternal error in multilineStringState in scanner during copy", ERROR_INTERNAL);
             return multilineStringState(token);
         } else {
+            // fprintf(stderr, "aboba\n");
             symbol = getc(stdin);
-            if (symbol == '\n' || symbol == EOF) {
+            if (isAcc()) {
                 fprintf(stderr, "Success, multistring content is @@%s@@\n", token->content.str);
                 token->type = T_STRING_LIT;
                 return NO_ERR; // success, return the string, clean buffer 
             } else {
-                return printErrorAndReturn("Lexical error in multilineStringState in scanner after final 3 quotes", LEX_ERR);
+                return printErrorAndReturn("Second lexical error in multilineStringState in scanner after final 3 quotes", LEX_ERR);
             }
         }
     }
@@ -633,6 +656,7 @@ int startState(token_t * token) {
         symbol = getc(stdin);
         return intState(token);
     } else if (symbol == '\"') {
+        // fprintf(stderr, "first\n");
         symbol = getc(stdin);
         return oneQuoteState(token);
     } else if (symbol == EOF) {
@@ -640,7 +664,7 @@ int startState(token_t * token) {
         fprintf(stderr, "Success, EOF is found\n");
     } else if (symbol == '/') {
         if (isCommi()) {
-            startState(token);
+            return startState(token);
         } else {
             if (isOper(token)) {
                 symbol = getc(stdin);
@@ -654,6 +678,7 @@ int startState(token_t * token) {
             symbol = getc(stdin);
             return NO_ERR;
         }
+        // fprintf(stderr, "last symbol : %c\n", symbol);
         return printErrorAndReturn("Lexical error in startState in scanner (last else)", LEX_ERR);
     }
     return NO_ERR;

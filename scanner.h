@@ -19,7 +19,7 @@ int multilineStringState(token_t * token);
 int oneQuoteState(token_t * token);
 void endOfMultilineStringDetector(char * temp);
 bool isKeyword(token_t * token);
-bool isType(token_t * token);
+bool isType(token_t * token, bool qFlag);
 bool isAcc();
 bool isCommi();
 bool isOper(token_t * token);
