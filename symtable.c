@@ -126,9 +126,8 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
 }
 
 bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type) {
-    if(func->argumentAmount <= 0 || func->argumentsInArray >= func->argumentAmount) {
-        return false;
-    }
+
+
     int pos = func->argumentsInArray;
     
     func->param[pos] = (data_param_t*)malloc(sizeof(data_param_t));
@@ -156,8 +155,19 @@ bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int
     strcpy(func->param[pos]->name, name);
     
     func->argumentsInArray++;
-    
+    func->argumentAmount = func->argumentsInArray;
+
     return true;
+}
+
+data_param_t* symtable_get_argument(symtable_t* table, char* key, int argumentPosition) {
+    htab_data_t* func_data = symtable_search(table, key);
+
+    if (func_data == NULL || argumentPosition < 0 || argumentPosition >= func_data->argumentAmount) {
+        return NULL;  // Invalid arguments or function not found.
+    }
+
+    return (func_data->param[argumentPosition]);
 }
 
 htab_data_t* symtable_search(symtable_t* table, char* key) {
@@ -183,6 +193,20 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
     } while(index != original_index);
 
     return NULL;
+}
+
+symtable_t* symtable_get_global(symtable_stack_t* stack) {
+    if (stack == NULL || stack->top == NULL) {
+        return NULL;  // Stack is empty.
+    }
+
+    stack_level_t* current = stack->top;
+
+    while (current->prev != NULL) {
+        current = current->prev;  // Move to the previous level in the stack.
+    }
+
+    return current->table;
 }
 
 void symtable_set_nil (symtable_t* table, char* key, bool nil) {

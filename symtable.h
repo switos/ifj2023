@@ -62,6 +62,8 @@ void symtable_free (symtable_t* table);
 
 htab_data_t* symtable_search (symtable_t* table, char* key);
 
+symtable_t* symtable_get_global(symtable_stack_t* stack);
+
 void symtable_set_nil (symtable_t* table, char* key, bool nil);
 
 void symtable_stack_init (symtable_stack_t* stack);

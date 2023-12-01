@@ -425,6 +425,7 @@ int oneQuoteState(token_t * token) {
     } else if (symbol > 31) {
         return stringState(token);
     }
+    return printErrorAndReturn("Lexical error in oneQuoteState", LEX_ERR);
 }
 
 int escapeAllowed(token_t * token) {
@@ -537,7 +538,9 @@ int twoQuotesStringState(token_t * token) {
             return printErrorAndReturn("Lexical error in twoQuotesStringState in scanner after starting 3 quotes", LEX_ERR);
         }
     }
+    return printErrorAndReturn("Lexical error in twoQuotesStringState in scanner", LEX_ERR);
 }
+
 
 /**
  * @brief helper function to make sure this is the end of multiline string
@@ -616,6 +619,7 @@ int multilineStringState(token_t * token) {
             }
         }
     }
+    return printErrorAndReturn("Second lexical error in multilineStringState in scanner after final 3 quotes", LEX_ERR);
 }
 
 /**

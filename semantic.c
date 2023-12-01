@@ -2,19 +2,19 @@
 
 
 int TypeMap(int type, int exp) {
-    switch (type-4)
+    switch (type)
     {
     case ET_DOUBLE:
     case ET_INT:
     case ET_STRING:
-        if(type != exp+4){
+        if(type != exp){
             return 1;
         }
         return 0;
     case ET_DOUBLEN:
     case ET_INTN:
     case ET_STRINGN:
-        if(type != exp+4 && type-3 != exp+4) { //&& exp != ET_NIL
+        if(type != exp && type-3 != exp) { //&& exp != ET_NIL
             return 1;
         }
         return 0;
@@ -24,18 +24,69 @@ int TypeMap(int type, int exp) {
     }
 }
 
-int funAddArgument(symtable_stack_t *symStack, char *name, char *argname, char *argid, int type) {
+
+
+
+int zeroArgsCheck(symtable_stack_t *symStack, char *name) {
     htab_data_t *data = symtable_stack_search(symStack, name);
-    if (data == NULL)
-        return printErrorAndReturn("Semantic error occured in funDefiner", SEM_ERR_UNDEFINED_FUNCTION);
-    symtable_add_arguments(data, argname, argid, type);
+    if (data == NULL) {
+        return printErrorAndReturn("Enternal error in Check argument", ERROR_INTERNAL);
+    }
+    if (data->argumentsInArray != 0) {
+        return printErrorAndReturn("Wrong number of arguments", SEM_ERR_WRONG_PARAM);
+    }
+    return NO_ERR;
 }
 
-funDefiner(symtable_stack_t *symStack, int type, char *name) {
+int checkArgument(symtable_stack_t *symStack, char *name, char *argName, int type, int number) {
+    symtable_t *table = symtable_get_global(symStack);
+    if (table == NULL) {
+        return printErrorAndReturn("Enternal error in Check argument", ERROR_INTERNAL);
+    }
+    
+    data_param_t *argument = symtable_get_argument(table, name, number);
+    if(argument == NULL ) {
+        return printErrorAndReturn("Wrong number of arguments", SEM_ERR_WRONG_PARAM);
+    }
+
+    if (strcmp(argument->name, argName)) {
+        return printErrorAndReturn("Wrong name of argument", SEM_ERR_OTHER);
+    }
+
+    if (TypeMap(argument->type, type)) {
+        return printErrorAndReturn("Wrong type of argument", SEM_ERR_WRONG_PARAM);
+    }
+
+
+    return NO_ERR;
+}
+
+int setType(symtable_stack_t *symStack, char *name, int type) {
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
-        symtable_insert_data(symStack->top->table, name, type, name, false, false, -2);
-    else {
+        return printErrorAndReturn("Semantic error occured in SetType", SEM_ERR_UNDEFINED_FUNCTION);
+    data->type = type;
+    return NO_ERR;
+}
+
+int funAddArgument(symtable_stack_t *symStack, char *name, char *argName, char *argId, int type) {
+    htab_data_t *data = symtable_stack_search(symStack, name);
+    if (data == NULL)
+        return printErrorAndReturn("Semantic error occured in SetType", SEM_ERR_UNDEFINED_FUNCTION);
+    if (data->initialized == false) { 
+        if ( !(symtable_add_arguments(data, argName, argId, type)) ) {
+            fprintf(stderr, "Add arguments do not work\n");
+        }
+    }
+    return NO_ERR;
+}
+
+int funDefiner(symtable_stack_t *symStack, int type, char *name) {
+    htab_data_t *data = symtable_stack_search(symStack, name);
+    if (data == NULL){
+        symtable_insert_data(symStack->top->table, name, type, name, false, false, 10);
+        return NO_ERR;
+    } else {
         if (data->initialized == false ) {
             data->initialized = true;
             return NO_ERR;
@@ -49,10 +100,10 @@ int varDefiner(symtable_stack_t *symStack, int type, char* name, bool inicialize
     return 0;
 }
 
-int checkDefinition(symtable_stack_t *symStack, char* name ) {
+int checkDefinition(symtable_stack_t *symStack, char* name) {
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
-        return printErrorAndReturn("Undefined variable in Dedinition check", SEM_ERR_UNDEFINED_VAR);
+        return printErrorAndReturn("Undefined variable or function in Definition check", SEM_ERR_UNDEFINED_VAR);
     return 0;
 }
 
@@ -75,7 +126,7 @@ int mutableCheck(symtable_stack_t *symStack, char* name) {
 
 int idCheckType(symtable_stack_t *symStack, char* name, int type) {
     htab_data_t *data = symtable_stack_search(symStack, name);
-    if (TypeMap(data->type, type)) { 
+    if (TypeMap(data->type, type) == 0) { 
         data->initialized = true;
         return NO_ERR;
     }
@@ -108,4 +159,6 @@ int VarDefAssignSemanticCheck(int *type, int exp){
 
 }
 
-
+void buildInFunctionDefenition(){
+    
+}

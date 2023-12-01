@@ -46,14 +46,15 @@ typedef enum {
 } ES_SYMBOL;
 
 typedef enum { 
-    ET_INT = 15,
+    ET_INT = 18,
     ET_DOUBLE,
     ET_STRING,
     ET_INTN,
     ET_DOUBLEN,
     ET_STRINGN,
-    ET_NIL,
+    ET_NIL = 24,
     ET_UNDEFINED = 95,
+    ET_VOID,
 } ET_TYPE;
 
 typedef enum {
@@ -78,7 +79,7 @@ typedef enum {
 
 int getTypeFromToken(token_t* token, symtable_stack_t *symStack) {
     if(token->type >= T_INT_LIT && token->type <= T_STRING_LIT ) {
-        return token->type;
+        return token->type + 3;
     } else if (token->type == T_ID){
         return symtable_stack_search(symStack, token->content.str)->type;
     } else {
