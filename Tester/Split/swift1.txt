@@ -130,3 +130,9 @@ if (x > && y < 10) {
 // Using incorrect operators or malformed logic in conditions
 
 # END OF TEST #
+let str : String = Hello" // Not opened string
+
+# END OF TEST #
+let str : String = "Hello // Not closed string
+
+# END OF TEST #
