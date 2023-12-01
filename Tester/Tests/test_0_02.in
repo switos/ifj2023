@@ -1,0 +1,8 @@
+func printMessage(print m : String) {
+    write(m)
+}
+func main() -> Int {
+    let message : String = "Hello, World!"
+    printMessage(print : message)
+    return 0
+}
