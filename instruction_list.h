@@ -99,14 +99,14 @@ typedef struct {
 } operand_t;
 
 typedef struct {
-    operand_t operand_1;
-    operand_t operand_2;
-    operand_t result;
+    operand_t* operand_1;
+    operand_t* operand_2;
+    operand_t* result;
     instructions inst;
 } taCode;
 
 typedef struct DLLElement{
-    taCode data;
+    taCode* data;
     struct DLLElement *previousElement;
     struct DLLElement *nextElement;
 } *DLLElementPtr;
@@ -259,13 +259,6 @@ void DLL_Previous(DLList* list);
  * @return 0 if there is not active element 
  */
 int DLL_IsActive(DLList* list);
-
-/**
- * @brief initializing data for DLList
- * 
- * @param target pointer to the data
- */
-void init_data(taCode* target);
 
 /**
  * @brief setting value of the operand

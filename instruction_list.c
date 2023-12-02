@@ -104,7 +104,7 @@ void DLL_GetFirst( DLList *list, taCode *dataPtr ) {
 		return;
 	}
 	else {
-		*dataPtr = list->firstElement->data;
+		dataPtr = list->firstElement->data;
 	}
 }
 
@@ -113,7 +113,7 @@ void DLL_GetLast( DLList *list, taCode *dataPtr ) {
 		return;
 	}
 	else {
-		*dataPtr = list->lastElement->data;
+		dataPtr = list->lastElement->data;
 	}
 }
 
@@ -239,7 +239,7 @@ void DLL_GetValue( DLList *list, taCode *dataPtr ) {
 	if (list->activeElement == NULL) {
 		return;
 	} else {
-		*dataPtr = list->activeElement->data;
+		dataPtr = list->activeElement->data;
 	}
 }
 
@@ -268,16 +268,6 @@ int DLL_IsActive( DLList *list ) {
 	return (list->activeElement != NULL);
 }
 
-void init_data(taCode* target) {
-	if (target == NULL) {
-		return;
-	}
-
-	target->operand_1.value = NULL;
-	target->operand_2.value = NULL;
-	target->result.value = NULL;
-}
-
 bool set_operand_value(operand_t* target, char* source) {
 	if (target == NULL) {
 		return false;
@@ -290,7 +280,6 @@ bool set_operand_value(operand_t* target, char* source) {
 
 	target->value = (char*) malloc((strlen(source)+1) * __CHAR_BIT__);
 	strncpy(target->value, source, strlen(source) + 1);
-	// printf("TESTING BLYAT : %s\n", target->value);
 	return true;
 }
 
@@ -299,36 +288,34 @@ void free_data_value(taCode* target) {
 		return;
 	}
 
-	if (target->operand_1.value != NULL) {
-		free(target->operand_1.value);
+	if (target->operand_1->value != NULL) {
+		free(target->operand_1->value);
 	}
-	target->operand_1.value = NULL;
+	target->operand_1->value = NULL;
 
-	if (target->operand_2.value != NULL) {
-		free(target->operand_2.value);
+	if (target->operand_2->value != NULL) {
+		free(target->operand_2->value);
 	}
-	target->operand_2.value = NULL;
+	target->operand_2->value = NULL;
 
-	if (target->result.value != NULL) {
-		free(target->result.value);
+	if (target->result->value != NULL) {
+		free(target->result->value);
 	}
-	target->result.value = NULL;
+	target->result->value = NULL;
 }
 
 bool insert_data(taCode* target, taCode* source) {
 	*target = *source;
-	// printf("in insert_data\n");
 	
-	if (!set_operand_value(&target->operand_1, source->operand_1.value)) {
+	if (!set_operand_value(&target->operand_1, source->operand_1->value)) {
 		free_data_value(target);
 		return false;
 	}
-	// printf("target op 1 : %s\n", target->operand_1.value);
-	if (!set_operand_value(&target->operand_2, source->operand_2.value)) {
+	if (!set_operand_value(&target->operand_2, source->operand_2->value)) {
 		free_data_value(target);
 		return false;
 	}
-	if (!set_operand_value(&target->result, source->result.value)) {
+	if (!set_operand_value(&target->result, source->result->value)) {
 		free_data_value(target);
 		return false;
 	}
@@ -341,20 +328,20 @@ void clear_data(taCode* source) {
  		return;
  	}
 
-	source->result.frame = F_DEFAULT;
-	source->result.type = ET_UNDEFINED;
+	source->result->frame = F_DEFAULT;
+	source->result->type = ET_UNDEFINED;
 	// if (source->result.out.str != NULL) {
 	// 	str_free(&source->result.out);
 	// }
 
-	source->operand_1.frame = F_DEFAULT;
-	source->operand_1.type = ET_UNDEFINED;
+	source->operand_1->frame = F_DEFAULT;
+	source->operand_1->type = ET_UNDEFINED;
 	// if (source->operand_1.out.str != NULL) {
 	// 	str_free(&source->operand_1.out);
 	// }	
 
-	source->operand_2.frame = F_DEFAULT;
-	source->operand_2.type = ET_UNDEFINED;
+	source->operand_2->frame = F_DEFAULT;
+	source->operand_2->type = ET_UNDEFINED;
 	// if (source->operand_2.out.str != NULL) {
 	// 	str_free(&source->operand_2.out);
 	// }
