@@ -42,6 +42,7 @@ typedef enum {
     ES_END,
     ES_CATCH,
     ES_NONTER,
+    ES_NONTERL,
     ES_UNDEFINED,
 } ES_SYMBOL;
 
@@ -90,11 +91,9 @@ int getTypeFromToken(token_t* token, symtable_stack_t *symStack) {
 int getSymbolFromToken(token_t* token) {
     if(token->type < T_ID) {
         return token->type;
-
-    } else if (token->type <= T_ID) {
+    } else if (token->type == T_ID) {
         return ES_ID;
-    } 
-    else if (token->type <= T_NIL) {
+    } else if (token->type <= T_STRING_LIT && token->type >= T_INT_LIT) {
         return ES_LIT;
     } else {
         return ES_END;

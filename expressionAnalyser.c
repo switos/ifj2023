@@ -65,10 +65,10 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
                 }
             } else if (rule != R_DIV) {
                     if ( ((*top)->next->next->type == ET_DOUBLE && (*top)->type == ET_INT) || ((*top)->next->next->type ==  ET_INT && (*top)->type == ET_DOUBLE) ) {
-                        if((*top)->next->next->symbol == ES_LIT && (*top)->next->next->type == ET_INT) {
+                        if((*top)->next->next->symbol == ES_NONTERL && (*top)->next->next->type == ET_INT) {
                             (*type) = ET_DOUBLE;
                             return NO_ERR;
-                        } else if ((*top)->symbol == ES_LIT && (*top)->type == ET_INT) {
+                        } else if ((*top)->symbol == ES_NONTERL && (*top)->type == ET_INT) {
                             (*type) = ET_DOUBLE;
                             return NO_ERR;
                         }
@@ -86,9 +86,9 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
             if((*top)->next->next->type == (*top)->type) {
                 return NO_ERR;
             } else if ( ((*top)->next->next->type == ET_DOUBLE && (*top)->type == ET_INT) || ((*top)->next->next->type ==  ET_INT && (*top)->type == ET_DOUBLE) ) {
-                        if((*top)->next->next->symbol == ES_LIT && (*top)->next->next->type == ET_INT) {
+                        if((*top)->next->next->symbol == ES_NONTERL && (*top)->next->next->type == ET_INT) {
                             return NO_ERR;
-                        } else if ((*top)->symbol == ES_LIT && (*top)->type == ET_INT) {
+                        } else if ((*top)->symbol == ES_NONTERL && (*top)->type == ET_INT) {
                             return NO_ERR;
                         }
             }
@@ -98,10 +98,20 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
         case R_G:
         case R_LEQ:
         case R_GEQ:
-            if( ((*top)->next->next->type == (*top)->type) && ( ( (*top)->next->next->type < ET_INTN ) && ( (*top)->type < ET_INTN ) ) ) {
+            // if( ((*top)->next->next->type == (*top)->type) && ( ( (*top)->next->next->type < ET_INTN ) && ( (*top)->type < ET_INTN ) ) ) {
+            //     return NO_ERR;
+            // }
+            fprintf(stderr, "fisrt type is %d symbol is %d, second is %d symbol is %d\n",(*top)->next->next->type, (*top)->next->next->symbol, (*top)->type, (*top)->symbol);
+            if((*top)->next->next->type == (*top)->type) {
                 return NO_ERR;
+            } else if ( ((*top)->next->next->type == ET_DOUBLE && (*top)->type == ET_INT) || ((*top)->next->next->type ==  ET_INT && (*top)->type == ET_DOUBLE) ) {
+                        if((*top)->next->next->symbol == ES_NONTERL && (*top)->next->next->type == ET_INT) {
+                            return NO_ERR;
+                        } else if ((*top)->symbol == ES_NONTERL && (*top)->type == ET_INT) {
+                            return NO_ERR;
+                        }
             }
-            return printErrorAndReturn("Semantic error occured while reducing rule", SEM_ERR_TYPE_COMPAT);
+            return printErrorAndReturn("Semantic error occured while reducing rule R_L", SEM_ERR_TYPE_COMPAT);
             break;
         case R_UNAR:
             if ((*top)->next->type >= T_DOUBLEN && (*top)->next->type <= T_STRINGN)
@@ -117,8 +127,10 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
 
 int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type){
     int rule;
+    int symbol = ES_NONTER;
     if ((*cnt) == 1) {
         if((*top)->symbol == ES_ID || (*top)->symbol == ES_LIT){
+            symbol = (*top)->symbol+4; // ES_NONTER OR ES_NONTERML
             rule = R_ID;
             fprintf(stderr,"Id rule is parsed\n");
         } else {
@@ -150,7 +162,7 @@ int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type){
         for(int i = 0; i <= (*cnt); i++){
             prcStackPop(top);
         }
-        prcStackPush(top, ES_NONTER, (*type));
+        prcStackPush(top, symbol, (*type));
         return NO_ERR;
     }
 
@@ -202,7 +214,6 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp, int *type, symtable_sta
             tokenExpr = &endToken;
             break;
         }
-        fprintf(stderr,"%d\n%d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
     } while (((getSymbolFromToken(tokenExpr) != ES_END) || (prcStackGetTerminal(&stack)->symbol != ES_END)) && result == 0 );
     prcStackFree(&stack);
     return result;

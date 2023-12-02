@@ -2,12 +2,31 @@
 token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
-string name;
+string varName;
+string funName;
 string argName;
 string argId;
 int argumentNumber = 0;
 bool firstAnalyseFlag = true;
 bool functionBodyFlag = false;
+
+void freeAll() {
+    symtable_stack_free(&symStack);
+    str_free(&token.content);
+    str_free(&funName);
+    str_free(&varName);
+    str_free(&argName);
+    str_free(&argId);
+}
+
+void initAll() {
+    str_init(&token.content);
+    str_init(&varName);
+    str_init(&funName);
+    str_init(&argName);
+    str_init(&argId);
+    symtable_stack_init(&symStack);
+}
 
 int newLineCheck() {
     if (token.newLineFlag == false)
@@ -31,11 +50,7 @@ int typeCheck(){
 }
 
 void exitAndFree(int etype) {
-    symtable_stack_free(&symStack);
-    str_free(&token.content);
-    str_free(&name);
-    str_free(&argName);
-    str_free(&argId);
+    freeAll();
     fprintf(stderr,"exit code is %d\n", etype);
     exit(etype);
 }
@@ -56,7 +71,7 @@ int expression(int *expType) {
         tmpToken.type = token.type;
         getTokenWrapped();
         if( token.type == T_OP_PAR){
-            str_copy_string(&name, &(tmpToken.content));
+            str_copy_string(&funName, &(tmpToken.content));
             str_free(&(tmpToken.content));
             return funCall(expType);
         } else {
@@ -71,26 +86,24 @@ int expression(int *expType) {
 int id() {
     int result = 0;
     int expType;
-    str_copy_string(&name, &(token.content)); //save id
+    str_copy_string(&varName, &(token.content)); //save id
     getTokenWrapped();
-    if ((result = idCheck(&symStack, name.str))) 
-        return result;
     if (token.type == T_ASSING) {
+        if ((result = idCheck(&symStack, varName.str))) 
+            return result;
         getTokenWrapped();
         result = expression(&expType);
         if (result == 0)
-            result = idCheckType(&symStack, name.str, expType);
+            result = idCheckType(&symStack, varName.str, expType);
         return result;
     } else if (token.type == T_OP_PAR) {
-        result = funCall(&expType);
-        if (result == 0)
-            result = idCheckType(&symStack, name.str, expType);
-        return result;
+        str_copy_string(&funName, &varName);
+        return funCall(&expType);
     }
     return printErrorAndReturn("Syntaxe error has occured in id", SYNTAX_ERR);
 }
 
-int varDefItem(bool modified, int type) {
+int varDefItem(bool constant, int type) {
     int typetmp = type;
     int result;
     if(token.type == T_ASSING) {
@@ -98,50 +111,50 @@ int varDefItem(bool modified, int type) {
             int expType = ET_UNDEFINED;
             if ((result = expression(&expType)))
                 return result;
-            fprintf(stderr,"TOKEN TYPE %d %d name is %s\n", type, expType, name.str);
+            fprintf(stderr,"TOKEN TYPE %d %d name is %s\n", type, expType, varName.str);
             if((result = VarDefAssignSemanticCheck(&typetmp, expType)))
                 return result;
-            varDefiner(&symStack, typetmp, name.str, true, modified);
-            if (symtable_stack_search(&symStack, name.str) == NULL) {
+            varDefiner(&symStack, typetmp, varName.str, true, constant);
+            if (symtable_stack_search(&symStack, varName.str) == NULL) {
                 fprintf(stderr,"Var definer dont work in varDefItem\n");
             }
             return NO_ERR;
     } else {
-        varDefiner(&symStack, typetmp, name.str, false, modified);
+        varDefiner(&symStack, typetmp, varName.str, false, constant);
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in varDefItem", SYNTAX_ERR);
 } 
 
-int varDefList(bool modified) {
+int varDefList(bool constant) {
     if(token.type == T_COLON) {
         getTokenWrapped();
         if(typeCheck()) {
             int type = token.type;
             fprintf(stderr,"TOKEN TYPE %d \n",token.type);
             getTokenWrapped();
-            return varDefItem(modified, type);
+            return varDefItem(constant, type);
         }
     } else if(token.type == T_ASSING) {
-        return varDefItem(modified, ET_UNDEFINED);
+        return varDefItem(constant, ET_UNDEFINED);
     }
     return printErrorAndReturn("Syntaxe error in VarDefList", SYNTAX_ERR);
 }
 
 int varDef() {
-    bool modified;
+    bool constant;
     if(token.type == T_LET) {
-        modified = true;
+        constant = true;
     } else {
-        modified = false;
+        constant = false;
     }
     getTokenWrapped();
     if(token.type ==  T_ID) {
-        str_copy_string(&name, &(token.content));
-        if(symtable_search(symStack.top->table, name.str) != NULL)
+        str_copy_string(&varName, &(token.content));
+        if(symtable_search(symStack.top->table, varName.str) != NULL)
             return printErrorAndReturn("Sematic error in VarDef, redefinition", SEM_ERR_UNDEFINED_FUNCTION);
         getTokenWrapped();
-        return varDefList(modified);
+        return varDefList(constant);
     }
     return printErrorAndReturn("Syntaxe error in VarDef", SYNTAX_ERR);
 }
@@ -150,23 +163,25 @@ int funDefType() {
     functionBodyFlag = true;
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
-        setType(&symStack, name.str, ET_VOID);
-        tFlagS(&token);
-        symtable_stack_push(&symStack);
+        setType(&symStack, funName.str, ET_VOID);
         if (firstAnalyseFlag) 
             return NO_ERR;  
+        tFlagS(&token);
+        symtable_stack_push(&symStack);
+        pushArguments(&symStack, funName.str);
         return localParse();
     } else if (token.type == T_ARROW ){
         getTokenWrapped();
         if (typeCheck()) {
-            setType(&symStack, name.str, token.type);
+            setType(&symStack, funName.str, token.type);
             getTokenWrapped();
             if (token.type == T_OP_BRACE) {
                 getTokenWrapped();
                 tFlagS(&token);
-                symtable_stack_push(&symStack);
                 if (firstAnalyseFlag) 
                     return NO_ERR;  
+                symtable_stack_push(&symStack);
+                pushArguments(&symStack, funName.str);
                 return localParse();
             }
         }
@@ -187,7 +202,7 @@ int funDefItem() {
                 if (token.type == T_COLON) {
                     getTokenWrapped();
                     if (typeCheck()) {
-                        result = funAddArgument(&symStack, name.str, argName.str, argId.str, token.type);
+                        result = funAddArgument(&symStack, funName.str, argName.str, argId.str, token.type);
                         if (result) {
                             return result;
                         }
@@ -217,7 +232,7 @@ int funDefPlist() {
             if (token.type == T_COLON) {
                 getTokenWrapped();
                 if (typeCheck()) {
-                    funAddArgument(&symStack, name.str, argName.str, argId.str, token.type);
+                    funAddArgument(&symStack, funName.str, argName.str, argId.str, token.type);
                     getTokenWrapped();
                     return funDefItem();
                 }
@@ -230,11 +245,11 @@ int funDefPlist() {
 int funDef() {
     getTokenWrapped();
     if (token.type == T_ID) {   
-        str_copy_string(&name, &(token.content)); //save id
+        str_copy_string(&funName, &(token.content)); //save id
         getTokenWrapped();
         if(token.type == T_OP_PAR) {  
             getTokenWrapped();
-            if (funDefiner(&symStack, ET_UNDEFINED, name.str))
+            if (funDefiner(&symStack, ET_UNDEFINED, funName.str))
                 return SEM_ERR_UNDEFINED_FUNCTION;
             return funDefPlist();
         }
@@ -249,7 +264,7 @@ int parItem(){
         getTokenWrapped();
         return parListId();
     } else if (litCheck()) {
-        result = checkArgument(&symStack, name.str, "_", getTypeFromToken(&token, &symStack), argumentNumber);
+        result = checkArgument(&symStack, funName.str, "_", getTypeFromToken(&token, &symStack), argumentNumber);
         if (result)
             return result;
         getTokenWrapped();
@@ -278,11 +293,11 @@ int parListId() {
         getTokenWrapped();
         if (token.type == T_ID || litCheck()) {
             if ( token.type == T_ID ) {
-                if ((result = checkInitialization(&symStack, argName.str))){
+                if ((result = checkInitialization(&symStack, token.content.str))){
                     return result;
                 }
             }
-            result = checkArgument(&symStack, name.str, argName.str, getTypeFromToken(&token, &symStack), argumentNumber);
+            result = checkArgument(&symStack, funName.str, argName.str, getTypeFromToken(&token, &symStack), argumentNumber);
             if (result)
                 return result;
             getTokenWrapped();
@@ -294,7 +309,7 @@ int parListId() {
         }
         if (symtable_stack_search(&symStack, argName.str) == NULL )
             return printErrorAndReturn("Entrenal error in parListID", ERROR_INTERNAL);
-        result = checkArgument(&symStack, name.str, "_", (symtable_stack_search(&symStack, argName.str))->type, argumentNumber);
+        result = checkArgument(&symStack, funName.str, "_", (symtable_stack_search(&symStack, argName.str))->type, argumentNumber);
         if (result)
                 return result;
         return parList();
@@ -305,11 +320,11 @@ int parListId() {
 int funCall(int  *type) {
     int result = 0;
     getTokenWrapped();
-    if (checkDefinition(&symStack, name.str))
+    if (checkDefinition(&symStack, funName.str))
         return SEM_ERR_UNDEFINED_FUNCTION;
-    (*type) = symtable_stack_search(&symStack, name.str)->type;
+    (*type) = symtable_stack_search(&symStack, funName.str)->type;
     if (token.type == T_CL_PAR) {
-        result =  zeroArgsCheck(&symStack, name.str);
+        result =  zeroArgsCheck(&symStack, funName.str);
         if (result)
             return result;
         getTokenWrapped();
@@ -319,7 +334,7 @@ int funCall(int  *type) {
         getTokenWrapped();
         return parListId();
     } else if (litCheck()) {
-        result = checkArgument(&symStack, name.str, "_", getTypeFromToken(&token, &symStack), argumentNumber);
+        result = checkArgument(&symStack, funName.str, "_", getTypeFromToken(&token, &symStack), argumentNumber);
         if (result)
             return result;
         getTokenWrapped();
@@ -332,7 +347,6 @@ int ifItem(){
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
         tFlagS(&token);
-        symtable_stack_push(&symStack);
         int result = localParse();
         if (result)
             return result;
@@ -340,8 +354,8 @@ int ifItem(){
             getTokenWrapped();
             if (token.type == T_OP_BRACE) {
                 getTokenWrapped();
-                tFlagS(&token);
                 symtable_stack_push(&symStack);
+                tFlagS(&token);
                 return localParse();
             }
         }
@@ -350,17 +364,28 @@ int ifItem(){
 }
 
 int ifList(){
+    int result = 0;
     int expType = ET_UNDEFINED;
     if (token.type != T_LET){
         int result = expAnalyse(&token, NULL, &expType, &symStack);
+        symtable_stack_push(&symStack);
         if (result)
             return result;
         return ifItem();
     } else if (token.type == T_LET) {
         getTokenWrapped();
         if (token.type == T_ID) {
-            getTokenWrapped();
-            return ifItem();
+            result = checkInitialization(&symStack, token.content.str);
+            if(result == 0) {
+                symtable_stack_push(&symStack);
+                int type = symtable_stack_search(&symStack, token.content.str)->type;
+                if (type > ET_STRING)
+                    type = type-3;
+                varDefiner(&symStack, type, token.content.str, true, true);
+                getTokenWrapped();
+                return ifItem();
+            }
+            return result;
         }
     }
     return printErrorAndReturn("Syntaxe error in IfList", SYNTAX_ERR);
@@ -465,12 +490,9 @@ int first_analyse() {
 
 int main() {
         int result = 0;
-        str_init(&token.content);
-        str_init(&name);
-        str_init(&argName);
-        str_init(&argId);
-        symtable_stack_init(&symStack);
+        initAll();
         symtable_stack_push(&symStack);
+        buildInFunctionDefenition(&symStack);
         getTokenWrapped();
         tFlagS(&token);
         result = first_analyse();
@@ -478,11 +500,7 @@ int main() {
         tFlagS(&token);
         if(result == 0)
             result = globalParse();
-        symtable_stack_free(&symStack);
-        str_free(&token.content);
-        str_free(&name);
-        str_free(&argName);
-        str_free(&argId);
+        freeAll();
         if (result){
             fprintf(stderr,"exit code in main is %d\n",result);
             exit(result);

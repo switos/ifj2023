@@ -31,25 +31,26 @@ symtable_t* symtable_init() {
     return table;
 }
 
-symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
+symtable_t* symtable_resize(symtable_t** table, int newTableSize) {
+    //printf("i am resized\n");
     htab_item_t** newArray = (htab_item_t**)calloc(newTableSize, sizeof(htab_item_t*));
     if (newArray == NULL) {
         fprintf(stderr, "Failed to allocate memory");
         return NULL;
     }
     
-    for (int i = 0; i < table->sizeAllocated; i++) {
-        if(table->array[i] == NULL) {
+    for (int i = 0; i < (*table)->sizeAllocated; i++) {
+        if((*table)->array[i] == NULL) {
             continue;
         }
-        htab_item_t* tmp = table->array[i];   
+        htab_item_t* tmp = (*table)->array[i];
         unsigned int index = get_hash(tmp->key, newTableSize);
         while (newArray[index] != NULL) {
             index = (index + 1) % newTableSize;
         }
         
         newArray[index] = tmp;
-        
+
     }
     
     symtable_t* newTable = (symtable_t*)malloc(sizeof(symtable_t));
@@ -60,19 +61,18 @@ symtable_t* symtable_resize(symtable_t* table, int newTableSize) {
     }
 
     newTable->sizeAllocated = newTableSize;
-    newTable->sizeUsed = table->sizeUsed;
+    newTable->sizeUsed = (*table)->sizeUsed;
     newTable->array = newArray;
 
     return newTable;
 }
 
-htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* name, bool initialized, bool constant, int argumentAmount) {
-    if (table->sizeUsed / table->sizeAllocated > THRESHOLD) {
-        table = symtable_resize(table, table->sizeAllocated * 2);
+htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant, int argumentAmount) {
+    if ((*table)->sizeUsed / (*table)->sizeAllocated > THRESHOLD) {
+        (*table) = symtable_resize( table, (*table)->sizeAllocated * 2);
     }
     
-    unsigned int index = get_hash(key, table->sizeAllocated);
-    unsigned int original_index = index;
+    unsigned int index = get_hash(key, (*table)->sizeAllocated);
 
     htab_item_t* newSlot = (htab_item_t*)malloc(sizeof(htab_item_t));
     if (newSlot == NULL) {
@@ -116,54 +116,60 @@ htab_data_t* symtable_insert_data(symtable_t* table, char* key, int type, char* 
     newSlot->data->nil =false;
 
     do {
-        index = (index + 1) % table->sizeAllocated;
-    } while(original_index != index);
+        index = (index + 1) % (*table)->sizeAllocated;
+    } while((*table)->array[index]!=NULL);
 
-    table->array[index] = newSlot;
-    table->sizeUsed++;
+    (*table)->array[index] = newSlot;
+    (*table)->sizeUsed++;
+
+    //printf("Inserted: key=%s, index=%u\n", key, index);
 
     return newSlot->data;
 }
 
-bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type) {
-
-
-    int pos = func->argumentsInArray;
+bool symtable_add_arguments(htab_data_t **func, char* name, char* identifier, int type) {
+    int pos = (*func)->argumentsInArray;
     
-    func->param[pos] = (data_param_t*)malloc(sizeof(data_param_t));
-    if (func->param[pos] == NULL) {
+    (*func)->param[pos] = (data_param_t*)malloc(sizeof(data_param_t));
+    if ((*func)->param[pos] == NULL) {
         fprintf(stderr, "Failed to allocate memory for parameter");
         return false;
     }
     
-    func->param[pos]->identifier = (char*)malloc(strlen(identifier) + 1);
-    if(func->param[pos]->identifier == NULL) {
+    (*func)->param[pos]->identifier = (char*)malloc(strlen(identifier) + 1);
+    if((*func)->param[pos]->identifier == NULL) {
         fprintf(stderr, "Failed to allocate memory");
         return false;
     }
     
-    func->param[pos]->name = (char*)malloc(strlen(name) + 1);
-    if(func->param[pos]->name == NULL) {
+    (*func)->param[pos]->name = (char*)malloc(strlen(name) + 1);
+    if((*func)->param[pos]->name == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free(func->param[pos]->identifier);
+        free((*func)->param[pos]->identifier);
         return false;
     }
     
-    func->param[pos]->type = type;
+    (*func)->param[pos]->type = type;
 
-    strcpy(func->param[pos]->identifier, identifier);
-    strcpy(func->param[pos]->name, name);
+    strcpy((*func)->param[pos]->identifier, identifier);
+    strcpy((*func)->param[pos]->name, name);
     
-    func->argumentsInArray++;
-    func->argumentAmount = func->argumentsInArray;
+    (*func)->argumentsInArray++;
+    (*func)->argumentAmount = (*func)->argumentsInArray;
 
     return true;
 }
 
 data_param_t* symtable_get_argument(symtable_t* table, char* key, int argumentPosition) {
     htab_data_t* func_data = symtable_search(table, key);
+    fprintf(stderr, "name is %s\n, arguments amount %d, argument in array %d, ", func_data->name, func_data->argumentAmount, func_data->argumentsInArray);
+    if (func_data == NULL) {
+        fprintf(stderr, "func data is NULL\n");
+        return NULL;
+    }
 
-    if (func_data == NULL || argumentPosition < 0 || argumentPosition >= func_data->argumentAmount) {
+    if (argumentPosition < 0 || argumentPosition > func_data->argumentAmount) {
+        fprintf(stderr, "Problem is in get argument\n");
         return NULL;  // Invalid arguments or function not found.
     }
 
@@ -171,7 +177,9 @@ data_param_t* symtable_get_argument(symtable_t* table, char* key, int argumentPo
 }
 
 htab_data_t* symtable_search(symtable_t* table, char* key) {
+    
     if (table == NULL || key == NULL) {
+        fprintf(stderr, "table or key is NULL\n");
         return NULL;
     }
 
@@ -183,7 +191,7 @@ htab_data_t* symtable_search(symtable_t* table, char* key) {
 
         if(tmp != NULL) {
             if (tmp->key != NULL) {
-                if (!strcmp(tmp->key, key)) {
+                if (strcmp(tmp->key, key) == 0) {
                     return tmp->data;
                 }
             }
