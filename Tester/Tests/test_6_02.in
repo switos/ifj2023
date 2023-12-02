@@ -1,4 +1,4 @@
-func getMax(a : Int, b : Int) -> Int {
+func getMax(_ a : Int, _ b : Int) -> Int {
     return a, b
 }
 // Multiple expressions in return statement

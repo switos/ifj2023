@@ -5,3 +5,4 @@ int localParse();
 int funCall();
 int parList();
 int parListId();
+int functionParse();

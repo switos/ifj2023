@@ -114,7 +114,7 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
             return printErrorAndReturn("Semantic error occured while reducing rule R_L", SEM_ERR_TYPE_COMPAT);
             break;
         case R_UNAR:
-            if ((*top)->next->type >= T_DOUBLEN && (*top)->next->type <= T_STRINGN)
+            if ((*top)->next->type >= T_INTN && (*top)->next->type <= T_STRINGN)
                 (*type) = (*top)->next->type - 3;
             return NO_ERR;
         case R_ID:
@@ -193,14 +193,12 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp, int *type, symtable_sta
                 printErrorAndReturn("Lexical error has occured while expression analysing", result);
             break;
         case 'l':
-            fprintf(stderr,"in case less with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED);
             prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack));
             if ((result = getTokenExpr(tokenGlobal, tokenTmp, symStack)) != 0)
                 printErrorAndReturn("Lexical error has occured while expression analysing", result);
             break;
         case 'g':
-            fprintf(stderr,"in case great with tokenExpr %d\nterminal on stack is %d\n",getSymbolFromToken(tokenExpr), prcStackGetTerminal(&stack)->symbol);
             if( ! (findCatch(&stack, &stackItemsCounter)) ) {
                 result = reduceByRule(&stack, &stackItemsCounter, type);
             } else { 

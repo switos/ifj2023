@@ -1,9 +1,18 @@
+/*
+IFJ projekt 2023
+xtiemn00: Vsevolod Tiemnohorov
+xpetro27: Denys Petrovsyi
+xbatur00: Illia Baturov
+xshish02: Sviatoslav Shishnev
+*/
+
 #include "parser.h"
 token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
 string varName;
 string funName;
+string funBodyName;
 string argName;
 string argId;
 int argumentNumber = 0;
@@ -169,7 +178,7 @@ int funDefType() {
         tFlagS(&token);
         symtable_stack_push(&symStack);
         pushArguments(&symStack, funName.str);
-        return localParse();
+        return functionParse();
     } else if (token.type == T_ARROW ){
         getTokenWrapped();
         if (typeCheck()) {
@@ -182,7 +191,7 @@ int funDefType() {
                     return NO_ERR;  
                 symtable_stack_push(&symStack);
                 pushArguments(&symStack, funName.str);
-                return localParse();
+                return functionParse();
             }
         }
     }
@@ -279,6 +288,9 @@ int parList() {
         argumentNumber++;
         return parItem();       
     } else if (token.type == T_CL_PAR) {
+        int result = 0;
+        if ((result = argAmountCheck(&symStack, funName.str, argumentNumber)) != 0)
+            return result;
         argumentNumber=0;
         getTokenWrapped();
         return NO_ERR;
@@ -406,11 +418,14 @@ int whl() {
 }
 
 int returnR () {
-    int expType;
+    int result = 0;
+    int expType = ET_VOID;
     if (token.type == T_ID || litCheck() || token.type == T_OP_PAR) {
-        return expression(&expType);
+        result =  expression(&expType);
     }
-    return NO_ERR;
+    if (result == 0)
+        result = ReturnSemanticCheck(&symStack, funBodyName.str, expType);
+    return result;
 }
 
 int parseInstruction() {
@@ -428,6 +443,9 @@ int parseInstruction() {
         return ifList();
     } else if (token.type == T_RETURN) {
         //check if we are in function defenition scope
+        if(functionBodyFlag == false) {
+            return printErrorAndReturn("Syntaxe error, incorrect return usage, it must be within function body", SYNTAX_ERR);
+        }
         getTokenWrapped();
         return returnR();
     }
@@ -462,11 +480,31 @@ int localParse () {
         return localParse();
     } else {
         symtable_stack_pop(&symStack);
-        fprintf(stderr, "Succes, RIGHT CURVY HORE parsed\n");
+        fprintf(stderr, "Succes, local parse ended\n");
         getTokenWrapped();
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in localParse", SYNTAX_ERR);
+}
+
+int functionParse () {
+    fprintf(stderr, "TOKEN TYPE is %d\n", token.type);
+    str_copy_string(&(funBodyName), &(funName));
+    if (token.type != T_CL_BRACE) {
+        if (newLineCheck())
+            return printErrorAndReturn("Syntax error has occured in functionParse, while newLineCheck", SYNTAX_ERR);
+        int result = parseInstruction();
+        if (result) 
+            return result;
+        return localParse();
+    } else {
+        symtable_stack_pop(&symStack);
+        functionBodyFlag = false;
+        fprintf(stderr, "Succes, function parse ended\n");
+        getTokenWrapped();
+        return NO_ERR;
+    }
+    return printErrorAndReturn("Syntax error has occured in functionParse", SYNTAX_ERR);
 }
 
 int first_analyse() {

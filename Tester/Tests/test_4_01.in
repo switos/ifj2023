@@ -1,4 +1,4 @@
-func multiply(a : Int, b : Int) -> Int {
+func multiply(_ a : Int, _ b : Int) -> Int {
     return a * b
 }
 let result = multiply("3", b : 4)

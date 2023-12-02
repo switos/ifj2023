@@ -103,7 +103,7 @@ int addArg2BuildInFun(symtable_stack_t *symStack, char *name, char *argName, cha
 
 
 int funDefiner(symtable_stack_t *symStack, int type, char *name) {
-    htab_data_t *data = symtable_stack_search(symStack, name);
+    htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
     if (data == NULL){
         symtable_insert_data(&(symStack->top->table), name, type, name, false, false, 10);
         return NO_ERR;
@@ -178,7 +178,25 @@ int VarDefAssignSemanticCheck(int *type, int exp){
         } 
         return NO_ERR;
     }
+}
 
+int ReturnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
+    htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
+    if ((data->type == ET_VOID && exp != ET_VOID) || (data->type != ET_VOID && exp == ET_VOID) ) {
+        return printErrorAndReturn("Semantic error function return type compatibility", SEM_ERR_WRONG_RET);
+    }
+    if (data->type != exp) {
+        return printErrorAndReturn("Semantic error function return type compatibility", SEM_ERR_WRONG_PARAM);
+    }
+    return 0;
+}
+
+int argAmountCheck(symtable_stack_t *symStack, char* name, int amount) {
+    
+    htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
+    if (((data->argumentsInArray ) == amount + 1 )|| data->constant == true ) 
+        return NO_ERR;
+    return printErrorAndReturn("Wrong number of arguments", SEM_ERR_WRONG_PARAM);
 }
 
 int pushArguments(symtable_stack_t *symStack, char *name) {
