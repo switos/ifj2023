@@ -1,3 +1,1 @@
-func main() {
-    var my*Var: Int = 7  // Lexical error: 'my*Var' contains an invalid character '*'
-}
+var item;Name : String = "Widget"  // Lexical error: Semicolon ';' used within an identifier

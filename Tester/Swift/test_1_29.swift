@@ -1,1 +1,0 @@
-var value: Int = 123.  // Lexical error: Misplaced decimal point at the end of an integer

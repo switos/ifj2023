@@ -1,4 +1,1 @@
-func main() {
-    var data_value: Int = 10
-    write(data#value)  // Lexical error: 'data#value' contains an invalid character '#'
-}
+var text : String = "Hello, \xWorld"  // Lexical error: Unrecognized escape sequence '\x'

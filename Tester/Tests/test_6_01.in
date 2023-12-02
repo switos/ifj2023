@@ -1,0 +1,4 @@
+func printMessage() {
+    return "Message"
+}
+// Return expression in a void function

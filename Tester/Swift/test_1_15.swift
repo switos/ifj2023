@@ -1,3 +1,0 @@
-func main() {
-    var price: Double = 99,99  // Lexical error: Comma ',' used instead of period '.' in decimal number
-}

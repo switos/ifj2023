@@ -1,0 +1,10 @@
+// Function to print a greeting message
+func greet(greet n : String) {
+    write("Hello, ", n, "!")
+}
+// Main function
+func main() -> Int {
+    let name : String = "IFJ23 Programmer"
+    greet(greet : name)
+    return 0
+}

@@ -1,0 +1,4 @@
+func sum(a : Int, b : Int) -> Int {
+    return
+}
+// Missing expression in return statement

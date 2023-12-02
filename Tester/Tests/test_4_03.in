@@ -1,0 +1,4 @@
+func getFlag() -> String {
+    return 1
+}
+// Returning an int instead of a string

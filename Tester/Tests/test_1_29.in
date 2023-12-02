@@ -1,1 +1,1 @@
-var value: Int = 123.  // Lexical error: Misplaced decimal point at the end of an integer
+#include <stdio.h>  // Lexical error: Preprocessor directives are not part of IFJ23

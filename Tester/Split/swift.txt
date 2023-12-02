@@ -1,0 +1,54 @@
+func main() -> Int {
+    write("Hello, World!")
+    return 0
+}
+
+# END OF TEST #
+func main() -> Int {
+    let message : String = "Hello, World!"
+    write(message)
+    return 0
+}
+
+# END OF TEST #
+func printMessage(print m : String) {
+    write(m)
+}
+func main() -> Int {
+    let message : String = "Hello, World!"
+    printMessage(print : message)
+    return 0
+}
+
+# END OF TEST #
+func main() -> Int {
+    let part1 : String = "Hello, "
+    let part2 : String = "World!"
+    let message : String = part1 + part2
+    write(message)
+    return 0
+}
+
+# END OF TEST #
+func main() -> Int {
+    var counter : Int = 0
+    while (counter < 1) {
+        write("Hello, World!")
+        counter = counter + 1
+    }
+    return 0
+}
+
+# END OF TEST #
+// Function to print a greeting message
+func greet(greet n : String) {
+    write("Hello, ", n, "!")
+}
+// Main function
+func main() -> Int {
+    let name : String = "IFJ23 Programmer"
+    greet(greet : name)
+    return 0
+}
+
+# END OF TEST #

@@ -1,0 +1,5 @@
+let x : Int = 10
+while {
+    x = x + 1
+}
+// Incorrect while loop syntax, such as missing condition

@@ -1,0 +1,2 @@
+let result : Int = 5 + "number"
+// Adding a string to an integer

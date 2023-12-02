@@ -1,0 +1,5 @@
+{
+    let x : Int = 10
+    return x
+}
+// A function without a proper header

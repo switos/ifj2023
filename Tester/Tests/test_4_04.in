@@ -1,0 +1,6 @@
+let name : String = "IFJ23"
+func processNumber(num : Int) -> Int {
+    return num * 2
+}
+let result = processNumber(name)
+// Passing a string to a function expecting an int

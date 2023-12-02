@@ -1,4 +1,1 @@
-func main() {
-    var value: Int = 10
-    write(val$ue)  // Lexical error: 'val$ue' contains an invalid character '$'
-}
+var příklad : Int = 5  // Lexical error: Non-ASCII characters in the identifier 'příklad'

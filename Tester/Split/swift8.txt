@@ -1,0 +1,27 @@
+let x = nil
+// Type of 'x' cannot be inferred from 'nil'
+
+# END OF TEST #
+func process(value) {
+    // Function body
+}
+// Type of 'value' is not specified and cannot be inferred
+
+# END OF TEST #
+let result = getNumber() + getValue()
+// If 'getNumber' and 'getValue' don't have clear return types
+
+# END OF TEST #
+let condition : Int = 1
+let x = condition ?? "String" : 100
+// Cannot infer if 'x' is a String or an Int
+
+# END OF TEST #
+let value = compute()
+// If 'compute' does not have a specified return type
+
+# END OF TEST #
+let sum = a + b
+// If 'a' and 'b' do not have specified types
+
+# END OF TEST #

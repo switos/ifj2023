@@ -1,3 +1,1 @@
-func main() {
-    var text: String = "Hello, \ "  // Lexical error: Incomplete escape sequence '\ '
-}
+var path : String = "C:\Program Files"  // Lexical error: Backslash '\' used without an escape sequence

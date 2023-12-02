@@ -1,1 +1,3 @@
-var numbers[10]  // Lexical error: Array declaration is incorrect in IFJ23
+func main() {
+    var num : Double = 1.5e  // Lexical error: Incomplete exponent 'e' in floating-point literal
+}

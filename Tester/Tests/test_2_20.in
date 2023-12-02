@@ -1,0 +1,1 @@
+let complex : Double Int = 5.0 // Mixing two types in a declaration

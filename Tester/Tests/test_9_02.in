@@ -1,0 +1,6 @@
+func checkPositive(num : Int) -> Int {
+    if (num > 0) {
+        return 1
+    }
+}
+// Missing return statement for when condition is false

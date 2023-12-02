@@ -1,1 +1,0 @@
-var příklad: Int = 5  // Lexical error: Non-ASCII characters in the identifier 'příklad'

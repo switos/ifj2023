@@ -1,0 +1,5 @@
+func multiply(a : Int, b : Int) -> Int {
+    return a * b
+}
+let result = multiply("3", b : 4)
+// Passing a string instead of an int for 'a'

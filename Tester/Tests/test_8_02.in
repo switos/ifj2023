@@ -1,0 +1,2 @@
+let result = getNumber() + getValue()
+// If 'getNumber' and 'getValue' don't have clear return types

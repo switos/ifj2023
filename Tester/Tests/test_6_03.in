@@ -1,0 +1,5 @@
+func getNumber() -> Int {
+    // Some code here
+    return
+}
+// Empty return in a function that should return an int

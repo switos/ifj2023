@@ -1,0 +1,2 @@
+let value = compute()
+// If 'compute' does not have a specified return type

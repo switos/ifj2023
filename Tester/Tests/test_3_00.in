@@ -1,0 +1,2 @@
+let result = sum(5, 10)
+// Assuming 'sum' function is not defined

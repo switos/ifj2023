@@ -1,3 +1,4 @@
 func main() {
-    var num: Double = 1.5e  // Lexical error: Incomplete exponent 'e' in floating-point literal
+    var value : Int = 12a4  // Lexical error: '12a4' is not a valid number literal
+    write(value)
 }

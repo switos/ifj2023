@@ -1,0 +1,3 @@
+let x : Int = 10
+let result = x(5)
+// Incorrectly using 'x' as if it were a function

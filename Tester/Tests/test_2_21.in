@@ -1,0 +1,1 @@
+Int let : number = 5 // Misplacing the type qualifier in variable declarations

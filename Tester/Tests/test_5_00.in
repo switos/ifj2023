@@ -1,0 +1,2 @@
+let result = x + 5
+// 'x' is not defined

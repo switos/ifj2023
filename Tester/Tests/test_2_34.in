@@ -1,0 +1,4 @@
+fun getMax(a : Int) -> Int {
+    return a
+}
+// 'fun' instead of 'func'

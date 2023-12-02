@@ -1,4 +1,1 @@
-func main() {
-    var _count: Int = 5
-    write(_c@unt)  // Lexical error: '_c@unt' contains an invalid character '@'
-}
+let str : String = "Invalid sequence \m here" // Including invalid escape sequences in strings for specific types

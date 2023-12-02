@@ -1,0 +1,7 @@
+let x : Int = 10
+if (x > 5) {
+    let y = x
+else {
+    let y = 0
+}
+// Using braces incorrectly in if-else statements

@@ -1,1 +1,3 @@
-var příklad: Int = 5  // Lexical error: Non-ASCII characters in the identifier 'příklad'
+func main() {
+    var char : String = "\u{1Z34}"  // Lexical error: 'Z' is not valid in a Unicode escape sequence
+}

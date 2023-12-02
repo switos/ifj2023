@@ -1,0 +1,2 @@
+let division : Int = 10 / "2"
+// Using a string as a divisor

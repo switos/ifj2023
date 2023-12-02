@@ -1,3 +1,4 @@
 func main() {
-    var sum: Int = 5 ^^ 3  // Lexical error: '^^' is an unrecognized operator in IFJ23
+    var data_value : Int = 10
+    write(data#value)  // Lexical error: 'data#value' contains an invalid character '#'
 }

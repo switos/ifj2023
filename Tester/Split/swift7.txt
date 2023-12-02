@@ -1,0 +1,24 @@
+let result : Int = 5 + "number"
+// Adding a string to an integer
+
+# END OF TEST #
+let name : String = "Age: " + 30
+// Concatenating string with an integer
+
+# END OF TEST #
+let isEqual : Int = (5 == "5")
+// Comparing an integer with a string
+
+# END OF TEST #
+let result : Int = 3 * "Hello"
+// Multiplying a string by an integer
+
+# END OF TEST #
+let total : Double = 5 + 3.14 * "2"
+// Mixing integers, doubles, and strings
+
+# END OF TEST #
+let division : Int = 10 / "2"
+// Using a string as a divisor
+
+# END OF TEST #

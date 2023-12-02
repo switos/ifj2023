@@ -1,0 +1,7 @@
+func getMax(a : Int, b : Int) -> Int {
+    if a > b {
+        return a
+    }
+    return "b"
+}
+// Returning a string instead of an int

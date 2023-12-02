@@ -1,3 +1,1 @@
-func main() {
-    var hello-world: Int = 5  // Lexical error: 'hello-world' contains a hyphen
-}
+var @name : String = "IFJ23"  // Lexical error: At-symbol '@' is not valid at the beginning of an identifier

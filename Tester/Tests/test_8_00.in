@@ -1,0 +1,2 @@
+let x = nil
+// Type of 'x' cannot be inferred from 'nil'
