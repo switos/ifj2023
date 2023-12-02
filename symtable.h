@@ -54,9 +54,9 @@ symtable_t* symtable_init();
 
 symtable_t* symtable_resize(symtable_t** table, int newTableSize);
 
-htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant, int argumentAmount);
+htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant);
 
-bool symtable_add_arguments(htab_data_t** func, char* name, char* identifier, int type);
+bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type);
 
 void symtable_free (symtable_t* table);
 
