@@ -84,7 +84,7 @@ int funAddArgument(symtable_stack_t *symStack, char *name, char *argName, char *
     if (data == NULL)
         return printErrorAndReturn("Semantic error occured in funAddArguments", SEM_ERR_UNDEFINED_FUNCTION);
     if (data->initialized == false) { 
-        if ( !(symtable_add_arguments(&data, argName, argId, type)) ) {
+        if ( !(symtable_add_arguments(data, argName, argId, type)) ) {
             fprintf(stderr, "Add arguments do not work\n");
         }
     }
@@ -95,7 +95,7 @@ int addArg2BuildInFun(symtable_stack_t *symStack, char *name, char *argName, cha
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
         return printErrorAndReturn("NUUL in add argument", SEM_ERR_UNDEFINED_FUNCTION);
-    if ( !(symtable_add_arguments(&data, argName, argId, type)) ) {
+    if ( !(symtable_add_arguments(data, argName, argId, type)) ) {
         fprintf(stderr, "Add arguments do not work\n");
     }
     return 0;
