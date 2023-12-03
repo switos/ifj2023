@@ -479,3 +479,115 @@ void print_instruction(DLList* list) {
 		DLL_Next(list);
 	}
 }
+
+void output_main_func(DLList* list) {
+	taCode* data = (taCode*)malloc(sizeof(taCode));
+	if(data = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data->operand_1 = (operand_t*)malloc(sizeof(operand_t));
+	set_operand_value(data->operand_1, "$$main");
+	data->inst = I_LABEL;
+	
+	DLL_InsertFirst(list, data);
+	DLL_First(list);
+}
+
+void output_user_func_start(DLList* list, operand_t* op1) {
+	taCode* data_label = (taCode*)malloc(sizeof(taCode));
+	if(data_label = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data_label->operand_1 = op1;
+	data_label->inst = I_LABEL;
+	DLL_InsertFirst(list, data_label);
+	DLL_First(list);
+
+	taCode* data_push = (taCode*)malloc(sizeof(taCode));
+	if(data_push = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+	data_push->inst = I_PUSHFRAME;
+	DLL_InsertAfter(list, data_push);
+	DLL_Next(list);
+}
+
+void output_user_func_return(DLList* list) {
+	taCode* data_pop = (taCode*)malloc(sizeof(taCode));
+	if(data_pop = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data_pop->inst = I_POPFRAME;
+	DLL_InsertAfter(list, data_pop);
+	DLL_Next(list);
+
+	taCode* data_return = (taCode*)malloc(sizeof(taCode));
+	if(data_return = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+	data_return->inst = I_RETURN;
+	DLL_InsertAfter(list, data_return);
+	DLL_Last(list);
+}
+
+void output_instruction_3args(DLList* list, operand_t* op1, operand_t* op2, operand_t* res, instructions inst) {
+	taCode* data = (taCode*)malloc(sizeof(taCode));
+	if(data = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data->operand_1 = op1;
+	data->operand_2 = op2;
+	data->result = res;
+	data->inst = inst;
+	DLL_InsertAfter(list, data);
+	DLL_Next(list);
+}
+
+void output_instruction_2args(DLList* list, operand_t* op1, operand_t* res, instructions inst) {
+	taCode* data = (taCode*)malloc(sizeof(taCode));
+	if(data = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data->operand_1 = op1;
+	data->result = res;
+	data->inst = inst;
+	DLL_InsertAfter(list, data);
+	DLL_Next(list);
+}
+
+void output_instruction_1arg(DLList* list, operand_t* op1, instructions inst) {
+	taCode* data = (taCode*)malloc(sizeof(taCode));
+	if(data = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data->operand_1 = op1;
+	data->inst = inst;
+	DLL_InsertAfter(list, data);
+	DLL_Next(list);
+}
+
+void output_instruction_noargs(DLList* list, instructions inst) {
+	taCode* data = (taCode*)malloc(sizeof(taCode));
+	if(data = NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return;
+	}
+
+	data->inst = inst;
+	DLL_InsertAfter(list, data);
+	DLL_Next(list);
+}
