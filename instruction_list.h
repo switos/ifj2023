@@ -1,13 +1,9 @@
 #ifndef INSTRUCTION_LIST
 #define INSTRUCTION_LIST
 
-#include <stdio.h>
-#include <stdbool.h>
 
-#include "scanner.h"
-#include "symtable.h"
-#include "str.h"
-#include "expressionAnalyser.h"
+
+#include "expressionAnalyser.c"
 
 typedef enum {
     I_MOVE,
