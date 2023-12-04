@@ -349,3 +349,16 @@ void clear_data(taCode* source) {
 	free_data_value(source);
 	source->inst = I_DEFAULT;
 }
+
+operand_t* create_operand(char* value, ET_TYPE type, frame_type frame) {
+	operand_t* new_operand = (operand_t*)malloc(sizeof(operand_t));
+	if(new_operand == NULL) {
+		fprintf(stderr, "Failed to allocate memory");
+		return NULL;
+	}
+
+	set_operand_value(new_operand, value);
+	new_operand->type = type;
+	new_operand->frame = frame;
+	return new_operand;
+}

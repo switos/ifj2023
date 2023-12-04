@@ -2,6 +2,7 @@
 token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
+DLList* list;
 string varName;
 string funName;
 string argName;
@@ -406,6 +407,7 @@ int whl() {
 }
 
 int returnR () {
+    output_user_func_return(list);
     int expType;
     if (token.type == T_ID || litCheck() || token.type == T_OP_PAR) {
         return expression(&expType);
@@ -437,6 +439,8 @@ int parseInstruction() {
 
 int globalParse () {
     fprintf(stderr, "%s\n",token.content.str);
+    DLL_Init(list);
+    output_main_func(list);
     if (token.type != T_EOF) {
         if (newLineCheck())
             return printErrorAndReturn("Syntax error has occured in globalParse, while newLineCheck", SYNTAX_ERR);
