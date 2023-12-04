@@ -362,3 +362,13 @@ operand_t* create_operand(char* value, ET_TYPE type, frame_type frame) {
 	new_operand->frame = frame;
 	return new_operand;
 }
+
+void init_data(taCode* target) {
+	if (target == NULL) {
+		return;
+	}
+
+	target->operand_1->value = NULL;
+	target->operand_2->value = NULL;
+	target->result->value = NULL;
+}

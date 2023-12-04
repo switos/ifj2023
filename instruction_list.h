@@ -290,4 +290,11 @@ bool insert_data(taCode* target, taCode* source);
  */
 void clear_data(taCode* source);
 
+/**
+ * @brief initializing data for DLList
+ * 
+ * @param target pointer to the data
+ */
+void init_data(taCode* target);
+
 #endif
