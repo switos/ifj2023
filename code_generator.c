@@ -264,7 +264,7 @@ void print_instruction(DLList* list) {
 	codeStart();
 	DLL_First(list);
 	while (DLL_IsActive(list)) {
-		pregenerating_instructions(&list->activeElement->data);
+		pregenerating_instructions(list->activeElement->data);
 		switch (list->activeElement->data->inst){
 			case I_COMMENT:
 				printf("# %s\n", list->activeElement->data->operand_1->out.str);
@@ -482,7 +482,7 @@ void print_instruction(DLList* list) {
 
 void output_main_func(DLList* list) {
 	taCode* data = (taCode*)malloc(sizeof(taCode));
-	if(data = NULL) {
+	if(data == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -497,7 +497,7 @@ void output_main_func(DLList* list) {
 
 void output_user_func_start(DLList* list, operand_t* op1) {
 	taCode* data_label = (taCode*)malloc(sizeof(taCode));
-	if(data_label = NULL) {
+	if(data_label == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -508,7 +508,7 @@ void output_user_func_start(DLList* list, operand_t* op1) {
 	DLL_First(list);
 
 	taCode* data_push = (taCode*)malloc(sizeof(taCode));
-	if(data_push = NULL) {
+	if(data_push == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -519,7 +519,7 @@ void output_user_func_start(DLList* list, operand_t* op1) {
 
 void output_user_func_return(DLList* list) {
 	taCode* data_pop = (taCode*)malloc(sizeof(taCode));
-	if(data_pop = NULL) {
+	if(data_pop == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -529,7 +529,7 @@ void output_user_func_return(DLList* list) {
 	DLL_Next(list);
 
 	taCode* data_return = (taCode*)malloc(sizeof(taCode));
-	if(data_return = NULL) {
+	if(data_return == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -540,7 +540,7 @@ void output_user_func_return(DLList* list) {
 
 void output_instruction_3args(DLList* list, operand_t* op1, operand_t* op2, operand_t* res, instructions inst) {
 	taCode* data = (taCode*)malloc(sizeof(taCode));
-	if(data = NULL) {
+	if(data == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -555,7 +555,7 @@ void output_instruction_3args(DLList* list, operand_t* op1, operand_t* op2, oper
 
 void output_instruction_2args(DLList* list, operand_t* op1, operand_t* res, instructions inst) {
 	taCode* data = (taCode*)malloc(sizeof(taCode));
-	if(data = NULL) {
+	if(data == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -569,7 +569,7 @@ void output_instruction_2args(DLList* list, operand_t* op1, operand_t* res, inst
 
 void output_instruction_1arg(DLList* list, operand_t* op1, instructions inst) {
 	taCode* data = (taCode*)malloc(sizeof(taCode));
-	if(data = NULL) {
+	if(data == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}
@@ -582,7 +582,7 @@ void output_instruction_1arg(DLList* list, operand_t* op1, instructions inst) {
 
 void output_instruction_noargs(DLList* list, instructions inst) {
 	taCode* data = (taCode*)malloc(sizeof(taCode));
-	if(data = NULL) {
+	if(data == NULL) {
 		fprintf(stderr, "Failed to allocate memory");
 		return;
 	}

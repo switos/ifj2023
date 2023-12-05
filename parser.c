@@ -10,7 +10,7 @@ xshish02: Sviatoslav Shishnev
 token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
-DLList* list;
+DLList list;
 string varName;
 string funName;
 string funBodyName;
@@ -24,9 +24,11 @@ void freeAll() {
     symtable_stack_free(&symStack);
     str_free(&token.content);
     str_free(&funName);
+    str_free(&funBodyName);
     str_free(&varName);
     str_free(&argName);
     str_free(&argId);
+    DLL_Dispose(&list);
 }
 
 void initAll() {
@@ -36,6 +38,7 @@ void initAll() {
     str_init(&argName);
     str_init(&argId);
     symtable_stack_init(&symStack);
+    DLL_Init(&list);
 }
 
 int newLineCheck() {
@@ -420,7 +423,7 @@ int whl() {
 
 int returnR () {
     int result = 0;
-    output_user_func_return(list);
+    // output_user_func_return(list);
     int expType = ET_VOID;
     if (token.type == T_ID || litCheck() || token.type == T_OP_PAR) {
         result =  expression(&expType);
@@ -456,8 +459,6 @@ int parseInstruction() {
 
 int globalParse () {
     fprintf(stderr, "%s\n",token.content.str);
-    DLL_Init(list);
-    output_main_func(list);
     if (token.type != T_EOF) {
         if (newLineCheck())
             return printErrorAndReturn("Syntax error has occured in globalParse, while newLineCheck", SYNTAX_ERR);

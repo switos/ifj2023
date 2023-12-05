@@ -293,7 +293,7 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
     }
     newElement->next = NULL;
     newElement->table = symtable_init();
-    if(newElement->table == NULL) {
+    if (newElement->table == NULL) {
         free(newElement);
         return NULL;
     }
@@ -301,8 +301,7 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
     if(stack->top == NULL) {
         stack->top = newElement;
         stack->top->prev = NULL;
-    }
-    else {
+    } else {
         stack_level_t* current = stack->top;
 
         stack->top = newElement;

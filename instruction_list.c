@@ -7,17 +7,19 @@ void DLL_Init( DLList *list ) {
 }
 
 void DLL_Dispose( DLList *list ) {
-	if (list->firstElement != NULL) { 
-		DLLElementPtr tmpElement = list->firstElement;
-		while(tmpElement->nextElement != NULL) { 
-			DLLElementPtr tmpElementNext = tmpElement->nextElement;
-			free_data_value(&tmpElement->data);
-			free(tmpElement);
-			tmpElement = tmpElementNext;
+	if (list != NULL) {	
+		if (list->firstElement != NULL) {
+			DLLElementPtr tmpElement = list->firstElement;
+			while(tmpElement->nextElement != NULL) { 
+				DLLElementPtr tmpElementNext = tmpElement->nextElement;
+				free_data_value(tmpElement->data);
+				free(tmpElement);
+				tmpElement = tmpElementNext;
+			}
+			list->firstElement = NULL;
+			list->activeElement = NULL;
+			list->lastElement = NULL;
 		}
-		list->firstElement = NULL;
-		list->activeElement = NULL;
-		list->lastElement = NULL;
 	}
 }
 
@@ -28,8 +30,8 @@ void DLL_InsertFirst( DLList *list, taCode* data ) {
 		return;
     }
 	if (list->firstElement == NULL && list->lastElement == NULL) {
-		init_data(&newElement->data);
-		if (!insert_data(&newElement->data, data)) {
+		init_data(newElement->data);
+		if (!insert_data(newElement->data, data)) {
 			free(newElement);
 			DLL_Dispose(list);
 			return;
@@ -40,8 +42,8 @@ void DLL_InsertFirst( DLList *list, taCode* data ) {
 		list->lastElement = newElement;
 	}
 	else { 
-		init_data(&newElement->data);
-		if (!insert_data(&newElement->data, data)) {
+		init_data(newElement->data);
+		if (!insert_data(newElement->data, data)) {
 			free(newElement);
 			DLL_Dispose(list);
 			return;
@@ -61,8 +63,8 @@ void DLL_InsertLast( DLList *list, taCode* data ) {
     }
 	if (list->firstElement == NULL && list->lastElement == NULL) {
 		// printf("in last if\n");
-		init_data(&newElement->data);
-		if (!insert_data(&newElement->data, data)) {
+		init_data(newElement->data);
+		if (!insert_data(newElement->data, data)) {
 			// printf("in false nahuy\n");
 			free(newElement);
 			DLL_Dispose(list);
@@ -76,8 +78,8 @@ void DLL_InsertLast( DLList *list, taCode* data ) {
 	}
 	else { 
 		list->lastElement->nextElement = newElement;
-		init_data(&newElement->data);
-		if (!insert_data(&newElement->data, data)) {
+		init_data(newElement->data);
+		if (!insert_data(newElement->data, data)) {
 			free(newElement);
 			DLL_Dispose(list);
 			return;
@@ -131,7 +133,7 @@ void DLL_DeleteFirst( DLList *list ) {
 			list->firstElement = tmpElement->nextElement;
 			list->firstElement->previousElement = NULL; 
 		}
-		free_data_value(&tmpElement->data);
+		free_data_value(tmpElement->data);
 		free(tmpElement);
 	}
 }
@@ -150,7 +152,7 @@ void DLL_DeleteLast( DLList *list ) {
 			list->lastElement = tmpElement->previousElement;
 			list->lastElement->nextElement = NULL;
 		}
-		free_data_value(&tmpElement->data);
+		free_data_value(tmpElement->data);
 		free(tmpElement);
 	}
 }
@@ -165,7 +167,7 @@ void DLL_DeleteAfter( DLList *list ) {
 			list->activeElement->nextElement = NULL;
 			list->lastElement = list->activeElement;
 		}
-		free_data_value(&tmpElement->data);
+		free_data_value(tmpElement->data);
 		free(tmpElement);
 	}
 }
@@ -180,7 +182,7 @@ void DLL_DeleteBefore( DLList *list ) {
 			list->activeElement->previousElement = NULL;
 			list->firstElement = list->activeElement;
 		}
-		free_data_value(&tmpElement->data);
+		free_data_value(tmpElement->data);
 		free(tmpElement);
 	}
 }
@@ -198,8 +200,8 @@ void DLL_InsertAfter( DLList *list, taCode* data ) {
 				newElement->nextElement = NULL;
 				list->lastElement = newElement;
 			}
-			init_data(&newElement->data);
-			if (!insert_data(&newElement->data, data)) {
+			init_data(newElement->data);
+			if (!insert_data(newElement->data, data)) {
 				free(newElement);
 				DLL_Dispose(list);
 				return;
@@ -223,8 +225,8 @@ void DLL_InsertBefore( DLList *list, taCode* data ) {
 				newElement->previousElement = NULL;
 				list->firstElement = newElement;
 			}
-			init_data(&newElement->data);
-			if (!insert_data(&newElement->data, data)) {
+			init_data(newElement->data);
+			if (!insert_data(newElement->data, data)) {
 				free(newElement);
 				DLL_Dispose(list);
 				return;
@@ -245,7 +247,7 @@ void DLL_GetValue( DLList *list, taCode *dataPtr ) {
 
 void DLL_SetValue( DLList *list, taCode* data ) {
 	if (list->activeElement != NULL) {
-		if (!insert_data(&list->activeElement->data, data)) {
+		if (!insert_data(list->activeElement->data, data)) {
 			DLL_Dispose(list);
 			return;
 		}
@@ -307,15 +309,15 @@ void free_data_value(taCode* target) {
 bool insert_data(taCode* target, taCode* source) {
 	*target = *source;
 	
-	if (!set_operand_value(&target->operand_1, source->operand_1->value)) {
+	if (!set_operand_value(target->operand_1, source->operand_1->value)) {
 		free_data_value(target);
 		return false;
 	}
-	if (!set_operand_value(&target->operand_2, source->operand_2->value)) {
+	if (!set_operand_value(target->operand_2, source->operand_2->value)) {
 		free_data_value(target);
 		return false;
 	}
-	if (!set_operand_value(&target->result, source->result->value)) {
+	if (!set_operand_value(target->result, source->result->value)) {
 		free_data_value(target);
 		return false;
 	}
