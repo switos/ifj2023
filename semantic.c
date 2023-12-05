@@ -113,7 +113,7 @@ int funDefiner(symtable_stack_t *symStack, int type, char *name) {
             return NO_ERR;
         }
     }
-    return printErrorAndReturn("Semantic error occured in funDefiner", SEM_ERR_UNDEFINED_FUNCTION);
+    return printErrorAndReturn("Semantic error occured in funDefiner", SEM_ERR_OTHER);
 }
 
 int varDefiner(symtable_stack_t *symStack, int type, char* name, bool inicialized, bool constant ) {

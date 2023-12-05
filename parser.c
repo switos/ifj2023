@@ -44,7 +44,7 @@ int newLineCheck() {
 }
 
 int litCheck(){
-    if (token.type == T_FLOAT_LIT || token.type == T_STRING_LIT || token.type == T_INT_LIT) 
+    if (token.type == T_FLOAT_LIT || token.type == T_STRING_LIT || token.type == T_INT_LIT || token.type == T_NIL) 
         return 1;
     return 0;
 
@@ -442,7 +442,6 @@ int parseInstruction() {
         getTokenWrapped();
         return ifList();
     } else if (token.type == T_RETURN) {
-        //check if we are in function defenition scope
         if(functionBodyFlag == false) {
             return printErrorAndReturn("Syntaxe error, incorrect return usage, it must be within function body", SYNTAX_ERR);
         }

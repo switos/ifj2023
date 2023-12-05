@@ -53,6 +53,9 @@ bool str_copy_string(string* target, string* source) {
     // if (target->allocSize == 0) {
     //     printf("NULLLLLL SUKAAAA\n");
     // }
+    if (target == NULL || source == NULL) {
+        return false;
+    }
     if (source->length >= target->allocSize) { // this means we need more memory
         if ((target->str = (char *) realloc(target->str, source->length + 1)) == NULL) {
             return false;

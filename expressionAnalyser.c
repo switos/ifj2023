@@ -10,28 +10,17 @@ int setTokenExpr(token_t* tokenGlobal, token_t* tokenTmp, symtable_stack_t *symS
         tokenExpr = tokenTmp;
         tokenFlag = 1;
     }
-    if (tokenExpr->type == T_ID) {        
-        return checkInitialization(symStack, tokenExpr->content.str);
-    }
     return NO_ERR;
 }
 
 int getTokenExpr(token_t* tokenGlobal, token_t* tokenTmp, symtable_stack_t *symStack) {
-    int result;
     if (tokenFlag == 1){
         tokenExpr = tokenGlobal;
         tokenFlag = 2;
-        result = 0;
+        return NO_ERR;
     } else {
-        result = getToken(tokenGlobal);
+        return getToken(tokenGlobal);
     }
-    if (result)
-        return result;
-    if (tokenExpr->type == T_ID) {        
-        return checkInitialization(symStack, tokenExpr->content.str);
-    }
-    return NO_ERR;
-    
 } 
 
 int findCatch(precedenceStackNode_t** top, int* count) {
@@ -62,8 +51,7 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
                 if ((*top)->next->next->type == (*top)->type) {
                     (*type) = (*top)->next->next->type;
                     return NO_ERR;
-                }
-            } else if (rule != R_DIV) {
+                } else if (rule != R_DIV) {
                     if ( ((*top)->next->next->type == ET_DOUBLE && (*top)->type == ET_INT) || ((*top)->next->next->type ==  ET_INT && (*top)->type == ET_DOUBLE) ) {
                         if((*top)->next->next->symbol == ES_NONTERL && (*top)->next->next->type == ET_INT) {
                             (*type) = ET_DOUBLE;
@@ -78,6 +66,7 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
                             return NO_ERR;
                         }
                     }
+                }
             }
             return printErrorAndReturn("Semantic error occured while reducing rule", SEM_ERR_TYPE_COMPAT);
             break;
@@ -125,14 +114,24 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
     }
 }
 
-int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type){
-    int rule;
+int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type, symtable_stack_t *symStack){
+    int rule = R_ERROR;
     int symbol = ES_NONTER;
+    int error = SYNTAX_ERR;
     if ((*cnt) == 1) {
         if((*top)->symbol == ES_ID || (*top)->symbol == ES_LIT){
-            symbol = (*top)->symbol+4; // ES_NONTER OR ES_NONTERML
-            rule = R_ID;
-            fprintf(stderr,"Id rule is parsed\n");
+            int result = 0;
+            if( (*top)->symbol == ES_ID) {
+                fprintf(stderr, "%s\n",(*top)->content.str);
+                result = checkInitialization(symStack, (*top)->content.str);  
+            }
+            symbol = (*top)->symbol+4; // ES_NONTER OR ES_NONTERMLITRAL
+            if (result == 0) {
+                rule = R_ID;
+            } else {
+                error = result;
+                rule = R_ERROR;
+            }
         } else {
             rule = R_ERROR;
         } 
@@ -143,41 +142,43 @@ int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type){
                 rule = R_ERROR;
         }
     } else if ((*cnt) == 3) {
-        if (((*top)->next->next->symbol == ES_OP_PAR) && ((*top)->next->symbol == ES_NONTER) && ((*top)->symbol == ES_CL_PAR)) {
+        if (((*top)->next->next->symbol == ES_OP_PAR) && ((*top)->next->symbol == ES_NONTER || (*top)->next->symbol == ES_NONTERL ) && ((*top)->symbol == ES_CL_PAR)) {
             rule =  R_PAR;
-        } else if ( (*top)->next->next->symbol == ES_NONTER && (*top)->symbol == ES_NONTER ) {
+        } else if ( ((*top)->next->next->symbol == ES_NONTERL || (*top)->next->next->symbol == ES_NONTER) && ((*top)->symbol == ES_NONTER || (*top)->symbol == ES_NONTERL)) {
             if ((*top)->next->symbol < R_UNAR){
                 rule = (*top)->next->symbol;
             } else { 
                 rule = R_ERROR;
             }
         }
-    } else {
-        rule = R_ERROR;
     }
+
     if (rule != R_ERROR ) {
-        int result;
-        if ((result = checkExprSemantic(top, (*cnt), type, rule)))
+        int result = 0;
+        //char* content = '\0';
+        result = checkExprSemantic(top, (*cnt), type, rule);
+        if (result){
             return result;
+        }
         for(int i = 0; i <= (*cnt); i++){
             prcStackPop(top);
         }
-        prcStackPush(top, symbol, (*type));
+        prcStackPush(top, symbol, (*type), NULL);
         return NO_ERR;
     }
 
-    return printErrorAndReturn("Syntax Error has occured in reduce by rule", SYNTAX_ERR);
+    return printErrorAndReturn("Syntax Error has occured in reduce by rule", error);
 }
 
 int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp, int *type, symtable_stack_t *symStack) {
+
     token_t endToken;
     endToken.type = T_EOF; 
     precedenceStackNode_t* stack = NULL; 
     int stackItemsCounter = 0;
-    prcStackPush(&stack, ES_END, ES_UNDEFINED);
+    prcStackPush(&stack, ES_END, ES_UNDEFINED, NULL);
     int result = 0;
     result = setTokenExpr(tokenGlobal, tokenTmp,symStack);
-
     if (result) {
         prcStackFree(&stack);
         return result;
@@ -185,22 +186,23 @@ int expAnalyse (token_t* tokenGlobal, token_t* tokenTmp, int *type, symtable_sta
 
     do {
         precedenceStackNode_t* stackTerminal = prcStackGetTerminal(&stack);
+
         switch (precedenceTable[stackTerminal->symbol][getSymbolFromToken(tokenExpr)])
         {
         case '=':
-            prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack));
+            prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack), &(tokenExpr->content));
             if ((result = getTokenExpr(tokenGlobal, tokenTmp, symStack)) != 0)
                 printErrorAndReturn("Lexical error has occured while expression analysing", result);
             break;
         case 'l':
-            prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED);
-            prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack));
+            prcStackPushAfter(&stackTerminal, ES_CATCH, ES_UNDEFINED, NULL);
+            prcStackPush(&stack, getSymbolFromToken(tokenExpr), getTypeFromToken(tokenExpr, symStack), &(tokenExpr->content));
             if ((result = getTokenExpr(tokenGlobal, tokenTmp, symStack)) != 0)
                 printErrorAndReturn("Lexical error has occured while expression analysing", result);
             break;
         case 'g':
             if( ! (findCatch(&stack, &stackItemsCounter)) ) {
-                result = reduceByRule(&stack, &stackItemsCounter, type);
+                result = reduceByRule(&stack, &stackItemsCounter, type, symStack);
             } else { 
                 result = printErrorAndReturn("Syntax error has occured in expression analyser while findCatch\n", SYNTAX_ERR);
             }
