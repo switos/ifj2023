@@ -1,4 +1,4 @@
-func sum(a : Int, b : Int) -> Int {
+func sum(_ a : Int, _ b : Int) -> Int {
     return a + b
 }
 let result = sum(5)
