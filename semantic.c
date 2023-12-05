@@ -2,29 +2,36 @@
 
 
 int TypeMap(int type, int exp) {
-    switch (type)
-    {
-    case ET_DOUBLE:
-    case ET_INT:
-    case ET_STRING:
-        if(type != exp){
-            if(type == ET_DOUBLE && exp == ET_INT)
+    switch (type) {
+        case ET_DOUBLE:
+            if(exp == ET_DOUBLE || exp == ET_INT)
+                return 0;
+            return 1; 
+        case ET_INT:
+            if (exp == ET_INT)
                 return 0;
             return 1;
-        }
-        return 0;
-    case ET_DOUBLEN:
-    case ET_INTN:
-    case ET_STRINGN:
-        if(type != exp && type-3 != exp) { //&& exp != ET_NIL
+        case ET_STRING:
+            if(exp != ET_STRING)
+                return 1;
+            return 0;
+        case ET_DOUBLEN:
+            if(exp == ET_DOUBLE || exp == ET_INT || exp == ET_DOUBLEN || exp == ET_INTN || exp == ET_NIL)
+                return 0;
             return 1;
-        }
-        return 0;
-    case ET_VOID:
-        return 1;
-    default:
-        fprintf(stderr, "DEFAULT IN TYPEMAP FUNCTION, SOMETHING REALLY BAD HAPPEND\n");
-        return 1;
+        case ET_INTN:
+            if (exp == ET_INT || exp == ET_NIL || exp == ET_INTN )
+                return 0;
+            return 1;
+        case ET_STRINGN:
+            if(exp == ET_STRINGN || exp == ET_STRING || exp == ET_NIL)//&& exp != ET_NIL
+                return 0;
+            return 1;
+        case ET_VOID:
+            return 1;
+        default:
+            fprintf(stderr, "DEFAULT IN TYPEMAP FUNCTION, SOMETHING REALLY BAD HAPPEND\n");
+            return 1;
     }
 }
 
@@ -121,6 +128,15 @@ int varDefiner(symtable_stack_t *symStack, int type, char* name, bool inicialize
     return 0;
 }
 
+int set_nil(symtable_stack_t *symStack, char* name) {
+    htab_data_t *data = symtable_stack_search(symStack, name);
+    if (data == NULL)
+        return printErrorAndReturn("Undefined variable or function in Definition check", SEM_ERR_UNDEFINED_VAR);
+    data->nil = true;
+    data->initialized = true;
+    return 0;    
+}
+
 int checkDefinition(symtable_stack_t *symStack, char* name) {
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
@@ -149,6 +165,7 @@ int mutableCheck(symtable_stack_t *symStack, char* name) {
 int idCheckType(symtable_stack_t *symStack, char* name, int type) {
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (TypeMap(data->type, type) == 0) { 
+
         data->initialized = true;
         return NO_ERR;
     }
@@ -167,7 +184,7 @@ int idCheck(symtable_stack_t *symStack, char* name) {
 int VarDefAssignSemanticCheck(int *type, int exp){
 
     if ((*type) == ET_UNDEFINED) {
-        if(exp >= ET_INT){
+        if(exp >= ET_INT && exp <= ET_STRINGN){
             (*type) = exp;
             return NO_ERR;
         }
