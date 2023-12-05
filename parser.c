@@ -535,6 +535,7 @@ int first_analyse() {
 int main() {
         int result = 0;
         initAll();
+        output_main_func(&list);
         symtable_stack_push(&symStack);
         buildInFunctionDefenition(&symStack);
         getTokenWrapped();

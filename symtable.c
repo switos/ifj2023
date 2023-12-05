@@ -67,7 +67,7 @@ symtable_t* symtable_resize(symtable_t** table, int newTableSize) {
     return newTable;
 }
 
-htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant) {
+htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant, bool isVar) {
     if ((*table)->sizeUsed / (*table)->sizeAllocated > THRESHOLD) {
         (*table) = symtable_resize( table, (*table)->sizeAllocated * 2);
     }
@@ -102,6 +102,7 @@ htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char*
     newSlot->data->initialized = initialized;
     newSlot->data->type = type;
     newSlot->data->nil =false;
+    newSlot->data->isVar = isVar;
 
     do {
         index = (index + 1) % (*table)->sizeAllocated;
