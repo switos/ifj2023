@@ -1,6 +1,6 @@
-func checkPositive(num : Int) -> Int {
+func checkPositive(_ num : Int) -> Int {
     if (num > 0) {
         return 1
-    }
+    } else {}
 }
 // Missing return statement for when condition is false

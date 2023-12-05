@@ -252,15 +252,15 @@ int funDefPlist() {
 }
 
 int funDef() {
+    int result = 0;
     getTokenWrapped();
     if (token.type == T_ID) {   
         str_copy_string(&funName, &(token.content)); //save id
         getTokenWrapped();
         if(token.type == T_OP_PAR) {  
             getTokenWrapped();
-            if (funDefiner(&symStack, ET_UNDEFINED, funName.str))
-                return SEM_ERR_UNDEFINED_FUNCTION;
-            return funDefPlist();
+            result = funDefiner(&symStack, ET_UNDEFINED, funName.str);
+            return result ? result : funDefPlist();
         }
     }
     return printErrorAndReturn("Syntax error has occured in funDef", SYNTAX_ERR);
@@ -442,8 +442,8 @@ int parseInstruction() {
         getTokenWrapped();
         return ifList();
     } else if (token.type == T_RETURN) {
-        if(functionBodyFlag == false) {
-            return printErrorAndReturn("Syntaxe error, incorrect return usage, it must be within function body", SYNTAX_ERR);
+        if(!functionBodyFlag) {
+            return printErrorAndReturn("Incorrect return usage, it must be within function body", SEM_ERR_OTHER);
         }
         getTokenWrapped();
         return returnR();
