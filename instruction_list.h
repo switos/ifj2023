@@ -88,7 +88,7 @@ typedef enum {
 } frame_type;
 
 typedef struct {
-    string out;
+    string* out;
     char* value;
     ET_TYPE type;
     frame_type frame;
@@ -295,6 +295,6 @@ void clear_data(taCode* source);
  * 
  * @param target pointer to the data
  */
-void init_data(taCode* target);
+taCode* init_data();
 
 #endif

@@ -28,7 +28,7 @@ void freeAll() {
     str_free(&varName);
     str_free(&argName);
     str_free(&argId);
-    DLL_Dispose(&list);
+    // DLL_Dispose(&list);
 }
 
 void initAll() {
@@ -38,7 +38,7 @@ void initAll() {
     str_init(&argName);
     str_init(&argId);
     symtable_stack_init(&symStack);
-    DLL_Init(&list);
+    // DLL_Init(&list);
 }
 
 int newLineCheck() {
@@ -535,7 +535,7 @@ int first_analyse() {
 int main() {
         int result = 0;
         initAll();
-        output_main_func(&list);
+        // output_main_func(&list);
         symtable_stack_push(&symStack);
         buildInFunctionDefenition(&symStack);
         getTokenWrapped();
@@ -545,6 +545,8 @@ int main() {
         tFlagS(&token);
         if(result == 0)
             result = globalParse();
+        // if (!result)
+        //     print_instruction(&list);
         freeAll();
         if (result){
             fprintf(stderr,"exit code in main is %d\n",result);

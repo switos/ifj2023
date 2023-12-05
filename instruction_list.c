@@ -7,10 +7,10 @@ void DLL_Init( DLList *list ) {
 }
 
 void DLL_Dispose( DLList *list ) {
-	if (list != NULL) {	
+	if (list != NULL) {
 		if (list->firstElement != NULL) {
 			DLLElementPtr tmpElement = list->firstElement;
-			while(tmpElement->nextElement != NULL) { 
+			while(tmpElement != NULL) { 
 				DLLElementPtr tmpElementNext = tmpElement->nextElement;
 				free_data_value(tmpElement->data);
 				free(tmpElement);
@@ -30,24 +30,14 @@ void DLL_InsertFirst( DLList *list, taCode* data ) {
 		return;
     }
 	if (list->firstElement == NULL && list->lastElement == NULL) {
-		init_data(newElement->data);
-		if (!insert_data(newElement->data, data)) {
-			free(newElement);
-			DLL_Dispose(list);
-			return;
-		}
+		newElement->data = data;
 		newElement->nextElement = NULL;
 		newElement->previousElement = NULL;
 		list->firstElement = newElement;
 		list->lastElement = newElement;
 	}
 	else { 
-		init_data(newElement->data);
-		if (!insert_data(newElement->data, data)) {
-			free(newElement);
-			DLL_Dispose(list);
-			return;
-		}
+		newElement->data = data;
 		list->firstElement->previousElement = newElement;
 		newElement->nextElement = list->firstElement;
 		newElement->previousElement = NULL;
@@ -62,14 +52,7 @@ void DLL_InsertLast( DLList *list, taCode* data ) {
 		return;
     }
 	if (list->firstElement == NULL && list->lastElement == NULL) {
-		// printf("in last if\n");
-		init_data(newElement->data);
-		if (!insert_data(newElement->data, data)) {
-			// printf("in false nahuy\n");
-			free(newElement);
-			DLL_Dispose(list);
-			return;
-		}
+		newElement->data = data;
 		// printf("new data val op1 : %s\n", newElement->data.operand_1.value);
 		newElement->nextElement = NULL;
 		newElement->previousElement = NULL;
@@ -78,12 +61,7 @@ void DLL_InsertLast( DLList *list, taCode* data ) {
 	}
 	else { 
 		list->lastElement->nextElement = newElement;
-		init_data(newElement->data);
-		if (!insert_data(newElement->data, data)) {
-			free(newElement);
-			DLL_Dispose(list);
-			return;
-		}
+		newElement->data = data;
 		newElement->nextElement = NULL;
 		newElement->previousElement = list->lastElement;
 		list->lastElement = newElement;
@@ -200,12 +178,7 @@ void DLL_InsertAfter( DLList *list, taCode* data ) {
 				newElement->nextElement = NULL;
 				list->lastElement = newElement;
 			}
-			init_data(newElement->data);
-			if (!insert_data(newElement->data, data)) {
-				free(newElement);
-				DLL_Dispose(list);
-				return;
-			}
+			newElement->data = data;
 			newElement->previousElement = list->activeElement;
 			list->activeElement->nextElement = newElement;
 		}
@@ -225,12 +198,7 @@ void DLL_InsertBefore( DLList *list, taCode* data ) {
 				newElement->previousElement = NULL;
 				list->firstElement = newElement;
 			}
-			init_data(newElement->data);
-			if (!insert_data(newElement->data, data)) {
-				free(newElement);
-				DLL_Dispose(list);
-				return;
-			}
+			newElement->data = data;
 			newElement->nextElement = list->activeElement;
 			list->activeElement->previousElement = newElement;
 		}
@@ -304,6 +272,25 @@ void free_data_value(taCode* target) {
 		free(target->result->value);
 	}
 	target->result->value = NULL;
+
+	if (target->operand_1->out)
+		str_free(target->operand_1->out);
+
+	if (target->operand_2->out)
+		str_free(target->operand_2->out);
+
+	if (target->result->out)
+		str_free(target->result->out);
+
+	free(target->operand_1->out);
+	free(target->operand_2->out);
+	free(target->result->out);
+
+	free(target->operand_1);
+	free(target->operand_2);
+	free(target->result);
+
+	free(target);
 }
 
 bool insert_data(taCode* target, taCode* source) {
@@ -365,12 +352,37 @@ operand_t* create_operand(char* value, ET_TYPE type, frame_type frame) {
 	return new_operand;
 }
 
-void init_data(taCode* target) {
-	if (target == NULL) {
-		return;
-	}
+taCode* init_data() {
+	taCode* newData = (taCode*)malloc(sizeof(taCode));
 
-	target->operand_1->value = NULL;
-	target->operand_2->value = NULL;
-	target->result->value = NULL;
+	newData->inst = I_DEFAULT;
+	newData->operand_1 = (operand_t*)malloc(sizeof(operand_t));
+	newData->operand_2 = (operand_t*)malloc(sizeof(operand_t));
+	newData->result = (operand_t*)malloc(sizeof(operand_t));
+
+	newData->operand_1->frame = F_DEFAULT;
+	newData->operand_1->type = ET_UNDEFINED;
+	newData->operand_1->value = NULL;
+	newData->operand_1->out = (string*)malloc(sizeof(string));
+	// newData->operand_1->out = NULL;
+	// if (!str_init(newData->operand_1->out))
+	// 	return NULL;
+
+	newData->operand_2->frame = F_DEFAULT;
+	newData->operand_2->type = ET_UNDEFINED;
+	newData->operand_2->value = NULL;
+	newData->operand_2->out = (string*)malloc(sizeof(string));
+	// newData->operand_1->out = NULL;
+	// if (!str_init(newData->operand_2->out))
+	// 	return NULL;
+
+	newData->result->frame = F_DEFAULT;
+	newData->result->type = ET_UNDEFINED;
+	newData->result->value = NULL;
+	newData->result->out = (string*)malloc(sizeof(string));
+	// newData->operand_1->out = NULL;
+	// if (!str_init(newData->result->out))
+	// 	return NULL;
+
+	return newData;
 }
