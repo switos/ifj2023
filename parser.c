@@ -117,7 +117,7 @@ int id() {
 }
 
 int varDefItem(bool constant, int type) {
-    int typetmp = type;
+    int typeTmp = type;
     int result;
     if(token.type == T_ASSING) {
             getTokenWrapped();
@@ -125,15 +125,17 @@ int varDefItem(bool constant, int type) {
             if ((result = expression(&expType)))
                 return result;
             fprintf(stderr,"TOKEN TYPE %d %d name is %s\n", type, expType, varName.str);
-            if((result = VarDefAssignSemanticCheck(&typetmp, expType)))
+            if((result = VarDefAssignSemanticCheck(&typeTmp, expType)))
                 return result;
-            varDefiner(&symStack, typetmp, varName.str, true, constant);
+            varDefiner(&symStack, typeTmp, varName.str, true, constant);
             if (symtable_stack_search(&symStack, varName.str) == NULL) {
                 fprintf(stderr,"Var definer dont work in varDefItem\n");
             }
             return NO_ERR;
     } else {
-        varDefiner(&symStack, typetmp, varName.str, false, constant);
+        varDefiner(&symStack, typeTmp, varName.str, false, constant);
+        if( typeTmp <= T_STRINGN && typeTmp >= T_INTN )
+            set_nil(&symStack, varName.str);
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in varDefItem", SYNTAX_ERR);
