@@ -64,6 +64,9 @@ symtable_t* symtable_resize(symtable_t** table, int newTableSize) {
     newTable->sizeUsed = (*table)->sizeUsed;
     newTable->array = newArray;
 
+    free((*table)->array);
+    free(*table);
+
     return newTable;
 }
 

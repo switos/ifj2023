@@ -28,7 +28,7 @@ void freeAll() {
     str_free(&varName);
     str_free(&argName);
     str_free(&argId);
-    // DLL_Dispose(&list);
+    DLL_Dispose(&list);
 }
 
 void initAll() {
@@ -38,7 +38,7 @@ void initAll() {
     str_init(&argName);
     str_init(&argId);
     symtable_stack_init(&symStack);
-    // DLL_Init(&list);
+    DLL_Init(&list);
 }
 
 int newLineCheck() {
@@ -132,6 +132,8 @@ int varDefItem(bool constant, int type) {
             if (symtable_stack_search(&symStack, varName.str) == NULL) {
                 fprintf(stderr,"Var definer dont work in varDefItem\n");
             }
+
+            //output_instruction_1arg(&list, ,I_DEFVAR);
             return NO_ERR;
     } else {
         varDefiner(&symStack, typeTmp, varName.str, false, constant);
@@ -539,7 +541,7 @@ int first_analyse() {
 int main() {
         int result = 0;
         initAll();
-        // output_main_func(&list);
+        output_main_func(&list);
         symtable_stack_push(&symStack);
         buildInFunctionDefenition(&symStack);
         getTokenWrapped();
@@ -549,11 +551,16 @@ int main() {
         tFlagS(&token);
         if(result == 0)
             result = globalParse();
-        // if (!result)
-        //     print_instruction(&list);
-        freeAll();
+        
         if (result){
             fprintf(stderr,"exit code in main is %d\n",result);
             exit(result);
         }
+        operand_t* op = create_operand("aboba", ET_STRING, F_LF);
+        output_instruction_1arg(&list, op, I_DEFVAR);
+        if (!result)
+            print_instruction(&list);
+        freeAll();
+        
+        return result;
 }

@@ -238,6 +238,18 @@ int DLL_IsActive( DLList *list ) {
 	return (list->activeElement != NULL);
 }
 
+void deleteOperand(operand_t* op) {
+	if (op->value != NULL) {
+		free(op->value);
+	}
+	op->value = NULL;
+
+	if (op->out)
+		str_free(op->out);
+	free(op->out);
+	free(op);
+}
+
 bool set_operand_value(operand_t* target, char* source) {
 	if (target == NULL) {
 		return false;
@@ -258,37 +270,9 @@ void free_data_value(taCode* target) {
 		return;
 	}
 
-	if (target->operand_1->value != NULL) {
-		free(target->operand_1->value);
-	}
-	target->operand_1->value = NULL;
-
-	if (target->operand_2->value != NULL) {
-		free(target->operand_2->value);
-	}
-	target->operand_2->value = NULL;
-
-	if (target->result->value != NULL) {
-		free(target->result->value);
-	}
-	target->result->value = NULL;
-
-	if (target->operand_1->out)
-		str_free(target->operand_1->out);
-
-	if (target->operand_2->out)
-		str_free(target->operand_2->out);
-
-	if (target->result->out)
-		str_free(target->result->out);
-
-	free(target->operand_1->out);
-	free(target->operand_2->out);
-	free(target->result->out);
-
-	free(target->operand_1);
-	free(target->operand_2);
-	free(target->result);
+	deleteOperand(target->operand_1);
+	deleteOperand(target->operand_2);
+	deleteOperand(target->result);
 
 	free(target);
 }
@@ -341,16 +325,26 @@ void clear_data(taCode* source) {
 
 operand_t* create_operand(char* value, ET_TYPE type, frame_type frame) {
 	operand_t* new_operand = (operand_t*)malloc(sizeof(operand_t));
-	if(new_operand == NULL) {
-		fprintf(stderr, "Failed to allocate memory");
-		return NULL;
-	}
 
 	set_operand_value(new_operand, value);
 	new_operand->type = type;
 	new_operand->frame = frame;
+	new_operand->out = (string*)malloc(sizeof(string));
+	str_init(new_operand->out);
 	return new_operand;
 }
+
+void changeOperand(operand_t* source, operand_t* target) {
+	if(source == NULL || target == NULL) {
+		return;
+	}
+	operand_t* tmp = target;
+	target = source;
+	deleteOperand(tmp);
+	
+}
+
+//void changeOperand(operand_t*)
 
 taCode* init_data() {
 	taCode* newData = (taCode*)malloc(sizeof(taCode));

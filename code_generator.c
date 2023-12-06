@@ -534,9 +534,9 @@ void output_user_func_return(DLList* list) {
 void output_instruction_3args(DLList* list, operand_t* op1, operand_t* op2, operand_t* res, instructions inst) {
 	taCode* data = init_data();
 
-	data->operand_1 = op1;
-	data->operand_2 = op2;
-	data->result = res;
+	changeOperand(op1, data->operand_1);
+	changeOperand(op2, data->operand_2);
+	changeOperand(res, data->result);
 	data->inst = inst;
 	DLL_InsertAfter(list, data);
 	DLL_Next(list);
@@ -545,8 +545,8 @@ void output_instruction_3args(DLList* list, operand_t* op1, operand_t* op2, oper
 void output_instruction_2args(DLList* list, operand_t* op1, operand_t* res, instructions inst) {
 	taCode* data = init_data();
 
-	data->operand_1 = op1;
-	data->result = res;
+	changeOperand(op1, data->operand_1);
+	changeOperand(res, data->result);
 	data->inst = inst;
 	DLL_InsertAfter(list, data);
 	DLL_Next(list);
@@ -555,7 +555,7 @@ void output_instruction_2args(DLList* list, operand_t* op1, operand_t* res, inst
 void output_instruction_1arg(DLList* list, operand_t* op1, instructions inst) {
 	taCode* data = init_data();
 
-	data->operand_1 = op1;
+	changeOperand(op1, data->operand_1);
 	data->inst = inst;
 	DLL_InsertAfter(list, data);
 	DLL_Next(list);
