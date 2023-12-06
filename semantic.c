@@ -62,6 +62,11 @@ int checkArgument(symtable_stack_t *symStack, char *name, char *argName, int typ
 
     htab_data_t * data = symtable_search(table, name); 
 
+    if (data->isVar == true) {
+        return printErrorAndReturn("Variable called instead of function not defined", SEM_ERR_OTHER);
+    }
+    
+
     if(data->constant == true) 
         return NO_ERR;
 
@@ -204,7 +209,7 @@ int VarDefAssignSemanticCheck(int *type, int exp){
     }
 }
 
-int ReturnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
+int returnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
     htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
     if ((data->type == ET_VOID && exp != ET_VOID) || (data->type != ET_VOID && exp == ET_VOID) ) {
         return printErrorAndReturn("Semantic error function return type compatibility", SEM_ERR_WRONG_RET);
@@ -213,6 +218,15 @@ int ReturnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
         return printErrorAndReturn("Semantic error function return type compatibility", SEM_ERR_WRONG_PARAM);
     }
     return 0;
+}
+
+int returnExistingCheck(bool functionBodyFlag, bool *returnFlag) {
+    if( functionBodyFlag ) {
+        if ( !returnFlag )
+            return printErrorAndReturn("Return error has occured in localParse", SYNTAX_ERR);
+        returnFlag = false;
+    }
+    return NO_ERR;
 }
 
 int argAmountCheck(symtable_stack_t *symStack, char* name, int amount) {

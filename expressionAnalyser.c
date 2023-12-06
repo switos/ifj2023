@@ -45,16 +45,43 @@ int findCatch(precedenceStackNode_t** top, int* count) {
     return 1;
 }
 
+int nilconTypemap(int first, int secondEs, int second) {
+        fprintf(stderr, "%d \n", first);
+        switch (first) {
+            case ET_DOUBLEN:
+                switch (secondEs) {
+                    case ES_NONTER:
+                        if(second == ET_DOUBLEN || second == ET_DOUBLE )
+                            return 0;
+                        return 1;
+                    case ES_NONTERL:
+                        if(second == ET_DOUBLE || ET_INT)
+                            return 0;
+                        return 1;
+                }
+            case ET_INTN:
+                if (second == ET_INT || second == ET_INTN )
+                    return 0;
+                return 1;
+            case ET_STRINGN:
+                if(second == ET_STRINGN || second == ET_STRING)
+                    return 0;
+                return 1;
+            default:
+                fprintf(stderr, "DEFAULT IN NILCON TYPEMAP FUNCTION, SOMETHING REALLY BAD HAPPEND\n");
+                return 1;
+    }
+}
 
-int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule) {
 
-    fprintf(stderr, "rule : %d\n", rule);
+int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule, symtable_stack_t *symStack, string *content) {
+
     switch (rule) {
         case R_PLUS:
         case R_MINUS:
         case R_MUL:
         case R_DIV:
-            fprintf(stderr,"i am okay first non terminal type is %d, second is %d\n",(*top)->next->next->type, (*top)->type);
+          //  fprintf(stderr,"i am okay first non terminal type is %d, second is %d\n",(*top)->next->next->type, (*top)->type);
             if( ((*top)->next->next->type >= ET_INT && (*top)->next->next->type <= ET_STRING) && ((*top)->type >= ET_INT && (*top)->type <= ET_STRING)  ){
                 if ((*top)->next->next->type == (*top)->type) {
                     (*type) = (*top)->next->next->type;
@@ -95,10 +122,7 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
         case R_G:
         case R_LEQ:
         case R_GEQ:
-            // if( ((*top)->next->next->type == (*top)->type) && ( ( (*top)->next->next->type < ET_INTN ) && ( (*top)->type < ET_INTN ) ) ) {
-            //     return NO_ERR;
-            // }
-            fprintf(stderr, "fisrt type is %d symbol is %d, second is %d symbol is %d\n",(*top)->next->next->type, (*top)->next->next->symbol, (*top)->type, (*top)->symbol);
+           // fprintf(stderr, "fisrt type is %d symbol is %d, second is %d symbol is %d\n",(*top)->next->next->type, (*top)->next->next->symbol, (*top)->type, (*top)->symbol);
             if((*top)->next->next->type == (*top)->type) {
                 return NO_ERR;
             } else if ( ((*top)->next->next->type == ET_DOUBLE && (*top)->type == ET_INT) || ((*top)->next->next->type ==  ET_INT && (*top)->type == ET_DOUBLE) ) {
@@ -111,11 +135,20 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
             return printErrorAndReturn("Semantic error occured while reducing rule R_L", SEM_ERR_TYPE_COMPAT);
             break;
         case R_UNAR:
-            if ((*top)->next->type >= T_INTN && (*top)->next->type <= T_STRINGN)
+            if ((*top)->next->type >= ET_INTN && (*top)->next->type <= ET_STRINGN)
                 (*type) = (*top)->next->type - 3;
+            return NO_ERR;
+        case R_NILCON: 
+            if (nilconTypemap( (*top)->next->next->type, (*top)->symbol, (*top)->type)) {
+                return printErrorAndReturn("Semantic error occured while reducing rule R_NILCON", SEM_ERR_TYPE_COMPAT);;
+            }
             return NO_ERR;
         case R_ID:
             (*type) = (*top)->type;
+            if((*top)->symbol == ES_ID) {
+                fprintf(stderr, "ID name is %s", (*top)->content.str);
+                str_copy_string(content, &((*top)->content));
+            }
             return NO_ERR;    
         case R_PAR:
             return NO_ERR;
@@ -162,18 +195,19 @@ int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type, symtable_stac
             }
         }
     }
-
     if (rule != R_ERROR ) {
         int result = 0;
-        //char* content = '\0';
-        result = checkExprSemantic(top, (*cnt), type, rule);
+        string content;
+        str_init(&content);
+        result = checkExprSemantic(top, (*cnt), type, rule, symStack, &content);
         if (result){
             return result;
         }
         for(int i = 0; i <= (*cnt); i++){
             prcStackPop(top);
         }
-        prcStackPush(top, symbol, (*type), NULL);
+        prcStackPush(top, symbol, (*type), &content);
+        str_free(&content);
         return NO_ERR;
     }
 

@@ -19,6 +19,7 @@ string argId;
 int argumentNumber = 0;
 bool firstAnalyseFlag = true;
 bool functionBodyFlag = false;
+bool returnFlag = false;
 
 void freeAll() {
     symtable_stack_free(&symStack);
@@ -435,7 +436,7 @@ int returnR () {
         result =  expression(&expType);
     }
     if (result == 0)
-        result = ReturnSemanticCheck(&symStack, funBodyName.str, expType);
+        result = returnSemanticCheck(&symStack, funBodyName.str, expType);
     return result;
 }
 
@@ -456,6 +457,7 @@ int parseInstruction() {
         if(!functionBodyFlag) {
             return printErrorAndReturn("Incorrect return usage, it must be within function body", SEM_ERR_OTHER);
         }
+        returnFlag = true;
         getTokenWrapped();
         return returnR();
     }
@@ -489,6 +491,8 @@ int localParse () {
             return result;
         return localParse();
     } else {
+        //returnExistingCheck(functionBodyFlag, &returnFlag);
+        returnFlag = false;
         symtable_stack_pop(&symStack);
         fprintf(stderr, "Success, local parse ended\n");
         getTokenWrapped();
@@ -508,6 +512,8 @@ int functionParse () {
             return result;
         return localParse();
     } else {
+        //returnExistingCheck(functionBodyFlag, &returnFlag);
+        returnFlag = false;
         symtable_stack_pop(&symStack);
         functionBodyFlag = false;
         fprintf(stderr, "Success, function parse ended\n");

@@ -90,9 +90,11 @@ int getTypeFromToken(token_t* token, symtable_stack_t *symStack) {
         return token->type + 3;
     } else if (token->type == T_ID){
         htab_data_t* data;
+
         if ( (data = symtable_stack_search(symStack, token->content.str)) == NULL) {
             return ET_UNDEFINED;
         }
+        fprintf(stderr, "type is %d \n", data->type);
         return (data->type);
     } else if (token->type == T_NIL) {
         return ET_NIL;
@@ -114,7 +116,7 @@ int getSymbolFromToken(token_t* token) {
 }
 
 void chooseContent(int es, string* target, string* source) {
-    if ( es == ES_ID || es == ES_LIT) {
+    if ( es == ES_ID || es == ES_LIT || es == ES_NONTER ) {
         str_copy_string(target, source);
     }
 

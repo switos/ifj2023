@@ -5,5 +5,5 @@ read input
 if [ "$input" == "1" ]; then
     ./compiler < testFile
 else
-    python3.9 ./Tester/tester.py ./compiler ./Tester/Tests
+    python3 ./Tester/tester.py ./compiler ./Tester/Tests
 fi

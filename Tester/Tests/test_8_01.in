@@ -1,4 +1,4 @@
-func process(value) {
+func process(_ value) {
     // Function body
 }
 // Type of 'value' is not specified and cannot be inferred
