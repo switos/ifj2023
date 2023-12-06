@@ -157,7 +157,6 @@ int checkDefinition(symtable_stack_t *symStack, char* name) {
 }
 
 int checkInitialization(symtable_stack_t *symStack, char* name ) {
-    fprintf(stderr, "name on defenition check is %s\n", name);
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
         return printErrorAndReturn("Undefined variable in InitCheck, on definition check", SEM_ERR_UNDEFINED_VAR);
@@ -211,7 +210,6 @@ int VarDefAssignSemanticCheck(int *type, int exp){
 
 int returnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
     htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
-    fprintf(stderr, "retrun type is %d, exp type is %d, with name %s\n", data->type, exp, name);
     if ((data->type == ET_VOID && exp != ET_VOID) || (data->type != ET_VOID && exp == ET_VOID) ) {
         return printErrorAndReturn("Semantic error function return type compatibility", SEM_ERR_WRONG_RET);
     }

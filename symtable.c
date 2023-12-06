@@ -70,7 +70,8 @@ symtable_t* symtable_resize(symtable_t** table, int newTableSize) {
     newTable->sizeAllocated = newTableSize;
     newTable->sizeUsed = (*table)->sizeUsed;
     newTable->array = newArray;
-
+    free((*table)->array);
+    free((*table));
     return newTable;
 }
 
@@ -164,7 +165,6 @@ bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int
 
 data_param_t* symtable_get_argument(symtable_t* table, char* key, int argumentPosition) {
     htab_data_t* func_data = symtable_search(table, key);
-    fprintf(stderr, "name is %s, arguments amount %d, argument in array %d\n", func_data->name, func_data->argumentAmount, func_data->argumentsInArray);
     if (func_data == NULL) {
         fprintf(stderr, "func data is NULL\n");
         return NULL;

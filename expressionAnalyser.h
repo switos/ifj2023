@@ -94,7 +94,6 @@ int getTypeFromToken(token_t* token, symtable_stack_t *symStack) {
         if ( (data = symtable_stack_search(symStack, token->content.str)) == NULL) {
             return ET_UNDEFINED;
         }
-        fprintf(stderr, "type is %d \n", data->type);
         return (data->type);
     } else if (token->type == T_NIL) {
         return ET_NIL;
@@ -140,7 +139,6 @@ int prcStackInit(precedenceStackNode_t** top, int symbol, int type, string *cont
     }
     str_init(&((*top)->content));
     if ( content != NULL ) {
-        fprintf(stderr, "source is %s\n", content->str);
         chooseContent(symbol, &((*top)->content), content);
     }
     (*top)->symbol = symbol;
@@ -191,7 +189,6 @@ int prcStackPop(precedenceStackNode_t** top){
         tmp = NULL;
         return 0;
     } else {
-        fprintf(stderr,"stack is empty\n");
         return 1;
     }
 }

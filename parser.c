@@ -48,15 +48,14 @@ int newLineCheck() {
     return 0;
 }
 
-int litCheck(){
+int litCheck() {
     if (token.type == T_FLOAT_LIT || token.type == T_STRING_LIT || token.type == T_INT_LIT || token.type == T_NIL) 
         return 1;
     return 0;
 
 } 
 
-
-int typeCheck(){
+int typeCheck() {
     if (token.type >= T_INT && token.type <= T_STRINGN) {
         return 1;
     } else {
@@ -118,6 +117,8 @@ int id() {
     return printErrorAndReturn("Syntaxe error has occured in id", SYNTAX_ERR);
 }
 
+// Variable defenition is below
+
 int varDefItem(bool constant, int type) {
     int typeTmp = type;
     int result;
@@ -126,7 +127,6 @@ int varDefItem(bool constant, int type) {
             int expType = ET_UNDEFINED;
             if ((result = expression(&expType)))
                 return result;
-            fprintf(stderr,"TOKEN TYPE %d %d name is %s\n", type, expType, varName.str);
             if((result = VarDefAssignSemanticCheck(&typeTmp, expType)))
                 return result;
             varDefiner(&symStack, typeTmp, varName.str, true, constant);
@@ -148,7 +148,6 @@ int varDefList(bool constant) {
         getTokenWrapped();
         if(typeCheck()) {
             int type = token.type;
-            fprintf(stderr,"TOKEN TYPE %d \n",token.type);
             getTokenWrapped();
             return varDefItem(constant, type);
         }
@@ -175,6 +174,8 @@ int varDef() {
     }
     return printErrorAndReturn("Syntaxe error in VarDef", SYNTAX_ERR);
 }
+
+// Function defenition is below
 
 int funDefType() {
     functionBodyFlag = true;
@@ -463,12 +464,10 @@ int parseInstruction() {
         getTokenWrapped();
         return returnR();
     }
-    fprintf(stderr, "%d\n%s\n",token.type,token.content.str);
     return printErrorAndReturn("Syntaxe error in parseInstruction", SYNTAX_ERR);
 }
 
 int globalParse () {
-    fprintf(stderr, "%s\n",token.content.str);
     if (token.type != T_EOF) {
         if (newLineCheck())
             return printErrorAndReturn("Syntax error has occured in globalParse, while newLineCheck", SYNTAX_ERR);
@@ -477,14 +476,12 @@ int globalParse () {
             return result;
         return globalParse();
     } else {
-        fprintf(stderr, "Success, EOF parsed\n");
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in globalParse", SYNTAX_ERR);
 }
 
 int localParse () {
-    fprintf(stderr, "TOKEN TYPE is %d\n", token.type);
     if (token.type != T_CL_BRACE) {
         if (newLineCheck())
             return printErrorAndReturn("Syntax error has occured in localParse, while newLineCheck", SYNTAX_ERR);
@@ -495,7 +492,6 @@ int localParse () {
     } else {
         returnFlag = false;
         symtable_stack_pop(&symStack);
-        fprintf(stderr, "Success, local parse ended\n");
         getTokenWrapped();
         return NO_ERR;
     }
@@ -503,7 +499,6 @@ int localParse () {
 }
 
 int functionParse () {
-    fprintf(stderr, "TOKEN TYPE is %d\n", token.type);
     if (token.type != T_CL_BRACE) {
         if (newLineCheck())
             return printErrorAndReturn("Syntax error has occured in functionParse, while newLineCheck", SYNTAX_ERR);
@@ -515,7 +510,6 @@ int functionParse () {
         returnFlag = false;
         symtable_stack_pop(&symStack);
         functionBodyFlag = false;
-        fprintf(stderr, "Success, function parse ended\n");
         getTokenWrapped();
         return NO_ERR;
     }

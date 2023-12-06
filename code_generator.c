@@ -154,9 +154,6 @@ bool pregenerating_instructions(taCode* data) {
 	if (!str_init(data->result->out)) {
 		return false;
 	}
-	
-// Хохол, прочитав плакат "Бей жидов, спасай Россию":
-// - Лозунг гарный... А циль погана...
 
 	if (!str_init(data->operand_1->out)) {
 		return false;

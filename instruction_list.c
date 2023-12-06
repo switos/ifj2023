@@ -60,7 +60,6 @@ void DLL_InsertLast( DLList *list, taCode* data ) {
     }
 	if (list->firstElement == NULL && list->lastElement == NULL) {
 		newElement->data = data;
-		// printf("new data val op1 : %s\n", newElement->data.operand_1.value);
 		newElement->nextElement = NULL;
 		newElement->previousElement = NULL;
 		list->lastElement = newElement;
@@ -326,21 +325,14 @@ void clear_data(taCode* source) {
 
 	source->result->frame = F_DEFAULT;
 	source->result->type = ET_UNDEFINED;
-	// if (source->result.out.str != NULL) {
-	// 	str_free(&source->result.out);
-	// }
+
 
 	source->operand_1->frame = F_DEFAULT;
 	source->operand_1->type = ET_UNDEFINED;
-	// if (source->operand_1.out.str != NULL) {
-	// 	str_free(&source->operand_1.out);
-	// }	
+
 
 	source->operand_2->frame = F_DEFAULT;
 	source->operand_2->type = ET_UNDEFINED;
-	// if (source->operand_2.out.str != NULL) {
-	// 	str_free(&source->operand_2.out);
-	// }
 	
 	free_data_value(source);
 	source->inst = I_DEFAULT;

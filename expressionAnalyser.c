@@ -46,7 +46,6 @@ int findCatch(precedenceStackNode_t** top, int* count) {
 }
 
 int nilconTypemap(int first, int secondEs, int second) {
-        fprintf(stderr, "%d \n", first);
         switch (first) {
             case ET_DOUBLEN:
                 switch (secondEs) {
@@ -81,7 +80,6 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule,
         case R_MINUS:
         case R_MUL:
         case R_DIV:
-          //  fprintf(stderr,"i am okay first non terminal type is %d, second is %d\n",(*top)->next->next->type, (*top)->type);
             if( ((*top)->next->next->type >= ET_INT && (*top)->next->next->type <= ET_STRING) && ((*top)->type >= ET_INT && (*top)->type <= ET_STRING)  ){
                 if ((*top)->next->next->type == (*top)->type) {
                     (*type) = (*top)->next->next->type;
@@ -122,7 +120,6 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule,
         case R_G:
         case R_LEQ:
         case R_GEQ:
-           // fprintf(stderr, "fisrt type is %d symbol is %d, second is %d symbol is %d\n",(*top)->next->next->type, (*top)->next->next->symbol, (*top)->type, (*top)->symbol);
             if((*top)->next->next->type == (*top)->type) {
                 return NO_ERR;
             } else if ( ((*top)->next->next->type == ET_DOUBLE && (*top)->type == ET_INT) || ((*top)->next->next->type ==  ET_INT && (*top)->type == ET_DOUBLE) ) {
@@ -146,7 +143,6 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule,
         case R_ID:
             (*type) = (*top)->type;
             if((*top)->symbol == ES_ID) {
-                fprintf(stderr, "ID name is %s", (*top)->content.str);
                 str_copy_string(content, &((*top)->content));
             }
             return NO_ERR;    
@@ -165,7 +161,6 @@ int reduceByRule(precedenceStackNode_t **top, int *cnt, int *type, symtable_stac
         if((*top)->symbol == ES_ID || (*top)->symbol == ES_LIT){
             int result = 0;
             if( (*top)->symbol == ES_ID) {
-                fprintf(stderr, "%s\n",(*top)->content.str);
                 result = checkInitialization(symStack, (*top)->content.str);  
             }
             symbol = (*top)->symbol+4; // ES_NONTER OR ES_NONTERMLITRAL
