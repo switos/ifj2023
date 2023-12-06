@@ -8,13 +8,9 @@ xshish02: Sviatoslav Shishnev
 #ifndef INSTRUCTION_LIST
 #define INSTRUCTION_LIST
 
-#include <stdio.h>
-#include <stdbool.h>
 
-#include "scanner.h"
-#include "symtable.h"
-#include "str.h"
-#include "expressionAnalyser.h"
+
+#include "expressionAnalyser.c"
 
 typedef enum {
     I_MOVE,
@@ -99,21 +95,21 @@ typedef enum {
 } frame_type;
 
 typedef struct {
-    string out;
+    string* out;
     char* value;
     ET_TYPE type;
     frame_type frame;
 } operand_t;
 
 typedef struct {
-    operand_t operand_1;
-    operand_t operand_2;
-    operand_t result;
+    operand_t* operand_1;
+    operand_t* operand_2;
+    operand_t* result;
     instructions inst;
 } taCode;
 
 typedef struct DLLElement{
-    taCode data;
+    taCode* data;
     struct DLLElement *previousElement;
     struct DLLElement *nextElement;
 } *DLLElementPtr;
@@ -268,13 +264,6 @@ void DLL_Previous(DLList* list);
 int DLL_IsActive(DLList* list);
 
 /**
- * @brief initializing data for DLList
- * 
- * @param target pointer to the data
- */
-void init_data(taCode* target);
-
-/**
  * @brief setting value of the operand
  * 
  * @param target pointer to the data
@@ -307,5 +296,12 @@ bool insert_data(taCode* target, taCode* source);
  * @param target pointer to the data
  */
 void clear_data(taCode* source);
+
+/**
+ * @brief initializing data for DLList
+ * 
+ * @param target pointer to the data
+ */
+taCode* init_data();
 
 #endif

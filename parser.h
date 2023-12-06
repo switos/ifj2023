@@ -5,7 +5,7 @@ xpetro27: Denys Petrovsyi
 xbatur00: Illia Baturov
 xshish02: Sviatoslav Shishnev
 */
-#include "expressionAnalyser.c"
+#include "code_generator.c"
 
 int globalParse();
 int localParse();

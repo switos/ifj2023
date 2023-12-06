@@ -48,6 +48,7 @@ int findCatch(precedenceStackNode_t** top, int* count) {
 
 int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule) {
 
+    fprintf(stderr, "rule : %d\n", rule);
     switch (rule) {
         case R_PLUS:
         case R_MINUS:
@@ -116,8 +117,10 @@ int checkExprSemantic(precedenceStackNode_t **top, int cnt, int *type, int rule)
         case R_ID:
             (*type) = (*top)->type;
             return NO_ERR;    
-        default:
+        case R_PAR:
             return NO_ERR;
+        default:
+            return SEM_ERR_TYPE_COMPAT;
     }
 }
 

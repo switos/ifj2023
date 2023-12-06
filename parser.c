@@ -10,6 +10,7 @@ xshish02: Sviatoslav Shishnev
 token_t token;
 precedenceStackNode_t* prcStack;
 symtable_stack_t symStack;
+DLList list;
 string varName;
 string funName;
 string funBodyName;
@@ -23,9 +24,11 @@ void freeAll() {
     symtable_stack_free(&symStack);
     str_free(&token.content);
     str_free(&funName);
+    str_free(&funBodyName);
     str_free(&varName);
     str_free(&argName);
     str_free(&argId);
+    // DLL_Dispose(&list);
 }
 
 void initAll() {
@@ -35,6 +38,7 @@ void initAll() {
     str_init(&argName);
     str_init(&argId);
     symtable_stack_init(&symStack);
+    // DLL_Init(&list);
 }
 
 int newLineCheck() {
@@ -49,6 +53,7 @@ int litCheck(){
     return 0;
 
 } 
+
 
 int typeCheck(){
     if (token.type >= T_INT && token.type <= T_STRINGN) {
@@ -268,6 +273,9 @@ int funDef() {
     return printErrorAndReturn("Syntax error has occured in funDef", SYNTAX_ERR);
 }
  
+
+// Function call is bellow
+
 int parItem(){
     int result = 0;
     if (token.type == T_ID) {
@@ -303,11 +311,11 @@ int parList() {
 
 int parListId() {
     int result = 0;
-    if (token.type == T_COLON ){
+    if ( token.type == T_COLON ){ // ( ID : 
         getTokenWrapped();
-        if (token.type == T_ID || litCheck()) {
-            if ( token.type == T_ID ) {
-                if ((result = checkInitialization(&symStack, token.content.str))){
+        if (token.type == T_ID || litCheck()) { // ( ID : ID|LIT 
+            if ( token.type == T_ID ) { 
+                if ((result = checkInitialization(&symStack, token.content.str))) {
                     return result;
                 }
             }
@@ -337,17 +345,17 @@ int funCall(int  *type) {
     if (checkDefinition(&symStack, funName.str))
         return SEM_ERR_UNDEFINED_FUNCTION;
     (*type) = symtable_stack_search(&symStack, funName.str)->type;
-    if (token.type == T_CL_PAR) {
+    if (token.type == T_CL_PAR) { // ()
         result =  zeroArgsCheck(&symStack, funName.str);
         if (result)
             return result;
         getTokenWrapped();
         return NO_ERR;
-    } else if (token.type == T_ID) {
+    } else if (token.type == T_ID) { // ( ID 
         str_copy_string(&argName, &(token.content));
         getTokenWrapped();
         return parListId();
-    } else if (litCheck()) {
+    } else if (litCheck()) { // ( LIT
         result = checkArgument(&symStack, funName.str, "_", getTypeFromToken(&token, &symStack), argumentNumber);
         if (result)
             return result;
@@ -421,6 +429,7 @@ int whl() {
 
 int returnR () {
     int result = NO_ERR;
+    // output_user_func_return(list);
     int expType = ET_VOID;
     if (token.type == T_ID || litCheck() || token.type == T_OP_PAR) {
         result =  expression(&expType);
@@ -464,7 +473,7 @@ int globalParse () {
             return result;
         return globalParse();
     } else {
-        fprintf(stderr, "Succes, EOF parsed\n");
+        fprintf(stderr, "Success, EOF parsed\n");
         return NO_ERR;
     }
     return printErrorAndReturn("Syntax error has occured in globalParse", SYNTAX_ERR);
@@ -481,7 +490,7 @@ int localParse () {
         return localParse();
     } else {
         symtable_stack_pop(&symStack);
-        fprintf(stderr, "Succes, local parse ended\n");
+        fprintf(stderr, "Success, local parse ended\n");
         getTokenWrapped();
         return NO_ERR;
     }
@@ -501,7 +510,7 @@ int functionParse () {
     } else {
         symtable_stack_pop(&symStack);
         functionBodyFlag = false;
-        fprintf(stderr, "Succes, function parse ended\n");
+        fprintf(stderr, "Success, function parse ended\n");
         getTokenWrapped();
         return NO_ERR;
     }
@@ -530,6 +539,7 @@ int first_analyse() {
 int main() {
         int result = 0;
         initAll();
+        // output_main_func(&list);
         symtable_stack_push(&symStack);
         buildInFunctionDefenition(&symStack);
         getTokenWrapped();
@@ -539,6 +549,8 @@ int main() {
         tFlagS(&token);
         if(result == 0)
             result = globalParse();
+        // if (!result)
+        //     print_instruction(&list);
         freeAll();
         if (result){
             fprintf(stderr,"exit code in main is %d\n",result);

@@ -98,7 +98,7 @@ int funAddArgument(symtable_stack_t *symStack, char *name, char *argName, char *
     if (data == NULL)
         return printErrorAndReturn("Semantic error occured in funAddArguments", SEM_ERR_UNDEFINED_FUNCTION);
     if (data->initialized == false) { 
-        if ( !(symtable_add_arguments(&data, argName, argId, type)) ) {
+        if ( !(symtable_add_arguments(data, argName, argId, type)) ) {
             fprintf(stderr, "Add arguments do not work\n");
         }
     }
@@ -109,7 +109,7 @@ int addArg2BuildInFun(symtable_stack_t *symStack, char *name, char *argName, cha
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
         return printErrorAndReturn("NUUL in add argument", SEM_ERR_UNDEFINED_FUNCTION);
-    if ( !(symtable_add_arguments(&data, argName, argId, type)) ) {
+    if ( !(symtable_add_arguments(data, argName, argId, type)) ) {
         fprintf(stderr, "Add arguments do not work\n");
     }
     return 0;
@@ -119,7 +119,7 @@ int addArg2BuildInFun(symtable_stack_t *symStack, char *name, char *argName, cha
 int funDefiner(symtable_stack_t *symStack, int type, char *name) {
     htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
     if (data == NULL){
-        symtable_insert_data(&(symStack->top->table), name, type, name, false, false, 10);
+        symtable_insert_data(&(symStack->top->table), name, type, name, false, false, false);
         return NO_ERR;
     } else {
         if (data->initialized == false ) {
@@ -131,7 +131,7 @@ int funDefiner(symtable_stack_t *symStack, int type, char *name) {
 }
 
 int varDefiner(symtable_stack_t *symStack, int type, char* name, bool inicialized, bool constant ) {
-    symtable_insert_data(&(symStack->top->table), name, type, name, inicialized, constant, -1);
+    symtable_insert_data(&(symStack->top->table), name, type, name, inicialized, constant, true);
     return 0;
 }
 
@@ -156,7 +156,7 @@ int checkInitialization(symtable_stack_t *symStack, char* name ) {
     htab_data_t *data = symtable_stack_search(symStack, name);
     if (data == NULL)
         return printErrorAndReturn("Undefined variable in InitCheck, on definition check", SEM_ERR_UNDEFINED_VAR);
-    if (data->initialized != true && data->argumentAmount < 0) 
+    if (data->initialized != true && data->isVar == true) 
         return printErrorAndReturn("Uninitialized variable in InitCheck", SEM_ERR_UNDEFINED_VAR);
     return 0;
 }
@@ -250,23 +250,23 @@ int pushArguments(symtable_stack_t *symStack, char *name) {
 
 
 void buildInFunctionDefenition(symtable_stack_t *symStack) {
-    symtable_insert_data(&(symStack->top->table), "readString", ET_STRINGN, "readString", true, false, 0); // func readString() -> String?
-    symtable_insert_data(&(symStack->top->table), "readInt", ET_INTN, "readInt", true, false, 0); // func readInt() -> Int?
-    symtable_insert_data(&(symStack->top->table), "readDouble", ET_DOUBLEN, "readDouble", true, false, 0); // func readDouble() -> Double?
-    symtable_insert_data(&(symStack->top->table), "write", ET_VOID, "write", true, true, 0); // func write ( term1 , term2 , …, term𝑛 )
-    symtable_insert_data(&(symStack->top->table), "Int2Double", ET_DOUBLE, "Int2Double", true, false, 1); //func Int2Double(_ term ∶ Int) -> Double 
+    symtable_insert_data(&(symStack->top->table), "readString", ET_STRINGN, "readString", true, false, false); // func readString() -> String?
+    symtable_insert_data(&(symStack->top->table), "readInt", ET_INTN, "readInt", true, false, false); // func readInt() -> Int?
+    symtable_insert_data(&(symStack->top->table), "readDouble", ET_DOUBLEN, "readDouble", true, false, false); // func readDouble() -> Double?
+    symtable_insert_data(&(symStack->top->table), "write", ET_VOID, "write", true, true, false); // func write ( term1 , term2 , …, term𝑛 )
+    symtable_insert_data(&(symStack->top->table), "Int2Double", ET_DOUBLE, "Int2Double", true, false, false); //func Int2Double(_ term ∶ Int) -> Double 
     addArg2BuildInFun(symStack, "Int2Double", "_", "term", ET_INT);
-    symtable_insert_data(&(symStack->top->table), "Double2Int", ET_INT, "Double2Int", true, false, 1); //func Double2Int(_ term ∶ Double) -> Int
+    symtable_insert_data(&(symStack->top->table), "Double2Int", ET_INT, "Double2Int", true, false, false); //func Double2Int(_ term ∶ Double) -> Int
     addArg2BuildInFun(symStack, "Double2Int", "_", "term", ET_DOUBLE);
-    symtable_insert_data(&(symStack->top->table), "length", ET_INT, "length", true, false, 1); //func length(_ 𝑠 : String) -> Int
+    symtable_insert_data(&(symStack->top->table), "length", ET_INT, "length", true, false, false); //func length(_ 𝑠 : String) -> Int
     addArg2BuildInFun(symStack, "length", "_", "s", ET_STRING);
-    symtable_insert_data(&(symStack->top->table), "substring", ET_STRINGN, "substring", true, false, 3); //func substring(of 𝑠 : String, startingAt 𝑖 : Int, endingBefore 𝑗 : Int) -> String?
+    symtable_insert_data(&(symStack->top->table), "substring", ET_STRINGN, "substring", true, false, false); //func substring(of 𝑠 : String, startingAt 𝑖 : Int, endingBefore 𝑗 : Int) -> String?
     addArg2BuildInFun(symStack, "substring", "of", "s", ET_STRING);
     addArg2BuildInFun(symStack, "substring", "startingAt", "i", ET_INT);
     addArg2BuildInFun(symStack, "substring", "endingBefore", "j", ET_INT);
-    symtable_insert_data(&(symStack->top->table), "ord", ET_INT, "ord", true, false, 1); //func ord(_ 𝑐 : String) -> Int
+    symtable_insert_data(&(symStack->top->table), "ord", ET_INT, "ord", true, false, false); //func ord(_ 𝑐 : String) -> Int
     addArg2BuildInFun(symStack, "ord", "_", "c", ET_STRING);
-    symtable_insert_data(&(symStack->top->table), "chr", ET_STRING, "chr", true, false, 1); //func chr(_ 𝑖 : Int) -> String
+    symtable_insert_data(&(symStack->top->table), "chr", ET_STRING, "chr", true, false, false); //func chr(_ 𝑖 : Int) -> String
     addArg2BuildInFun(symStack, "chr", "_", "i", ET_INT);
 
 }

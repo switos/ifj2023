@@ -74,7 +74,7 @@ symtable_t* symtable_resize(symtable_t** table, int newTableSize) {
     return newTable;
 }
 
-htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant, int argumentAmount) {
+htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char* name, bool initialized, bool constant, bool isVar) {
     if ((*table)->sizeUsed / (*table)->sizeAllocated > THRESHOLD) {
         (*table) = symtable_resize( table, (*table)->sizeAllocated * 2);
     }
@@ -100,27 +100,16 @@ htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char*
         return NULL;
     }
 
-    if (argumentAmount > 0) {
-        newSlot->data->param = (data_param_t**)malloc(sizeof(data_param_t*) * argumentAmount);
-        if (newSlot->data->param == NULL) {
-            fprintf(stderr, "Failed to allocate memory");
-            free(newSlot->key);
-            free(newSlot->data->name);
-            free(newSlot->data);
-            free(newSlot);
-            return NULL;
-        }
-    }
-
     strcpy(newSlot->key, key);
     strcpy(newSlot->data->name, name);
 
-    newSlot->data->argumentAmount = argumentAmount;
+    newSlot->data->argumentAmount = 0;
     newSlot->data->argumentsInArray = 0;
     newSlot->data->constant = constant;
     newSlot->data->initialized = initialized;
     newSlot->data->type = type;
     newSlot->data->nil =false;
+    newSlot->data->isVar = isVar;
 
     do {
         index = (index + 1) % (*table)->sizeAllocated;
@@ -134,42 +123,48 @@ htab_data_t* symtable_insert_data(symtable_t** table, char* key, int type, char*
     return newSlot->data;
 }
 
-bool symtable_add_arguments(htab_data_t **func, char* name, char* identifier, int type) {
-    int pos = (*func)->argumentsInArray;
+bool symtable_add_arguments(htab_data_t* func, char* name, char* identifier, int type) {
+    if(func->argumentAmount == 0) {
+        func->param = (data_param_t**)malloc(sizeof(data_param_t*));
+    }
+    else {
+        func->param = (data_param_t**)realloc(func->param, sizeof(data_param_t) * (func->argumentAmount + 1));
+    }
+    func->argumentAmount++;
+    int pos = func->argumentsInArray;
     
-    (*func)->param[pos] = (data_param_t*)malloc(sizeof(data_param_t));
-    if ((*func)->param[pos] == NULL) {
+    func->param[pos] = (data_param_t*)malloc(sizeof(data_param_t));
+    if (func->param[pos] == NULL) {
         fprintf(stderr, "Failed to allocate memory for parameter");
         return false;
     }
     
-    (*func)->param[pos]->identifier = (char*)malloc(strlen(identifier) + 1);
-    if((*func)->param[pos]->identifier == NULL) {
+    func->param[pos]->identifier = (char*)malloc(strlen(identifier) + 1);
+    if(func->param[pos]->identifier == NULL) {
         fprintf(stderr, "Failed to allocate memory");
         return false;
     }
     
-    (*func)->param[pos]->name = (char*)malloc(strlen(name) + 1);
-    if((*func)->param[pos]->name == NULL) {
+    func->param[pos]->name = (char*)malloc(strlen(name) + 1);
+    if(func->param[pos]->name == NULL) {
         fprintf(stderr, "Failed to allocate memory");
-        free((*func)->param[pos]->identifier);
+        free(func->param[pos]->identifier);
         return false;
     }
     
-    (*func)->param[pos]->type = type;
+    func->param[pos]->type = type;
 
-    strcpy((*func)->param[pos]->identifier, identifier);
-    strcpy((*func)->param[pos]->name, name);
+    strcpy(func->param[pos]->identifier, identifier);
+    strcpy(func->param[pos]->name, name);
     
-    (*func)->argumentsInArray++;
-    (*func)->argumentAmount = (*func)->argumentsInArray;
-
+    func->argumentsInArray++;
+    
     return true;
 }
 
 data_param_t* symtable_get_argument(symtable_t* table, char* key, int argumentPosition) {
     htab_data_t* func_data = symtable_search(table, key);
-    fprintf(stderr, "name is %s\n, arguments amount %d, argument in array %d, ", func_data->name, func_data->argumentAmount, func_data->argumentsInArray);
+    fprintf(stderr, "name is %s, arguments amount %d, argument in array %d\n", func_data->name, func_data->argumentAmount, func_data->argumentsInArray);
     if (func_data == NULL) {
         fprintf(stderr, "func data is NULL\n");
         return NULL;
@@ -306,7 +301,7 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
     }
     newElement->next = NULL;
     newElement->table = symtable_init();
-    if(newElement->table == NULL) {
+    if (newElement->table == NULL) {
         free(newElement);
         return NULL;
     }
@@ -314,8 +309,7 @@ stack_level_t* symtable_stack_push (symtable_stack_t* stack) {
     if(stack->top == NULL) {
         stack->top = newElement;
         stack->top->prev = NULL;
-    }
-    else {
+    } else {
         stack_level_t* current = stack->top;
 
         stack->top = newElement;
