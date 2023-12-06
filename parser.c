@@ -186,6 +186,7 @@ int funDefType() {
         tFlagS(&token);
         symtable_stack_push(&symStack);
         pushArguments(&symStack, funName.str);
+        str_copy_string(&(funBodyName), &(funName));
         return functionParse();
     } else if (token.type == T_ARROW ){
         getTokenWrapped();
@@ -199,6 +200,7 @@ int funDefType() {
                     return NO_ERR;  
                 symtable_stack_push(&symStack);
                 pushArguments(&symStack, funName.str);
+                str_copy_string(&(funBodyName), &(funName));
                 return functionParse();
             }
         }
@@ -491,7 +493,6 @@ int localParse () {
             return result;
         return localParse();
     } else {
-        //returnExistingCheck(functionBodyFlag, &returnFlag);
         returnFlag = false;
         symtable_stack_pop(&symStack);
         fprintf(stderr, "Success, local parse ended\n");
@@ -503,16 +504,14 @@ int localParse () {
 
 int functionParse () {
     fprintf(stderr, "TOKEN TYPE is %d\n", token.type);
-    str_copy_string(&(funBodyName), &(funName));
     if (token.type != T_CL_BRACE) {
         if (newLineCheck())
             return printErrorAndReturn("Syntax error has occured in functionParse, while newLineCheck", SYNTAX_ERR);
         int result = parseInstruction();
         if (result) 
             return result;
-        return localParse();
+        return functionParse();
     } else {
-        //returnExistingCheck(functionBodyFlag, &returnFlag);
         returnFlag = false;
         symtable_stack_pop(&symStack);
         functionBodyFlag = false;

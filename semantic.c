@@ -211,6 +211,7 @@ int VarDefAssignSemanticCheck(int *type, int exp){
 
 int returnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
     htab_data_t *data = symtable_search (symtable_get_global(symStack),name);
+    fprintf(stderr, "retrun type is %d, exp type is %d, with name %s\n", data->type, exp, name);
     if ((data->type == ET_VOID && exp != ET_VOID) || (data->type != ET_VOID && exp == ET_VOID) ) {
         return printErrorAndReturn("Semantic error function return type compatibility", SEM_ERR_WRONG_RET);
     }
@@ -220,13 +221,18 @@ int returnSemanticCheck(symtable_stack_t *symStack, char* name, int exp){
     return 0;
 }
 
-int returnExistingCheck(bool functionBodyFlag, bool *returnFlag) {
-    if( functionBodyFlag ) {
-        if ( !returnFlag )
-            return printErrorAndReturn("Return error has occured in localParse", SYNTAX_ERR);
+int returnExistingCheck(symtable_stack_t *symStack, bool returnFlag, string *name) {
+    htab_data_t *data = symtable_search (symtable_get_global(symStack), name->str);
+    if( data != NULL ) {
+        if (data->type != ET_VOID) {
+            if ( !returnFlag )
+                return printErrorAndReturn("Function with return value have no retrun", SEM_ERR_WRONG_PARAM);
+        }
         returnFlag = false;
+        return NO_ERR;
+    } else { 
+        return printErrorAndReturn("Enternal error in returnExistingCheck", ERROR_INTERNAL);
     }
-    return NO_ERR;
 }
 
 int argAmountCheck(symtable_stack_t *symStack, char* name, int amount) {
