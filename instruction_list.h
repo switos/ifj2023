@@ -1,3 +1,10 @@
+/*
+IFJ projekt 2023
+xtiemn00: Vsevolod Tiemnohorov
+xpetro27: Denys Petrovsyi
+xbatur00: Illia Baturov
+xshish02: Sviatoslav Shishnev
+*/
 #ifndef INSTRUCTION_LIST
 #define INSTRUCTION_LIST
 

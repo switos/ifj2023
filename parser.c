@@ -293,7 +293,7 @@ int parList() {
         int result = 0;
         if ((result = argAmountCheck(&symStack, funName.str, argumentNumber)) != 0)
             return result;
-        argumentNumber=0;
+        argumentNumber = 0;
         getTokenWrapped();
         return NO_ERR;
     }
@@ -390,7 +390,7 @@ int ifList(){
         getTokenWrapped();
         if (token.type == T_ID) {
             result = checkInitialization(&symStack, token.content.str);
-            if(result == 0) {
+            if(result == NO_ERR) {
                 symtable_stack_push(&symStack);
                 int type = symtable_stack_search(&symStack, token.content.str)->type;
                 if (type > ET_STRING)
@@ -408,7 +408,7 @@ int ifList(){
 int whl() {
     int expType = ET_UNDEFINED;
     int result = expAnalyse(&token, NULL, &expType, &symStack);
-    if(result) 
+    if(result)
         return result;
     if (token.type == T_OP_BRACE) {
         getTokenWrapped();
@@ -420,7 +420,7 @@ int whl() {
 }
 
 int returnR () {
-    int result = 0;
+    int result = NO_ERR;
     int expType = ET_VOID;
     if (token.type == T_ID || litCheck() || token.type == T_OP_PAR) {
         result =  expression(&expType);
